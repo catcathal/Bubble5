@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bubble5 | AI Chatbots for Modern Businesses</title>
+  <style>
+    /* CSS RESET & VARIABLES */
+    :root {
+      --primary: #4F46E5;
+      --primary-hover: #4338CA;
+      --secondary: #06B6D4;
+      --dark: #0F172A;
+      --light: #F8FAFC;
+      --gray-100: #F1F5F9;
+      --gray-300: #CBD5E1;
+      --gray-600: #475569;
+      --gray-800: #1E293B;
+      --radius: 12px;
+      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--light);
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      position: sticky;
+      top: 0;
+      background-color: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      border-bottom: 1px solid var(--gray-300);
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--gray-800);
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-outline {
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      background: transparent;
+    }
+
+    .btn-outline:hover {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    /* HERO SECTION */
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center;
+      background: linear-gradient(180deg, #EEF2FF 0%, var(--light) 100%);
+    }
+
+    .hero h1 {
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+      color: var(--dark);
+      line-height: 1.2;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--gray-600);
+      max-width: 600px;
+      margin: 0 auto 30px;
+    }
+
+    /* CHATBOT DEMO SECTION */
+    .demo-section {
+      padding: 60px 0;
+      background-color: white;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: var(--gray-600);
+      margin-bottom: 40px;
+    }
+
+    .chat-widget {
+      max-width: 450px;
+      margin: 0 auto;
+      border: 1px solid var(--gray-300);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      background-color: white;
+      display: flex;
+      flex-direction: column;
+      height: 500px;
+      position: relative;
+    }
+
+    .chat-header {
+      background-color: var(--primary);
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .demo-badge {
+      background-color: #F59E0B;
+      color: white;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background-color: #F8FAFC;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+    }
+
+    .message.bot {
+      background-color: white;
+      border: 1px solid var(--gray-300);
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+    }
+
+    .message.user {
+      background-color: var(--primary);
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+    }
+
+    .chat-input-area {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid var(--gray-300);
+      background-color: white;
+    }
+
+    .chat-input-area input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      outline: none;
+    }
+
+    .chat-input-area button {
+      margin-left: 8px;
+      padding: 10px 15px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* PRICING SECTION */
+    .pricing-section {
+      padding: 80px 0;
+      background-color: var(--gray-100);
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+
+    .pricing-card {
+      background-color: white;
+      padding: 30px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .pricing-card.popular {
+      border: 2px solid var(--primary);
+      position: relative;
+    }
+
+    .pricing-card .price {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin: 15px 0;
+    }
+
+    .pricing-features {
+      list-style: none;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .pricing-features li {
+      margin-bottom: 10px;
+      color: var(--gray-600);
+    }
+
+    /* FORM SECTIONS (EARLY ACCESS & CONTACT) */
+    .form-section {
+      padding: 60px 0;
+      background-color: white;
+    }
+
+    .form-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: var(--light);
+      padding: 30px;
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-300);
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    /* MODAL (LOGIN) */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 30px;
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    /* FOOTER */
+    footer {
+      background-color: var(--dark);
+      color: white;
+      text-align: center;
+      padding: 30px 0;
+      font-size: 0.9rem;
+    }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2rem; }
+      .nav-links { gap: 10px; }
+      .nav-links a { font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <div class="logo">💬 Bubble5</div>
+      <ul class="nav-links">
+        <li><a href="#demo">Demo</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#early-access">Early Access</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><button class="btn btn-outline" id="loginBtn">Business Login</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <header class="hero">
+    <div class="container">
+      <h1>Automate Customer Support with Bubble5</h1>
+      <p>Bubble5 provides smart, trainable AI chatbots for small and medium business owners. Resolve customer queries 24/7 in seconds.</p>
+      <a href="#early-access" class="btn btn-primary">Get Early Access</a>
+    </div>
+  </header>
+
+  <!-- INTERACTIVE CHATBOT DEMO -->
+  <section id="demo" class="demo-section">
+    <div class="container">
+      <h2 class="section-title">Try The Demonstration Chatbot</h2>
+      <p class="section-subtitle">Experience how Bubble5 interacts with your customers in real-time.</p>
+      
+      <div class="chat-widget">
+        <div class="chat-header">
+          <div>
+            <strong>Bubble5 Assistant</strong>
+            <br><small style="font-size: 0.75rem; opacity: 0.9;">Status: Online</small>
+          </div>
+          <!-- Clear Demo Identifier -->
+          <span class="demo-badge">Interactive Demo</span>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="message bot">
+            Hello! I am the Bubble5 demo assistant (AI backend disabled in preview). How can I help you today?
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <input type="text" id="chatInput" placeholder="Type 'hours', 'pricing', or 'hello'..." onkeypress="handleKeyPress(event)">
+          <button onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING SECTION -->
+  <section id="pricing" class="pricing-section">
+    <div class="container">
+      <h2 class="section-title">Simple & Transparent Pricing</h2>
+      <p class="section-subtitle">Choose the plan that fits your business needs.</p>
+      
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div>
+            <h3>Starter</h3>
+            <div class="price">$29<span>/mo</span></div>
+            <ul class="pricing-features">
+              <li>✓ 1 Chatbot Agent</li>
+              <li>✓ Up to 1,000 Chats/mo</li>
+              <li>✓ Basic AI Training</li>
+              <li>✓ Email Support</li>
+            </ul>
+          </div>
+          <a href="#early-access" class="btn btn-outline">Choose Starter</a>
+        </div>
+
+        <div class="pricing-card popular">
+          <div>
+            <h3>Pro</h3>
+            <div class="price">$79<span>/mo</span></div>
+            <ul class="pricing-features">
+              <li>✓ 3 Chatbot Agents</li>
+              <li>✓ Up to 10,000 Chats/mo</li>
+              <li>✓ Custom Knowledge Base Integration</li>
+              <li>✓ Priority Support</li>
+            </ul>
+          </div>
+          <a href="#early-access" class="btn btn-primary">Choose Pro</a>
+        </div>
+
+        <div class="pricing-card">
+          <div>
+            <h3>Enterprise</h3>
+            <div class="price">$199<span>/mo</span></div>
+            <ul class="pricing-features">
+              <li>✓ Unlimited Chatbot Agents</li>
+              <li>✓ Unlimited Chats</li>
+              <li>✓ Dedicated AI Backend</li>
+              <li>✓ 24/7 Account Manager</li>
+            </ul>
+          </div>
+          <a href="#contact" class="btn btn-outline">Contact Sales</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EARLY ACCESS REGISTRATION -->
+  <section id="early-access" class="form-section">
+    <div class="container">
+      <div class="form-container">
+        <h2 class="section-title">Register for Early Access</h2>
+        <p class="section-subtitle" style="margin-bottom: 20px;">Be among the first business owners to launch Bubble5.</p>
+        <form onsubmit="handleEarlyAccess(event)">
+          <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" required placeholder="Jane Doe">
+          </div>
+          <div class="form-group">
+            <label for="businessEmail">Business Email</label>
+            <input type="email" id="businessEmail" required placeholder="jane@company.com">
+          </div>
+          <div class="form-group">
+            <label for="companyName">Company Name</label>
+            <input type="text" id="companyName" required placeholder="Acme Inc.">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Registration</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT SECTION -->
+  <section id="contact" class="form-section" style="background-color: var(--gray-100);">
+    <div class="container">
+      <div class="form-container">
+        <h2 class="section-title">Contact Us</h2>
+        <p class="section-subtitle" style="margin-bottom: 20px;">Have questions? Reach out to our team directly.</p>
+        <form onsubmit="handleContact(event)">
+          <div class="form-group">
+            <label for="contactName">Name</label>
+            <input type="text" id="contactName" required>
+          </div>
+          <div class="form-group">
+            <label for="contactEmail">Email</label>
+            <input type="email" id="contactEmail" required>
+          </div>
+          <div class="form-group">
+            <label for="contactMessage">Message</label>
+            <textarea id="contactMessage" rows="4" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-outline" style="width: 100%;">Send Message</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUSINESS LOGIN MODAL -->
+  <div class="modal" id="loginModal">
+    <div class="modal-content">
+      <span class="close-modal" id="closeModal">&times;</span>
+      <h2 style="margin-bottom: 15px;">Business Owner Login</h2>
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Log In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 Bubble5 Inc. All rights reserved. | Demonstration Mode Active</p>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    // DEMO CHATBOT LOGIC
+    function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      // Add User Message
+      addMessage(text, 'user');
+      input.value = '';
+
+      // Simulated Bot Response (Demo Mode)
+      setTimeout(() => {
+        let reply = "This is a simulated response in DEMO MODE. Once connected to our AI backend, I will answer questions about your custom business data!";
+        const lower = text.toLowerCase();
+        
+        if (lower.includes('hello') || lower.includes('hi')) {
+          reply = "Hello! Thanks for testing the Bubble5 interactive demo.";
+        } else if (lower.includes('pricing') || lower.includes('cost')) {
+          reply = "Our plans start at $29/month! Check out our Pricing section above.";
+        } else if (lower.includes('hours')) {
+          reply = "In demo mode, our team operates 24/7!";
+        }
+
+        addMessage(reply, 'bot');
+      }, 600);
+    }
+
+    function addMessage(text, sender) {
+      const messagesDiv = document.getElementById('chatMessages');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${sender}`;
+      msgDiv.innerText = text;
+      messagesDiv.appendChild(msgDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+
+    // MODAL LOGIC
+    const modal = document.getElementById('loginModal');
+    const loginBtn = document.getElementById('loginBtn');
+    const closeModal = document.getElementById('closeModal');
+
+    loginBtn.onclick = () => modal.style.display = 'flex';
+    closeModal.onclick = () => modal.style.display = 'none';
+    window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+
+    // FORM HANDLERS
+    function handleEarlyAccess(e) {
+      e.preventDefault();
+      alert('Thank you for registering for early access! We will contact you soon.');
+      e.target.reset();
+    }
+
+    function handleContact(e) {
+      e.preventDefault();
+      alert('Message sent! Our support team will get back to you shortly.');
+      e.target.reset();
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      alert('Login functionality will be enabled when backend services are active.');
+      modal.style.display = 'none';
+      e.target.reset();
+    }
+  </script>
+</body>
+</html>

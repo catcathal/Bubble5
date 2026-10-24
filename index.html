@@ -417,6 +417,11 @@
     .message.typing { color: var(--gray-600); font-style: italic; }
     .message { white-space: pre-wrap; }
 
+    .form-status { margin-top: 12px; font-size: 0.9rem; text-align: center; min-height: 1.2em; }
+    .form-status.ok { color: #166534; }
+    .form-status.err { color: #B91C1C; }
+    form button[disabled] { opacity: 0.6; cursor: wait; }
+
     .demo-note {
       text-align: center;
       font-size: 0.8rem;
@@ -636,6 +641,7 @@
         <h2 class="section-title">Register for Early Access</h2>
         <p class="section-subtitle" style="margin-bottom: 20px;">Be among the first business owners to launch Bubble5.</p>
         <form onsubmit="handleEarlyAccess(event)">
+          <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;height:0;width:0;opacity:0;">
           <div class="form-group">
             <label for="fullName">Full Name</label>
             <input type="text" id="fullName" required placeholder="Jane Doe">
@@ -649,6 +655,7 @@
             <input type="text" id="companyName" required placeholder="Acme Inc.">
           </div>
           <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Registration</button>
+          <p class="form-status" role="status" aria-live="polite"></p>
         </form>
       </div>
     </div>
@@ -661,6 +668,7 @@
         <h2 class="section-title">Contact Us</h2>
         <p class="section-subtitle" style="margin-bottom: 20px;">Have questions? Reach out to our team directly.</p>
         <form onsubmit="handleContact(event)">
+          <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;height:0;width:0;opacity:0;">
           <div class="form-group">
             <label for="contactName">Name</label>
             <input type="text" id="contactName" required>
@@ -674,6 +682,7 @@
             <textarea id="contactMessage" rows="4" required></textarea>
           </div>
           <button type="submit" class="btn btn-outline" style="width: 100%;">Send Message</button>
+          <p class="form-status" role="status" aria-live="polite"></p>
         </form>
       </div>
     </div>
@@ -710,6 +719,9 @@
     // DEMO CHATBOT LOGIC (talks to the Cloudflare Worker backend)
     // After deploying the Worker, set this to its URL, e.g. https://bubble5-demo.<your-subdomain>.workers.dev
     const CHAT_API_URL = "https://bubble5-demo.REPLACE-ME.workers.dev/chat";
+
+    // Same Worker as the chat, different route.
+    const LEAD_API_URL = "https://bubble5-demo.REPLACE-ME.workers.dev/lead";
 
     const chatHistory = [];
     let chatBusy = false;
@@ -830,16 +842,54 @@
     window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
 
     // FORM HANDLERS
-    function handleEarlyAccess(e) {
+    async function submitLead(e, kind, fields, okMessage) {
       e.preventDefault();
-      alert('Thank you for registering for early access! We will contact you soon.');
-      e.target.reset();
+      const form = e.target;
+      const btn = form.querySelector('button[type="submit"]');
+      const status = form.querySelector('.form-status');
+      status.className = 'form-status';
+      status.textContent = '';
+      if (LEAD_API_URL.includes('REPLACE-ME')) {
+        status.classList.add('err');
+        status.textContent = "This form isn't connected yet. Please try again later.";
+        return;
+      }
+      btn.disabled = true;
+      try {
+        const res = await fetch(LEAD_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kind, website: form.elements['website'].value, ...fields })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+        status.classList.add('ok');
+        status.textContent = okMessage;
+        form.reset();
+      } catch (err) {
+        status.classList.add('err');
+        status.textContent = err.message === 'Failed to fetch'
+          ? 'Could not reach the server. Please check your connection and try again.'
+          : err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function handleEarlyAccess(e) {
+      submitLead(e, 'early_access', {
+        name: document.getElementById('fullName').value,
+        email: document.getElementById('businessEmail').value,
+        company: document.getElementById('companyName').value
+      }, "Thanks! You're on the early access list. We'll be in touch soon.");
     }
 
     function handleContact(e) {
-      e.preventDefault();
-      alert('Message sent! Our support team will get back to you shortly.');
-      e.target.reset();
+      submitLead(e, 'contact', {
+        name: document.getElementById('contactName').value,
+        email: document.getElementById('contactEmail').value,
+        message: document.getElementById('contactMessage').value
+      }, "Message sent! We'll get back to you shortly.");
     }
 
     function handleLogin(e) {

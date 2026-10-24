@@ -48,6 +48,79 @@ function cleanMessages(raw) {
   return msgs;
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_LEADS_PER_HOUR = 5;
+
+async function hashIp(ip) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("bubble5:" + ip));
+  return [...new Uint8Array(buf)].slice(0, 12).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+async function notifyByEmail(env, lead) {
+  if (!env.RESEND_API_KEY || !env.NOTIFY_EMAIL) return;
+  const label = lead.kind === "early_access" ? "Early access sign-up" : "Contact message";
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: env.FROM_EMAIL || "Bubble5 <onboarding@resend.dev>",
+      to: [env.NOTIFY_EMAIL],
+      reply_to: lead.email,
+      subject: `Bubble5: ${label} from ${lead.name}`,
+      html: `<p><b>${label}</b></p><p>Name: ${escapeHtml(lead.name)}<br>Email: ${escapeHtml(lead.email)}` +
+        (lead.company ? `<br>Company: ${escapeHtml(lead.company)}` : "") + `</p>` +
+        (lead.message ? `<p>${escapeHtml(lead.message).replace(/\n/g, "<br>")}</p>` : ""),
+    }),
+  });
+  if (!res.ok) console.error("Email notify failed", res.status, await res.text());
+}
+
+async function handleLead(request, env, cors) {
+  if (!cors["Access-Control-Allow-Origin"]) return json({ error: "Origin not allowed" }, 403);
+  let b;
+  try {
+    b = await request.json();
+  } catch {
+    return json({ error: "Invalid JSON" }, 400, cors);
+  }
+  if (b && b.website) return json({ ok: true }, 200, cors); // honeypot: pretend success to bots
+
+  const kind = b && b.kind;
+  const name = String((b && b.name) || "").trim().slice(0, 100);
+  const email = String((b && b.email) || "").trim().slice(0, 200);
+  const company = String((b && b.company) || "").trim().slice(0, 150);
+  const message = String((b && b.message) || "").trim().slice(0, 2000);
+
+  if (kind !== "early_access" && kind !== "contact") return json({ error: "Unknown form" }, 400, cors);
+  if (!name || !EMAIL_RE.test(email)) return json({ error: "Please enter your name and a valid email." }, 400, cors);
+  if (kind === "early_access" && !company) return json({ error: "Please enter your company name." }, 400, cors);
+  if (kind === "contact" && !message) return json({ error: "Please enter a message." }, 400, cors);
+
+  const ipHash = await hashIp(request.headers.get("CF-Connecting-IP") || "unknown");
+  const recent = await env.DB.prepare(
+    "SELECT COUNT(*) AS n FROM leads WHERE ip_hash = ? AND created_at > datetime('now','-1 hour')"
+  ).bind(ipHash).first();
+  if (recent && recent.n >= MAX_LEADS_PER_HOUR) {
+    return json({ error: "Too many submissions. Please try again later." }, 429, cors);
+  }
+
+  const lead = { kind, name, email, company, message };
+  await env.DB.prepare(
+    "INSERT INTO leads (kind, name, email, company, message, ip_hash) VALUES (?, ?, ?, ?, ?, ?)"
+  ).bind(kind, name, email, company || null, message || null, ipHash).run();
+
+  try {
+    await notifyByEmail(env, lead);
+  } catch (e) {
+    console.error("Email notify error", e); // the lead is saved; don't fail the visitor
+  }
+  return json({ ok: true }, 200, cors);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -74,6 +147,15 @@ export default {
         results.push({ key: doc.key, status: item.status });
       }
       return json({ instance: id, items: results }, 200);
+    }
+
+    if (url.pathname === "/lead" && request.method === "POST") {
+      try {
+        return await handleLead(request, env, cors);
+      } catch (e) {
+        console.error("Lead error", e);
+        return json({ error: "Something went wrong. Please try again." }, 500, cors);
+      }
     }
 
     if (url.pathname === "/chat" && request.method === "POST") {

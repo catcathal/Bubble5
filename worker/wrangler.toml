@@ -8,10 +8,21 @@ binding = "AI_SEARCH"
 namespace = "default"
 remote = true
 
+# D1 database that stores form submissions (see schema.sql).
+# Create it with: npx wrangler d1 create bubble5-leads  -> paste the database_id below.
+[[d1_databases]]
+binding = "DB"
+database_name = "bubble5-leads"
+database_id = "REPLACE-WITH-D1-DATABASE-ID"
+
 [vars]
+# Where new-lead emails go (optional; needs the RESEND_API_KEY secret too).
+NOTIFY_EMAIL = ""
+# FROM_EMAIL = "Bubble5 <hello@yourdomain.com>"   # must be a domain verified in Resend
 AI_SEARCH_INSTANCE = "bubble5-demo"
 # Comma-separated list of sites allowed to call this Worker from a browser.
 # Add your GitHub Pages / custom domain here.
 ALLOWED_ORIGINS = "https://catcathal.github.io,http://localhost:8080,http://127.0.0.1:8080"
 
+# Secrets: ADMIN_TOKEN (seeding) and optionally RESEND_API_KEY (email alerts)
 # One-time seeding secret (set with: npx wrangler secret put ADMIN_TOKEN)

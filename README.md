@@ -16,8 +16,7 @@ Landing page and live AI chatbot demo for Bubble5.
    View leads any time: `npx wrangler d1 execute bubble5-leads --remote --command "SELECT * FROM leads ORDER BY id DESC"`
 3b. Set a seeding secret: `cd worker && npx wrangler secret put ADMIN_TOKEN`
 4. Deploy: `npx wrangler deploy`. Note the URL it prints.
-5. Seed the knowledge base (creates the AI Search instance and uploads the sample docs):
-   `curl -X POST https://<your-worker-url>/seed -H "X-Admin-Token: <your token>"`
+5. The knowledge base seeds itself on the first chat (the first reply may say the demo is getting ready; try again after a minute or two). To re-seed manually after editing `kb.js`: `curl -X POST https://<your-worker-url>/seed -H "X-Admin-Token: <your token>"`
 6. In `index.html`, set `CHAT_API_URL` to `https://<your-worker-url>/chat` and `LEAD_API_URL` to `https://<your-worker-url>/lead`, commit and push.
 
 To demo a prospect's own business, edit the documents in `worker/src/kb.js` (and the persona in `SYSTEM_PROMPT` in `worker/src/index.js`), redeploy and re-run the seed call.

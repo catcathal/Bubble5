@@ -164,15 +164,11 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
 
     // One-time seeding of the demo knowledge base: POST /seed with header X-Admin-Token.
-    // Also allows GET /seed?token=... so it can be run from a phone browser. Rotate ADMIN_TOKEN afterwards.
-    if (url.pathname === "/seed" && (request.method === "POST" || request.method === "GET")) {
-      const supplied = request.headers.get("X-Admin-Token") || url.searchParams.get("token");
-      if (!env.ADMIN_TOKEN) {
-        return json({ error: "Unauthorized", reason: "ADMIN_TOKEN is not set on the running Worker (check the runtime Variables and Secrets list, then redeploy)." }, 401);
-      }
-      if (supplied !== env.ADMIN_TOKEN) {
-        // Temporary diagnostics: lengths only, never the value.
-        return json({ error: "Unauthorized", reason: "Token does not match.", you_sent_length: (supplied || "").length, saved_length: env.ADMIN_TOKEN.length }, 401);
+    // Optional manual re-seed (the Worker also seeds itself on the first chat). Requires the ADMIN_TOKEN secret.
+    if (url.pathname === "/seed" && request.method === "POST") {
+      const supplied = request.headers.get("X-Admin-Token");
+      if (!env.ADMIN_TOKEN || supplied !== env.ADMIN_TOKEN) {
+        return json({ error: "Unauthorized" }, 401);
       }
       return json(await seedKnowledgeBase(env), 200);
     }

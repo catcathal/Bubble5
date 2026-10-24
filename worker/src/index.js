@@ -132,8 +132,12 @@ export default {
     // Also allows GET /seed?token=... so it can be run from a phone browser. Rotate ADMIN_TOKEN afterwards.
     if (url.pathname === "/seed" && (request.method === "POST" || request.method === "GET")) {
       const supplied = request.headers.get("X-Admin-Token") || url.searchParams.get("token");
-      if (!env.ADMIN_TOKEN || supplied !== env.ADMIN_TOKEN) {
-        return json({ error: "Unauthorized" }, 401);
+      if (!env.ADMIN_TOKEN) {
+        return json({ error: "Unauthorized", reason: "ADMIN_TOKEN is not set on the running Worker (check the runtime Variables and Secrets list, then redeploy)." }, 401);
+      }
+      if (supplied !== env.ADMIN_TOKEN) {
+        // Temporary diagnostics: lengths only, never the value.
+        return json({ error: "Unauthorized", reason: "Token does not match.", you_sent_length: (supplied || "").length, saved_length: env.ADMIN_TOKEN.length }, 401);
       }
       const id = env.AI_SEARCH_INSTANCE;
       let instance;

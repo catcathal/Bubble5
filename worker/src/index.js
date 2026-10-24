@@ -129,8 +129,10 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
 
     // One-time seeding of the demo knowledge base: POST /seed with header X-Admin-Token.
-    if (url.pathname === "/seed" && request.method === "POST") {
-      if (!env.ADMIN_TOKEN || request.headers.get("X-Admin-Token") !== env.ADMIN_TOKEN) {
+    // Also allows GET /seed?token=... so it can be run from a phone browser. Rotate ADMIN_TOKEN afterwards.
+    if (url.pathname === "/seed" && (request.method === "POST" || request.method === "GET")) {
+      const supplied = request.headers.get("X-Admin-Token") || url.searchParams.get("token");
+      if (!env.ADMIN_TOKEN || supplied !== env.ADMIN_TOKEN) {
         return json({ error: "Unauthorized" }, 401);
       }
       const id = env.AI_SEARCH_INSTANCE;

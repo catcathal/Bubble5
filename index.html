@@ -76,8 +76,7 @@
     }
     .nav-bar { display: flex; align-items: center; justify-content: space-between; min-height: 64px; gap: 12px; }
     .logo { font: 800 1.35rem/1 var(--display); letter-spacing: -0.03em; color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
-    .logo-mark { width: 30px; height: 30px; border-radius: 50% 50% 50% 8px; background: var(--lagoon); display: inline-block; position: relative; }
-    .logo-mark::after { content: ""; position: absolute; right: 5px; top: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--sun); }
+    .logo-mark { position: relative; width: 34px; height: 32px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 50% 50% 50% 6px; background: var(--lagoon); color: var(--sun); font: 800 1.2rem/1 var(--display); letter-spacing: 0; }
     .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
     .nav-links a:not(.btn) { color: var(--ink); text-decoration: none; font-weight: 500; }
     .nav-links a:not(.btn):hover { text-decoration: underline; text-underline-offset: 4px; }
@@ -118,12 +117,19 @@
     .chat-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; background: var(--ink); color: #fff; }
     .chat-title { font: 700 1rem/1.2 var(--display); }
     .chat-sub { font-size: .8rem; opacity: .8; margin-top: 2px; }
+    .live-dot { display: inline-block; width: 9px; height: 9px; margin-right: 7px; border-radius: 50%; background: #E5252A; vertical-align: 1px; animation: liveBlink 1.2s ease-in-out infinite; }
+    @keyframes liveBlink { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(229,37,42,.55); } 50% { opacity: .25; box-shadow: 0 0 0 5px rgba(229,37,42,0); } }
     .demo-badge { background: var(--sun); color: var(--ink); font-size: .78rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
     .chat-messages { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; background: var(--paper); }
     .message { max-width: 86%; padding: 10px 14px; border-radius: 18px; font-size: .98rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
     .message.bot { align-self: flex-start; background: #fff; border: 1px solid var(--line); border-bottom-left-radius: 4px; }
     .message.user { align-self: flex-end; background: var(--lagoon); color: #fff; border-bottom-right-radius: 4px; }
-    .message.typing { color: var(--ink-soft); font-style: italic; }
+    .message.typing { color: var(--ink-soft); }
+    .dots { display: inline-flex; gap: 3px; margin-left: 4px; vertical-align: middle; }
+    .dots i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; animation: dotPulse 1.2s infinite ease-in-out; }
+    .dots i:nth-child(2) { animation-delay: .2s; }
+    .dots i:nth-child(3) { animation-delay: .4s; }
+    @keyframes dotPulse { 0%, 80%, 100% { opacity: .25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
     .chat-chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px 0; background: #fff; border-top: 1px solid var(--line); }
     .chat-chips button { min-height: 38px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 999px; background: #fff; color: var(--ink); font: 500 .9rem/1 var(--body); cursor: pointer; }
     .chat-chips button:hover { border-color: var(--lagoon); color: var(--lagoon-dark); }
@@ -234,13 +240,14 @@
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
       * { transition: none !important; }
+      .live-dot, .dots i { animation: none !important; }
     }
   </style>
 </head>
 <body>
   <nav class="nav" aria-label="Main">
     <div class="wrap nav-bar">
-      <a href="#top" class="logo"><span class="logo-mark" aria-hidden="true"></span>Bubble5</a>
+      <a href="#top" class="logo" aria-label="Bubble5 home"><span class="logo-mark" aria-hidden="true">5</span>Bubble5</a>
       <div class="nav-actions">
         <ul class="nav-links" id="navLinks">
           <li><a href="#demo">Demo</a></li>
@@ -272,7 +279,7 @@
               <div class="chat-title">Maple &amp; Co. Bakery assistant</div>
               <div class="chat-sub">Powered by Bubble5</div>
             </div>
-            <span class="demo-badge">Live demo</span>
+            <span class="demo-badge"><span class="live-dot" aria-hidden="true"></span>Live demo</span>
           </div>
           <div class="chat-messages" id="chatMessages" aria-live="polite">
             <div class="message bot">Hi! I'm a demo assistant for Maple &amp; Co. Bakery, a made-up business. Ask me about hours, the menu, allergies or custom cakes.</div>
@@ -436,7 +443,8 @@
 
       chatBusy = true;
       document.getElementById('sendBtn').disabled = true;
-      const botDiv = addMessage('Thinking...', 'bot typing');
+      const botDiv = addMessage('', 'bot typing');
+      botDiv.innerHTML = 'Thinking<span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>';
       let reply = '';
 
       try {

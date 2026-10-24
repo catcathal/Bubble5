@@ -121,7 +121,8 @@ async function handleLead(request, env, cors) {
   return json({ ok: true }, 200, cors);
 }
 
-// Creates the AI Search instance (if needed) and uploads the sample docs. Safe to run repeatedly.
+// Creates the AI Search instance (if needed) and queues the sample docs for indexing.
+// Uploads return immediately; indexing finishes in the background (usually within a minute or two).
 async function seedKnowledgeBase(env) {
   const id = env.AI_SEARCH_INSTANCE;
   let instance;
@@ -132,10 +133,16 @@ async function seedKnowledgeBase(env) {
   }
   const results = [];
   for (const doc of DEMO_DOCS) {
-    const item = await instance.items.uploadAndPoll(doc.key, doc.content);
-    results.push({ key: doc.key, status: item.status });
+    const item = await instance.items.upload(doc.key, doc.content);
+    results.push({ key: doc.key, id: item && item.id });
   }
-  return { instance: id, items: results };
+  return { instance: id, queued: results };
+}
+
+async function instanceExists(env) {
+  const res = await env.AI_SEARCH.list({ search: env.AI_SEARCH_INSTANCE, per_page: 5 });
+  const rows = (res && res.result) || [];
+  return rows.some((r) => r.id === env.AI_SEARCH_INSTANCE);
 }
 
 async function askAssistant(env, history) {
@@ -150,7 +157,7 @@ async function askAssistant(env, history) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const cors = corsHeaders(request, env);
 
@@ -197,10 +204,18 @@ export default {
         try {
           stream = await askAssistant(env, history);
         } catch (firstError) {
-          // Most likely the knowledge base has not been loaded yet: load it once, then retry.
-          console.error("First AI Search attempt failed, seeding", firstError);
-          await seedKnowledgeBase(env);
-          stream = await askAssistant(env, history);
+          console.error("AI Search chat failed", firstError);
+          // First visit ever: create the knowledge base in the background. Otherwise it is still indexing.
+          let exists = true;
+          try {
+            exists = await instanceExists(env);
+          } catch (e) {
+            console.error("AI Search list failed", e);
+          }
+          if (!exists) {
+            ctx.waitUntil(seedKnowledgeBase(env).catch((e) => console.error("Seed failed", e)));
+          }
+          return json({ error: "warming_up", message: "The demo is getting ready. Please try again in about a minute." }, 503, cors);
         }
         return new Response(stream, {
           headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-store", ...cors },

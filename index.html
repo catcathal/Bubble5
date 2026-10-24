@@ -750,12 +750,25 @@
         if (CHAT_API_URL.includes('REPLACE-ME')) {
           throw new Error('not-configured');
         }
-        const res = await fetch(CHAT_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: chatHistory })
-        });
-        if (!res.ok || !res.body) throw new Error('bad-response');
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 45000);
+        let res;
+        try {
+          res = await fetch(CHAT_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: chatHistory }),
+            signal: controller.signal
+          });
+        } finally {
+          clearTimeout(timer);
+        }
+        if (!res.ok || !res.body) {
+          const info = await res.json().catch(() => ({}));
+          const e = new Error('bad-response');
+          e.userMessage = info.message || info.error;
+          throw e;
+        }
 
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
@@ -788,7 +801,9 @@
         botDiv.classList.remove('typing');
         botDiv.innerText = err.message === 'not-configured'
           ? "The AI backend isn't connected yet. Deploy the Worker and set CHAT_API_URL in index.html."
-          : "Sorry, the demo assistant is unavailable right now. Please try again in a moment.";
+          : (err.userMessage || (err.name === 'AbortError'
+              ? "That took too long. Please try again in a moment."
+              : "Sorry, the demo assistant is unavailable right now. Please try again in a moment."));
         chatHistory.pop();
       } finally {
         chatBusy = false;

@@ -1,0 +1,17 @@
+name = "bubble5-demo"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# AI Search namespace binding. The Worker uses the instance named in AI_SEARCH_INSTANCE.
+[[ai_search_namespaces]]
+binding = "AI_SEARCH"
+namespace = "default"
+remote = true
+
+[vars]
+AI_SEARCH_INSTANCE = "bubble5-demo"
+# Comma-separated list of sites allowed to call this Worker from a browser.
+# Add your GitHub Pages / custom domain here.
+ALLOWED_ORIGINS = "https://catcathal.github.io,http://localhost:8080,http://127.0.0.1:8080"
+
+# One-time seeding secret (set with: npx wrangler secret put ADMIN_TOKEN)

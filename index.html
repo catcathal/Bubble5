@@ -255,44 +255,173 @@
       background-color: var(--gray-100);
     }
 
+    .billing-toggle {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-top: 24px;
+      font-weight: 600;
+      color: var(--gray-600);
+    }
+
+    .billing-toggle .switch {
+      position: relative;
+      width: 52px;
+      height: 28px;
+      background: var(--gray-300);
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .billing-toggle .switch::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .billing-toggle .switch[aria-checked="true"] { background: var(--primary); }
+    .billing-toggle .switch[aria-checked="true"]::after { transform: translateX(24px); }
+    .billing-toggle .active-label { color: var(--dark); }
+
+    .save-pill {
+      background: #DCFCE7;
+      color: #166534;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
     .pricing-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 30px;
+      gap: 28px;
       margin-top: 40px;
+      align-items: stretch;
     }
 
     .pricing-card {
       background-color: white;
-      padding: 30px;
-      border-radius: var(--radius);
+      padding: 32px 28px;
+      border-radius: 16px;
+      border: 1px solid var(--gray-300);
       box-shadow: var(--shadow);
-      text-align: center;
+      text-align: left;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .pricing-card:hover { transform: translateY(-4px); }
+
+    .pricing-card h3 { font-size: 1.25rem; }
+
+    .pricing-card .plan-tagline {
+      color: var(--gray-600);
+      font-size: 0.9rem;
+      margin-top: 4px;
     }
 
     .pricing-card.popular {
       border: 2px solid var(--primary);
-      position: relative;
+      box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.18), 0 8px 10px -6px rgba(79, 70, 229, 0.12);
+    }
+
+    .popular-badge {
+      position: absolute;
+      top: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--primary);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 999px;
     }
 
     .pricing-card .price {
-      font-size: 2.5rem;
+      font-size: 2.75rem;
       font-weight: 800;
-      margin: 15px 0;
+      margin: 18px 0 2px;
+      line-height: 1.1;
+    }
+
+    .pricing-card .price span {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--gray-600);
+    }
+
+    .pricing-card .billed-note {
+      font-size: 0.8rem;
+      color: var(--gray-600);
+      min-height: 1.2em;
     }
 
     .pricing-features {
       list-style: none;
-      margin: 20px 0;
+      margin: 22px 0 26px;
       text-align: left;
+      padding-top: 18px;
+      border-top: 1px solid var(--gray-100);
     }
 
     .pricing-features li {
       margin-bottom: 10px;
       color: var(--gray-600);
+      padding-left: 26px;
+      position: relative;
+    }
+
+    .pricing-features li::before {
+      content: "\2713";
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .chat-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 8px 10px 0;
+      background: white;
+    }
+
+    .chat-chips button {
+      font-size: 0.8rem;
+      padding: 5px 10px;
+      border: 1px solid var(--gray-300);
+      border-radius: 999px;
+      background: white;
+      color: var(--gray-800);
+      cursor: pointer;
+    }
+
+    .chat-chips button:hover { border-color: var(--primary); color: var(--primary); }
+
+    .message.typing { color: var(--gray-600); font-style: italic; }
+    .message { white-space: pre-wrap; }
+
+    .demo-note {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--gray-600);
+      margin-top: 12px;
     }
 
     /* FORM SECTIONS (EARLY ACCESS & CONTACT) */
@@ -411,54 +540,71 @@
         <div class="chat-header">
           <div>
             <strong>Bubble5 Assistant</strong>
-            <br><small style="font-size: 0.75rem; opacity: 0.9;">Status: Online</small>
+            <br><small style="font-size: 0.75rem; opacity: 0.9;">Status: Online (live AI demo)</small>
           </div>
           <!-- Clear Demo Identifier -->
           <span class="demo-badge">Interactive Demo</span>
         </div>
         <div class="chat-messages" id="chatMessages">
           <div class="message bot">
-            Hello! I am the Bubble5 demo assistant (AI backend disabled in preview). How can I help you today?
+            Hi! I'm a Bubble5 demo assistant for Maple &amp; Co. Bakery, a made-up business. Ask me about hours, the menu, allergies or custom cakes to see how I answer from a business's own information.
           </div>
         </div>
+        <div class="chat-chips" id="chatChips">
+          <button type="button" onclick="askSuggestion(this)">What are your opening hours?</button>
+          <button type="button" onclick="askSuggestion(this)">Do you have vegan options?</button>
+          <button type="button" onclick="askSuggestion(this)">How do I order a custom cake?</button>
+        </div>
         <div class="chat-input-area">
-          <input type="text" id="chatInput" placeholder="Type 'hours', 'pricing', or 'hello'..." onkeypress="handleKeyPress(event)">
-          <button onclick="sendMessage()">Send</button>
+          <input type="text" id="chatInput" maxlength="500" placeholder="Ask about hours, menu, cakes..." onkeypress="handleKeyPress(event)">
+          <button id="sendBtn" onclick="sendMessage()">Send</button>
         </div>
       </div>
+      <p class="demo-note">Demo only: answers come from a sample knowledge base for a fictional bakery.</p>
     </div>
   </section>
 
   <!-- PRICING SECTION -->
   <section id="pricing" class="pricing-section">
     <div class="container">
-      <h2 class="section-title">Simple & Transparent Pricing</h2>
+      <h2 class="section-title">Simple &amp; Transparent Pricing</h2>
       <p class="section-subtitle">Choose the plan that fits your business needs.</p>
-      
+
+      <div class="billing-toggle">
+        <span id="lblMonthly" class="active-label">Monthly</span>
+        <button type="button" class="switch" id="billingSwitch" role="switch" aria-checked="false" aria-label="Bill annually"></button>
+        <span id="lblAnnual">Annual <span class="save-pill">Save 20%</span></span>
+      </div>
+
       <div class="pricing-grid">
         <div class="pricing-card">
           <div>
             <h3>Starter</h3>
-            <div class="price">$29<span>/mo</span></div>
+            <p class="plan-tagline">For a single small site</p>
+            <div class="price" data-monthly="29" data-annual="23">$29<span>/mo</span></div>
+            <div class="billed-note"></div>
             <ul class="pricing-features">
-              <li>✓ 1 Chatbot Agent</li>
-              <li>✓ Up to 1,000 Chats/mo</li>
-              <li>✓ Basic AI Training</li>
-              <li>✓ Email Support</li>
+              <li>1 Chatbot Agent</li>
+              <li>Up to 1,000 Chats/mo</li>
+              <li>Basic AI Training</li>
+              <li>Email Support</li>
             </ul>
           </div>
           <a href="#early-access" class="btn btn-outline">Choose Starter</a>
         </div>
 
         <div class="pricing-card popular">
+          <span class="popular-badge">Most popular</span>
           <div>
             <h3>Pro</h3>
-            <div class="price">$79<span>/mo</span></div>
+            <p class="plan-tagline">For growing teams</p>
+            <div class="price" data-monthly="79" data-annual="63">$79<span>/mo</span></div>
+            <div class="billed-note"></div>
             <ul class="pricing-features">
-              <li>✓ 3 Chatbot Agents</li>
-              <li>✓ Up to 10,000 Chats/mo</li>
-              <li>✓ Custom Knowledge Base Integration</li>
-              <li>✓ Priority Support</li>
+              <li>3 Chatbot Agents</li>
+              <li>Up to 10,000 Chats/mo</li>
+              <li>Custom Knowledge Base Integration</li>
+              <li>Priority Support</li>
             </ul>
           </div>
           <a href="#early-access" class="btn btn-primary">Choose Pro</a>
@@ -467,12 +613,14 @@
         <div class="pricing-card">
           <div>
             <h3>Enterprise</h3>
-            <div class="price">$199<span>/mo</span></div>
+            <p class="plan-tagline">For high volume and custom needs</p>
+            <div class="price" data-monthly="199" data-annual="159">$199<span>/mo</span></div>
+            <div class="billed-note"></div>
             <ul class="pricing-features">
-              <li>✓ Unlimited Chatbot Agents</li>
-              <li>✓ Unlimited Chats</li>
-              <li>✓ Dedicated AI Backend</li>
-              <li>✓ 24/7 Account Manager</li>
+              <li>Unlimited Chatbot Agents</li>
+              <li>Unlimited Chats</li>
+              <li>Dedicated AI Backend</li>
+              <li>24/7 Account Manager</li>
             </ul>
           </div>
           <a href="#contact" class="btn btn-outline">Contact Sales</a>
@@ -559,31 +707,82 @@
 
   <!-- JAVASCRIPT -->
   <script>
-    // DEMO CHATBOT LOGIC
-    function sendMessage() {
+    // DEMO CHATBOT LOGIC (talks to the Cloudflare Worker backend)
+    // After deploying the Worker, set this to its URL, e.g. https://bubble5-demo.<your-subdomain>.workers.dev
+    const CHAT_API_URL = "https://bubble5-demo.REPLACE-ME.workers.dev/chat";
+
+    const chatHistory = [];
+    let chatBusy = false;
+
+    function askSuggestion(btn) {
+      document.getElementById('chatInput').value = btn.innerText;
+      sendMessage();
+    }
+
+    async function sendMessage() {
       const input = document.getElementById('chatInput');
       const text = input.value.trim();
-      if (!text) return;
+      if (!text || chatBusy) return;
 
-      // Add User Message
       addMessage(text, 'user');
+      chatHistory.push({ role: 'user', content: text });
       input.value = '';
+      document.getElementById('chatChips').style.display = 'none';
 
-      // Simulated Bot Response (Demo Mode)
-      setTimeout(() => {
-        let reply = "This is a simulated response in DEMO MODE. Once connected to our AI backend, I will answer questions about your custom business data!";
-        const lower = text.toLowerCase();
-        
-        if (lower.includes('hello') || lower.includes('hi')) {
-          reply = "Hello! Thanks for testing the Bubble5 interactive demo.";
-        } else if (lower.includes('pricing') || lower.includes('cost')) {
-          reply = "Our plans start at $29/month! Check out our Pricing section above.";
-        } else if (lower.includes('hours')) {
-          reply = "In demo mode, our team operates 24/7!";
+      chatBusy = true;
+      document.getElementById('sendBtn').disabled = true;
+      const botDiv = addMessage('Thinking...', 'bot typing');
+      let reply = '';
+
+      try {
+        if (CHAT_API_URL.includes('REPLACE-ME')) {
+          throw new Error('not-configured');
         }
+        const res = await fetch(CHAT_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: chatHistory })
+        });
+        if (!res.ok || !res.body) throw new Error('bad-response');
 
-        addMessage(reply, 'bot');
-      }, 600);
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            if (!line.startsWith('data:')) continue;
+            const data = line.slice(5).trim();
+            if (!data || data === '[DONE]') continue;
+            try {
+              const delta = JSON.parse(data).choices?.[0]?.delta?.content;
+              if (delta) {
+                reply += delta;
+                botDiv.classList.remove('typing');
+                botDiv.innerText = reply;
+                const box = document.getElementById('chatMessages');
+                box.scrollTop = box.scrollHeight;
+              }
+            } catch (_) { /* ignore non-JSON events such as the retrieved chunks */ }
+          }
+        }
+        if (!reply) throw new Error('empty');
+        chatHistory.push({ role: 'assistant', content: reply });
+      } catch (err) {
+        botDiv.classList.remove('typing');
+        botDiv.innerText = err.message === 'not-configured'
+          ? "The AI backend isn't connected yet. Deploy the Worker and set CHAT_API_URL in index.html."
+          : "Sorry, the demo assistant is unavailable right now. Please try again in a moment.";
+        chatHistory.pop();
+      } finally {
+        chatBusy = false;
+        document.getElementById('sendBtn').disabled = false;
+        input.focus();
+      }
     }
 
     function addMessage(text, sender) {
@@ -593,6 +792,7 @@
       msgDiv.innerText = text;
       messagesDiv.appendChild(msgDiv);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      return msgDiv;
     }
 
     function handleKeyPress(event) {
@@ -600,6 +800,25 @@
         sendMessage();
       }
     }
+
+    // PRICING TOGGLE
+    const billingSwitch = document.getElementById('billingSwitch');
+    function renderPricing() {
+      const annual = billingSwitch.getAttribute('aria-checked') === 'true';
+      document.querySelectorAll('.pricing-card .price').forEach(el => {
+        const amount = annual ? el.dataset.annual : el.dataset.monthly;
+        el.innerHTML = `$${amount}<span>/mo</span>`;
+        const note = el.parentElement.querySelector('.billed-note');
+        note.textContent = annual ? `Billed annually ($${el.dataset.annual * 12}/yr)` : '';
+      });
+      document.getElementById('lblMonthly').classList.toggle('active-label', !annual);
+      document.getElementById('lblAnnual').classList.toggle('active-label', annual);
+    }
+    billingSwitch.addEventListener('click', () => {
+      const on = billingSwitch.getAttribute('aria-checked') === 'true';
+      billingSwitch.setAttribute('aria-checked', String(!on));
+      renderPricing();
+    });
 
     // MODAL LOGIC
     const modal = document.getElementById('loginModal');

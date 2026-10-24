@@ -121,6 +121,34 @@ async function handleLead(request, env, cors) {
   return json({ ok: true }, 200, cors);
 }
 
+// Creates the AI Search instance (if needed) and uploads the sample docs. Safe to run repeatedly.
+async function seedKnowledgeBase(env) {
+  const id = env.AI_SEARCH_INSTANCE;
+  let instance;
+  try {
+    instance = await env.AI_SEARCH.create({ id });
+  } catch (e) {
+    instance = env.AI_SEARCH.get(id); // already exists
+  }
+  const results = [];
+  for (const doc of DEMO_DOCS) {
+    const item = await instance.items.uploadAndPoll(doc.key, doc.content);
+    results.push({ key: doc.key, status: item.status });
+  }
+  return { instance: id, items: results };
+}
+
+async function askAssistant(env, history) {
+  return env.AI_SEARCH.get(env.AI_SEARCH_INSTANCE).chatCompletions({
+    messages: [{ role: "system", content: SYSTEM_PROMPT }, ...history],
+    stream: true,
+    ai_search_options: {
+      retrieval: { max_num_results: 5 },
+      query_rewrite: { enabled: true },
+    },
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -139,20 +167,7 @@ export default {
         // Temporary diagnostics: lengths only, never the value.
         return json({ error: "Unauthorized", reason: "Token does not match.", you_sent_length: (supplied || "").length, saved_length: env.ADMIN_TOKEN.length }, 401);
       }
-      const id = env.AI_SEARCH_INSTANCE;
-      let instance;
-      try {
-        instance = await env.AI_SEARCH.create({ id });
-      } catch (e) {
-        // Instance probably exists already.
-        instance = env.AI_SEARCH.get(id);
-      }
-      const results = [];
-      for (const doc of DEMO_DOCS) {
-        const item = await instance.items.uploadAndPoll(doc.key, doc.content);
-        results.push({ key: doc.key, status: item.status });
-      }
-      return json({ instance: id, items: results }, 200);
+      return json(await seedKnowledgeBase(env), 200);
     }
 
     if (url.pathname === "/lead" && request.method === "POST") {
@@ -178,14 +193,15 @@ export default {
       if (!history) return json({ error: "Send a messages array ending with a user message" }, 400, cors);
 
       try {
-        const stream = await env.AI_SEARCH.get(env.AI_SEARCH_INSTANCE).chatCompletions({
-          messages: [{ role: "system", content: SYSTEM_PROMPT }, ...history],
-          stream: true,
-          ai_search_options: {
-            retrieval: { max_num_results: 5 },
-            query_rewrite: { enabled: true },
-          },
-        });
+        let stream;
+        try {
+          stream = await askAssistant(env, history);
+        } catch (firstError) {
+          // Most likely the knowledge base has not been loaded yet: load it once, then retry.
+          console.error("First AI Search attempt failed, seeding", firstError);
+          await seedKnowledgeBase(env);
+          stream = await askAssistant(env, history);
+        }
         return new Response(stream, {
           headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-store", ...cors },
         });

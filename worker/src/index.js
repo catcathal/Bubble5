@@ -79,6 +79,19 @@ async function notifyByEmail(env, lead) {
   if (!res.ok) console.error("Email notify failed", res.status, await res.text());
 }
 
+// Cloudflare Turnstile (CAPTCHA). Enforced only when the TURNSTILE_SECRET secret is set.
+async function turnstileOk(env, token, ip) {
+  if (!env.TURNSTILE_SECRET) return true;
+  if (!token || typeof token !== "string") return false;
+  const form = new FormData();
+  form.append("secret", env.TURNSTILE_SECRET);
+  form.append("response", token);
+  if (ip) form.append("remoteip", ip);
+  const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: form });
+  const data = await res.json().catch(() => ({}));
+  return data.success === true;
+}
+
 async function handleLead(request, env, cors) {
   if (!cors["Access-Control-Allow-Origin"]) return json({ error: "Origin not allowed" }, 403);
   let b;
@@ -96,6 +109,9 @@ async function handleLead(request, env, cors) {
   const message = String((b && b.message) || "").trim().slice(0, 2000);
 
   if (kind !== "early_access" && kind !== "contact") return json({ error: "Unknown form" }, 400, cors);
+  if (!(await turnstileOk(env, b.turnstile, request.headers.get("CF-Connecting-IP")))) {
+    return json({ error: "Please complete the captcha and try again." }, 400, cors);
+  }
   if (!name || !EMAIL_RE.test(email)) return json({ error: "Please enter your name and a valid email." }, 400, cors);
   if (kind === "early_access" && !company) return json({ error: "Please enter your company name." }, 400, cors);
   if (kind === "contact" && !message) return json({ error: "Please enter a message." }, 400, cors);

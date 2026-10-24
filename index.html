@@ -4,576 +4,299 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bubble5 | AI Chatbots for Modern Businesses</title>
+  <meta name="description" content="Bubble5 builds AI chatbots that answer customer questions from your own business information. Try the live demo.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* CSS RESET & VARIABLES */
     :root {
-      --primary: #4F46E5;
-      --primary-hover: #4338CA;
-      --secondary: #06B6D4;
-      --dark: #0F172A;
-      --light: #F8FAFC;
-      --gray-100: #F1F5F9;
-      --gray-300: #CBD5E1;
-      --gray-600: #475569;
-      --gray-800: #1E293B;
-      --radius: 12px;
-      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --ink: #0F2A2E;
+      --ink-soft: #3C5558;
+      --lagoon: #0E7C7B;
+      --lagoon-dark: #0A5F5E;
+      --mist: #E8F3F1;
+      --paper: #FBFDFC;
+      --sun: #FFC53D;
+      --line: #CFE0DC;
+      --danger: #B42318;
+      --ok: #137A3D;
+      --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+      --body: "Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
+    *, *::before, *::after { box-sizing: border-box; }
+    * { margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 76px; -webkit-text-size-adjust: 100%; }
     body {
-      background-color: var(--light);
-      color: var(--dark);
+      font-family: var(--body);
+      font-size: 1.0625rem;
       line-height: 1.6;
+      color: var(--ink);
+      background: var(--paper);
+      overflow-x: hidden;
     }
+    h1, h2, h3 { font-family: var(--display); line-height: 1.1; letter-spacing: -0.02em; }
+    a { color: var(--lagoon-dark); }
+    :focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; border-radius: 6px; }
 
-    a {
-      color: var(--primary);
+    .wrap { width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+
+    /* ---------- Buttons ---------- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 22px;
+      border-radius: 999px;
+      border: 2px solid transparent;
+      font: 600 1rem/1 var(--body);
       text-decoration: none;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color .15s, border-color .15s, color .15s;
     }
+    .btn-primary { background: var(--lagoon); color: #fff; }
+    .btn-primary:hover { background: var(--lagoon-dark); }
+    .btn-outline { background: transparent; color: var(--ink); border-color: var(--ink); }
+    .btn-outline:hover { background: var(--ink); color: #fff; }
+    .btn-sun { background: var(--sun); color: var(--ink); }
+    .btn-sun:hover { background: #ffd569; }
+    .btn-block { width: 100%; }
+    .btn[disabled], button[disabled] { opacity: .6; cursor: wait; }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-
-    /* NAVBAR */
-    .navbar {
+    /* ---------- Navigation ---------- */
+    .nav {
       position: sticky;
       top: 0;
-      background-color: rgba(255, 255, 255, 0.9);
+      z-index: 50;
+      background: rgba(251, 253, 252, .94);
       backdrop-filter: blur(8px);
-      z-index: 100;
-      border-bottom: 1px solid var(--gray-300);
+      border-bottom: 1px solid var(--line);
     }
-
-    .nav-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 70px;
-    }
-
-    .logo {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-      list-style: none;
-    }
-
-    .nav-links a {
-      color: var(--gray-800);
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-
-    .nav-links a:hover {
-      color: var(--primary);
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: background-color 0.2s, transform 0.1s;
-    }
-
-    .btn-primary {
-      background-color: var(--primary);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background-color: var(--primary-hover);
-    }
-
-    .btn-outline {
-      border: 2px solid var(--primary);
-      color: var(--primary);
-      background: transparent;
-    }
-
-    .btn-outline:hover {
-      background-color: var(--primary);
-      color: white;
-    }
-
-    /* HERO SECTION */
-    .hero {
-      padding: 80px 0 60px;
-      text-align: center;
-      background: linear-gradient(180deg, #EEF2FF 0%, var(--light) 100%);
-    }
-
-    .hero h1 {
-      font-size: 2.8rem;
-      margin-bottom: 20px;
-      color: var(--dark);
-      line-height: 1.2;
-    }
-
-    .hero p {
-      font-size: 1.2rem;
-      color: var(--gray-600);
-      max-width: 600px;
-      margin: 0 auto 30px;
-    }
-
-    /* CHATBOT DEMO SECTION */
-    .demo-section {
-      padding: 60px 0;
-      background-color: white;
-    }
-
-    .section-title {
-      text-align: center;
-      font-size: 2rem;
-      margin-bottom: 10px;
-    }
-
-    .section-subtitle {
-      text-align: center;
-      color: var(--gray-600);
-      margin-bottom: 40px;
-    }
-
-    .chat-widget {
-      max-width: 450px;
-      margin: 0 auto;
-      border: 1px solid var(--gray-300);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      background-color: white;
-      display: flex;
-      flex-direction: column;
-      height: 500px;
-      position: relative;
-    }
-
-    .chat-header {
-      background-color: var(--primary);
-      color: white;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .demo-badge {
-      background-color: #F59E0B;
-      color: white;
-      font-size: 0.75rem;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-weight: bold;
-      text-transform: uppercase;
-    }
-
-    .chat-messages {
-      flex: 1;
-      padding: 15px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background-color: #F8FAFC;
-    }
-
-    .message {
-      max-width: 80%;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 0.95rem;
-    }
-
-    .message.bot {
-      background-color: white;
-      border: 1px solid var(--gray-300);
-      align-self: flex-start;
-      border-bottom-left-radius: 2px;
-    }
-
-    .message.user {
-      background-color: var(--primary);
-      color: white;
-      align-self: flex-end;
-      border-bottom-right-radius: 2px;
-    }
-
-    .chat-input-area {
-      display: flex;
-      padding: 10px;
-      border-top: 1px solid var(--gray-300);
-      background-color: white;
-    }
-
-    .chat-input-area input {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid var(--gray-300);
-      border-radius: 6px;
-      outline: none;
-    }
-
-    .chat-input-area button {
-      margin-left: 8px;
-      padding: 10px 15px;
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    /* PRICING SECTION */
-    .pricing-section {
-      padding: 80px 0;
-      background-color: var(--gray-100);
-    }
-
-    .billing-toggle {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      margin-top: 24px;
-      font-weight: 600;
-      color: var(--gray-600);
-    }
-
-    .billing-toggle .switch {
-      position: relative;
-      width: 52px;
-      height: 28px;
-      background: var(--gray-300);
-      border: none;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .billing-toggle .switch::after {
-      content: "";
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 22px;
-      height: 22px;
-      background: white;
-      border-radius: 50%;
-      transition: transform 0.2s;
-    }
-
-    .billing-toggle .switch[aria-checked="true"] { background: var(--primary); }
-    .billing-toggle .switch[aria-checked="true"]::after { transform: translateX(24px); }
-    .billing-toggle .active-label { color: var(--dark); }
-
-    .save-pill {
-      background: #DCFCE7;
-      color: #166534;
-      font-size: 0.75rem;
-      padding: 2px 8px;
-      border-radius: 999px;
-    }
-
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 28px;
-      margin-top: 40px;
-      align-items: stretch;
-    }
-
-    .pricing-card {
-      background-color: white;
-      padding: 32px 28px;
-      border-radius: 16px;
-      border: 1px solid var(--gray-300);
-      box-shadow: var(--shadow);
-      text-align: left;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .pricing-card:hover { transform: translateY(-4px); }
-
-    .pricing-card h3 { font-size: 1.25rem; }
-
-    .pricing-card .plan-tagline {
-      color: var(--gray-600);
-      font-size: 0.9rem;
-      margin-top: 4px;
-    }
-
-    .pricing-card.popular {
-      border: 2px solid var(--primary);
-      box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.18), 0 8px 10px -6px rgba(79, 70, 229, 0.12);
-    }
-
-    .popular-badge {
-      position: absolute;
-      top: -13px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--primary);
-      color: white;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      padding: 4px 12px;
-      border-radius: 999px;
-    }
-
-    .pricing-card .price {
-      font-size: 2.75rem;
-      font-weight: 800;
-      margin: 18px 0 2px;
-      line-height: 1.1;
-    }
-
-    .pricing-card .price span {
-      font-size: 1rem;
-      font-weight: 500;
-      color: var(--gray-600);
-    }
-
-    .pricing-card .billed-note {
-      font-size: 0.8rem;
-      color: var(--gray-600);
-      min-height: 1.2em;
-    }
-
-    .pricing-features {
-      list-style: none;
-      margin: 22px 0 26px;
-      text-align: left;
-      padding-top: 18px;
-      border-top: 1px solid var(--gray-100);
-    }
-
-    .pricing-features li {
-      margin-bottom: 10px;
-      color: var(--gray-600);
-      padding-left: 26px;
-      position: relative;
-    }
-
-    .pricing-features li::before {
-      content: "\2713";
-      position: absolute;
-      left: 0;
-      color: var(--primary);
-      font-weight: 700;
-    }
-
-    .chat-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      padding: 8px 10px 0;
-      background: white;
-    }
-
-    .chat-chips button {
-      font-size: 0.8rem;
-      padding: 5px 10px;
-      border: 1px solid var(--gray-300);
-      border-radius: 999px;
-      background: white;
-      color: var(--gray-800);
-      cursor: pointer;
-    }
-
-    .chat-chips button:hover { border-color: var(--primary); color: var(--primary); }
-
-    .message.typing { color: var(--gray-600); font-style: italic; }
-    .message { white-space: pre-wrap; }
-
-    .form-status { margin-top: 12px; font-size: 0.9rem; text-align: center; min-height: 1.2em; }
-    .form-status.ok { color: #166534; }
-    .form-status.err { color: #B91C1C; }
-    form button[disabled] { opacity: 0.6; cursor: wait; }
-
-    .demo-note {
-      text-align: center;
-      font-size: 0.8rem;
-      color: var(--gray-600);
-      margin-top: 12px;
-    }
-
-    /* FORM SECTIONS (EARLY ACCESS & CONTACT) */
-    .form-section {
-      padding: 60px 0;
-      background-color: white;
-    }
-
-    .form-container {
-      max-width: 600px;
-      margin: 0 auto;
-      background-color: var(--light);
-      padding: 30px;
-      border-radius: var(--radius);
-      border: 1px solid var(--gray-300);
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 600;
-    }
-
-    .form-group input, .form-group textarea {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid var(--gray-300);
-      border-radius: 6px;
-      font-size: 1rem;
-    }
-
-    /* MODAL (LOGIN) */
-    .modal {
+    .nav-bar { display: flex; align-items: center; justify-content: space-between; min-height: 64px; gap: 12px; }
+    .logo { font: 800 1.35rem/1 var(--display); letter-spacing: -0.03em; color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+    .logo-mark { width: 30px; height: 30px; border-radius: 50% 50% 50% 8px; background: var(--lagoon); display: inline-block; position: relative; }
+    .logo-mark::after { content: ""; position: absolute; right: 5px; top: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--sun); }
+    .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+    .nav-links a:not(.btn) { color: var(--ink); text-decoration: none; font-weight: 500; }
+    .nav-links a:not(.btn):hover { text-decoration: underline; text-underline-offset: 4px; }
+    .nav-actions { display: flex; align-items: center; gap: 8px; }
+    .nav .btn { min-height: 42px; padding: 0 18px; }
+    .menu-btn {
       display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 200;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      background-color: white;
-      padding: 30px;
-      border-radius: var(--radius);
-      width: 100%;
-      max-width: 400px;
-      position: relative;
-    }
-
-    .close-modal {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      font-size: 1.5rem;
+      min-height: 42px;
+      padding: 0 16px;
+      border: 2px solid var(--ink);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--ink);
+      font: 600 .95rem/1 var(--body);
       cursor: pointer;
     }
 
-    /* FOOTER */
-    footer {
-      background-color: var(--dark);
-      color: white;
-      text-align: center;
-      padding: 30px 0;
-      font-size: 0.9rem;
-    }
+    /* ---------- Hero with live demo ---------- */
+    .hero { background: var(--mist); padding: 56px 0 72px; border-bottom: 1px solid var(--line); }
+    .hero-grid > * { min-width: 0; }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 56px; align-items: center; }
+    .hero h1 { font-size: clamp(2.3rem, 5.2vw, 3.9rem); font-weight: 800; max-width: 16ch; }
+    .hero-lead { margin-top: 20px; font-size: 1.15rem; color: var(--ink-soft); max-width: 46ch; }
+    .hero-actions { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 12px; }
 
-    /* RESPONSIVE DESIGN */
-    @media (max-width: 768px) {
-      .hero h1 { font-size: 2rem; }
-      .nav-links { gap: 10px; }
-      .nav-links a { font-size: 0.9rem; }
+    /* ---------- Chat widget ---------- */
+    .chat-widget {
+      display: flex;
+      flex-direction: column;
+      height: min(560px, 78vh);
+      min-height: 440px;
+      background: #fff;
+      border: 2px solid var(--ink);
+      border-radius: 28px 28px 28px 8px;
+      overflow: hidden;
+      box-shadow: 8px 8px 0 var(--ink);
+    }
+    .chat-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; background: var(--ink); color: #fff; }
+    .chat-title { font: 700 1rem/1.2 var(--display); }
+    .chat-sub { font-size: .8rem; opacity: .8; margin-top: 2px; }
+    .demo-badge { background: var(--sun); color: var(--ink); font-size: .78rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+    .chat-messages { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; background: var(--paper); }
+    .message { max-width: 86%; padding: 10px 14px; border-radius: 18px; font-size: .98rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .message.bot { align-self: flex-start; background: #fff; border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+    .message.user { align-self: flex-end; background: var(--lagoon); color: #fff; border-bottom-right-radius: 4px; }
+    .message.typing { color: var(--ink-soft); font-style: italic; }
+    .chat-chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px 0; background: #fff; border-top: 1px solid var(--line); }
+    .chat-chips button { min-height: 38px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 999px; background: #fff; color: var(--ink); font: 500 .9rem/1 var(--body); cursor: pointer; }
+    .chat-chips button:hover { border-color: var(--lagoon); color: var(--lagoon-dark); }
+    .chat-input-area { display: flex; gap: 8px; padding: 12px 16px 16px; background: #fff; }
+    .chat-input-area input { flex: 1; min-width: 0; min-height: 48px; padding: 0 16px; border: 1.5px solid var(--line); border-radius: 999px; font: 400 1rem var(--body); color: var(--ink); background: var(--paper); }
+    .chat-input-area input:focus { outline: none; border-color: var(--lagoon); box-shadow: 0 0 0 3px rgba(14,124,123,.2); }
+    .chat-input-area button { min-height: 48px; padding: 0 20px; border: none; border-radius: 999px; background: var(--lagoon); color: #fff; font: 600 1rem var(--body); cursor: pointer; }
+    .chat-input-area button:hover { background: var(--lagoon-dark); }
+    .demo-note { margin-top: 18px; font-size: .88rem; color: var(--ink-soft); }
+
+    /* ---------- Sections ---------- */
+    .section { padding: 80px 0; }
+    .section-head { max-width: 640px; margin-bottom: 36px; }
+    .section-head h2 { font-size: clamp(1.9rem, 4vw, 2.7rem); font-weight: 800; }
+    .section-head p { margin-top: 12px; color: var(--ink-soft); }
+
+    /* ---------- Pricing ---------- */
+    .billing-toggle { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 32px; font-weight: 600; color: var(--ink-soft); flex-wrap: wrap; }
+    .billing-toggle .active-label { color: var(--ink); }
+    .switch { position: relative; width: 56px; height: 32px; flex: none; border: 2px solid var(--ink); border-radius: 999px; background: var(--paper); cursor: pointer; }
+    .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); transition: transform .2s; }
+    .switch[aria-checked="true"] { background: var(--sun); }
+    .switch[aria-checked="true"]::after { transform: translateX(24px); }
+    .save-pill { margin-left: 6px; background: var(--sun); color: var(--ink); font-size: .8rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: stretch; }
+    .pricing-card { display: flex; flex-direction: column; padding: 28px 24px 24px; background: #fff; border: 1.5px solid var(--line); border-radius: 20px; }
+    .pricing-card.popular { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .pricing-card h3 { font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .popular-badge { background: var(--sun); color: var(--ink); font: 700 .78rem/1 var(--body); letter-spacing: 0; padding: 5px 10px; border-radius: 999px; }
+    .plan-tagline { margin-top: 6px; color: var(--ink-soft); font-size: .95rem; }
+    .popular .plan-tagline { color: #B9CFCC; }
+    .price { margin-top: 18px; font: 800 3rem/1 var(--display); letter-spacing: -0.03em; }
+    .price span { font: 500 1rem var(--body); letter-spacing: 0; color: var(--ink-soft); margin-left: 2px; }
+    .popular .price span { color: #B9CFCC; }
+    .billed-note { margin-top: 6px; min-height: 1.4em; font-size: .88rem; color: var(--ink-soft); }
+    .popular .billed-note { color: #B9CFCC; }
+    .pricing-features { list-style: none; margin: 20px 0 28px; padding-top: 20px; border-top: 1px solid var(--line); flex: 1; }
+    .popular .pricing-features { border-top-color: rgba(255,255,255,.2); }
+    .pricing-features li { position: relative; padding-left: 28px; margin-bottom: 10px; }
+    .pricing-features li::before { content: ""; position: absolute; left: 2px; top: .38em; width: 14px; height: 8px; border-left: 2.5px solid var(--lagoon); border-bottom: 2.5px solid var(--lagoon); transform: rotate(-45deg); }
+    .popular .pricing-features li::before { border-color: var(--sun); }
+    .pricing-card .btn { width: 100%; }
+    .popular .btn-primary { background: var(--sun); color: var(--ink); }
+    .popular .btn-primary:hover { background: #ffd569; }
+
+    /* ---------- Forms ---------- */
+    .contact-section { background: var(--mist); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .contact-wrap > * { min-width: 0; }
+    .contact-wrap { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 48px; align-items: start; }
+    .contact-intro h2 { font-size: clamp(1.9rem, 4vw, 2.7rem); font-weight: 800; }
+    .contact-intro p { margin-top: 14px; color: var(--ink-soft); max-width: 36ch; }
+    .optional { font-weight: 400; color: var(--ink-soft); }
+    .turnstile-box { margin: 4px 0 16px; min-height: 0; }
+    .form-card { background: #fff; border: 1.5px solid var(--line); border-radius: 20px; padding: 32px 28px; }
+        .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: .95rem; }
+    .form-group input, .form-group textarea { width: 100%; min-height: 48px; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; font: 400 1rem var(--body); color: var(--ink); background: var(--paper); }
+    .form-group textarea { min-height: 120px; resize: vertical; }
+    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--lagoon); box-shadow: 0 0 0 3px rgba(14,124,123,.2); }
+    .form-status { margin-top: 14px; min-height: 1.4em; font-size: .95rem; font-weight: 500; }
+    .form-status.ok { color: var(--ok); }
+    .form-status.err { color: var(--danger); }
+
+    /* ---------- Modal ---------- */
+    .modal { display: none; position: fixed; inset: 0; z-index: 100; align-items: center; justify-content: center; padding: 20px; background: rgba(15,42,46,.6); }
+    .modal-content { position: relative; width: 100%; max-width: 420px; background: #fff; border-radius: 20px; padding: 32px 28px 28px; }
+    .modal-content h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 20px; padding-right: 40px; }
+    .close-modal { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border: none; border-radius: 50%; background: var(--mist); color: var(--ink); font-size: 1.5rem; line-height: 1; cursor: pointer; }
+
+    /* ---------- Footer ---------- */
+    footer { padding: 32px 0 40px; color: var(--ink-soft); font-size: .92rem; }
+    .footer-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+
+    /* ---------- Tablet and phone ---------- */
+    @media (max-width: 920px) {
+      .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+      .hero h1 { max-width: 16ch; }
+      .pricing-grid { grid-template-columns: minmax(0, 1fr); max-width: 520px; }
+      .contact-wrap { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+    }
+    @media (max-width: 760px) {
+      .menu-btn { display: inline-flex; align-items: center; }
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 8px 20px 16px;
+        background: var(--paper);
+        border-bottom: 1px solid var(--line);
+      }
+      .nav-links.open { display: flex; }
+      .nav-links a:not(.btn) { display: block; padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 1.05rem; }
+      .nav-links li:last-child a { border-bottom: none; }
+      .nav-bar { position: relative; }
+      .hero { padding: 36px 0 52px; }
+      .hero-actions .btn { flex: 1 1 100%; }
+      .section { padding: 56px 0; }
+      .form-card { padding: 24px 20px; }
+      .chat-widget { box-shadow: 5px 5px 0 var(--ink); border-radius: 24px 24px 24px 6px; }
+      .message { max-width: 92%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
     }
   </style>
 </head>
 <body>
-
-  <!-- NAVBAR -->
-  <nav class="navbar">
-    <div class="container nav-container">
-      <div class="logo">💬 Bubble5</div>
-      <ul class="nav-links">
-        <li><a href="#demo">Demo</a></li>
-        <li><a href="#pricing">Pricing</a></li>
-        <li><a href="#early-access">Early Access</a></li>
-        <li><a href="#contact">Contact</a></li>
-        <li><button class="btn btn-outline" id="loginBtn">Business Login</button></li>
-      </ul>
+  <nav class="nav" aria-label="Main">
+    <div class="wrap nav-bar">
+      <a href="#top" class="logo"><span class="logo-mark" aria-hidden="true"></span>Bubble5</a>
+      <div class="nav-actions">
+        <ul class="nav-links" id="navLinks">
+          <li><a href="#demo">Demo</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#contact">Contact</a></li>
+          <li><button class="btn btn-outline" id="loginBtn" type="button">Business login</button></li>
+        </ul>
+        <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="navLinks">Menu</button>
+      </div>
     </div>
   </nav>
 
-  <!-- HERO SECTION -->
-  <header class="hero">
-    <div class="container">
-      <h1>Automate Customer Support with Bubble5</h1>
-      <p>Bubble5 provides smart, trainable AI chatbots for small and medium business owners. Resolve customer queries 24/7 in seconds.</p>
-      <a href="#early-access" class="btn btn-primary">Get Early Access</a>
+  <header class="hero" id="top">
+    <div class="wrap hero-grid">
+      <div>
+        <h1>A chatbot that answers from your own business info</h1>
+        <p class="hero-lead">Bubble5 builds AI chatbots for small businesses. Customers get accurate answers any hour of the day, and you stop answering the same questions twice.</p>
+        <div class="hero-actions">
+          <a href="#contact" class="btn btn-primary">Contact us</a>
+          <a href="#pricing" class="btn btn-outline">See pricing</a>
+        </div>
+        <p class="demo-note">Try the live demo: it answers as a made-up bakery, using only the information we gave it.</p>
+      </div>
+
+      <section id="demo" aria-label="Live demo chatbot">
+        <div class="chat-widget">
+          <div class="chat-header">
+            <div>
+              <div class="chat-title">Maple &amp; Co. Bakery assistant</div>
+              <div class="chat-sub">Powered by Bubble5</div>
+            </div>
+            <span class="demo-badge">Live demo</span>
+          </div>
+          <div class="chat-messages" id="chatMessages" aria-live="polite">
+            <div class="message bot">Hi! I'm a demo assistant for Maple &amp; Co. Bakery, a made-up business. Ask me about hours, the menu, allergies or custom cakes.</div>
+          </div>
+          <div class="chat-chips" id="chatChips">
+            <button type="button" onclick="askSuggestion(this)">What are your opening hours?</button>
+            <button type="button" onclick="askSuggestion(this)">Do you have vegan options?</button>
+            <button type="button" onclick="askSuggestion(this)">How do I order a custom cake?</button>
+          </div>
+          <div class="chat-input-area">
+            <input type="text" id="chatInput" maxlength="500" placeholder="Ask about hours, menu, cakes" aria-label="Your message" onkeypress="handleKeyPress(event)">
+            <button id="sendBtn" type="button" onclick="sendMessage()">Send</button>
+          </div>
+        </div>
+      </section>
     </div>
   </header>
 
-  <!-- INTERACTIVE CHATBOT DEMO -->
-  <section id="demo" class="demo-section">
-    <div class="container">
-      <h2 class="section-title">Try The Demonstration Chatbot</h2>
-      <p class="section-subtitle">Experience how Bubble5 interacts with your customers in real-time.</p>
-      
-      <div class="chat-widget">
-        <div class="chat-header">
-          <div>
-            <strong>Bubble5 Assistant</strong>
-            <br><small style="font-size: 0.75rem; opacity: 0.9;">Status: Online (live AI demo)</small>
-          </div>
-          <!-- Clear Demo Identifier -->
-          <span class="demo-badge">Interactive Demo</span>
-        </div>
-        <div class="chat-messages" id="chatMessages">
-          <div class="message bot">
-            Hi! I'm a Bubble5 demo assistant for Maple &amp; Co. Bakery, a made-up business. Ask me about hours, the menu, allergies or custom cakes to see how I answer from a business's own information.
-          </div>
-        </div>
-        <div class="chat-chips" id="chatChips">
-          <button type="button" onclick="askSuggestion(this)">What are your opening hours?</button>
-          <button type="button" onclick="askSuggestion(this)">Do you have vegan options?</button>
-          <button type="button" onclick="askSuggestion(this)">How do I order a custom cake?</button>
-        </div>
-        <div class="chat-input-area">
-          <input type="text" id="chatInput" maxlength="500" placeholder="Ask about hours, menu, cakes..." onkeypress="handleKeyPress(event)">
-          <button id="sendBtn" onclick="sendMessage()">Send</button>
-        </div>
+  <section id="pricing" class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Simple, transparent pricing</h2>
+        <p>Pick the plan that fits your business. Change or cancel any time.</p>
       </div>
-      <p class="demo-note">Demo only: answers come from a sample knowledge base for a fictional bakery.</p>
-    </div>
-  </section>
-
-  <!-- PRICING SECTION -->
-  <section id="pricing" class="pricing-section">
-    <div class="container">
-      <h2 class="section-title">Simple &amp; Transparent Pricing</h2>
-      <p class="section-subtitle">Choose the plan that fits your business needs.</p>
 
       <div class="billing-toggle">
         <span id="lblMonthly" class="active-label">Monthly</span>
@@ -582,140 +305,110 @@
       </div>
 
       <div class="pricing-grid">
-        <div class="pricing-card">
-          <div>
-            <h3>Starter</h3>
-            <p class="plan-tagline">For a single small site</p>
-            <div class="price" data-monthly="29" data-annual="23">$29<span>/mo</span></div>
-            <div class="billed-note"></div>
-            <ul class="pricing-features">
-              <li>1 Chatbot Agent</li>
-              <li>Up to 1,000 Chats/mo</li>
-              <li>Basic AI Training</li>
-              <li>Email Support</li>
-            </ul>
-          </div>
-          <a href="#early-access" class="btn btn-outline">Choose Starter</a>
-        </div>
+        <article class="pricing-card">
+          <h3>Starter</h3>
+          <p class="plan-tagline">For a single small site</p>
+          <div class="price" data-monthly="29" data-annual="23">$29<span>/mo</span></div>
+          <div class="billed-note"></div>
+          <ul class="pricing-features">
+            <li>1 chatbot agent</li>
+            <li>Up to 1,000 chats a month</li>
+            <li>Basic AI training</li>
+            <li>Email support</li>
+          </ul>
+          <a href="#contact" class="btn btn-outline">Choose Starter</a>
+        </article>
 
-        <div class="pricing-card popular">
-          <span class="popular-badge">Most popular</span>
-          <div>
-            <h3>Pro</h3>
-            <p class="plan-tagline">For growing teams</p>
-            <div class="price" data-monthly="79" data-annual="63">$79<span>/mo</span></div>
-            <div class="billed-note"></div>
-            <ul class="pricing-features">
-              <li>3 Chatbot Agents</li>
-              <li>Up to 10,000 Chats/mo</li>
-              <li>Custom Knowledge Base Integration</li>
-              <li>Priority Support</li>
-            </ul>
-          </div>
-          <a href="#early-access" class="btn btn-primary">Choose Pro</a>
-        </div>
+        <article class="pricing-card popular">
+          <h3>Pro <span class="popular-badge">Most popular</span></h3>
+          <p class="plan-tagline">For growing teams</p>
+          <div class="price" data-monthly="79" data-annual="63">$79<span>/mo</span></div>
+          <div class="billed-note"></div>
+          <ul class="pricing-features">
+            <li>3 chatbot agents</li>
+            <li>Up to 10,000 chats a month</li>
+            <li>Custom knowledge base integration</li>
+            <li>Priority support</li>
+          </ul>
+          <a href="#contact" class="btn btn-primary">Choose Pro</a>
+        </article>
 
-        <div class="pricing-card">
-          <div>
-            <h3>Enterprise</h3>
-            <p class="plan-tagline">For high volume and custom needs</p>
-            <div class="price" data-monthly="199" data-annual="159">$199<span>/mo</span></div>
-            <div class="billed-note"></div>
-            <ul class="pricing-features">
-              <li>Unlimited Chatbot Agents</li>
-              <li>Unlimited Chats</li>
-              <li>Dedicated AI Backend</li>
-              <li>24/7 Account Manager</li>
-            </ul>
-          </div>
-          <a href="#contact" class="btn btn-outline">Contact Sales</a>
-        </div>
+        <article class="pricing-card">
+          <h3>Enterprise</h3>
+          <p class="plan-tagline">For high volume and custom needs</p>
+          <div class="price" data-monthly="199" data-annual="159">$199<span>/mo</span></div>
+          <div class="billed-note"></div>
+          <ul class="pricing-features">
+            <li>Unlimited chatbot agents</li>
+            <li>Unlimited chats</li>
+            <li>Dedicated AI backend</li>
+            <li>24/7 account manager</li>
+          </ul>
+          <a href="#contact" class="btn btn-outline">Contact sales</a>
+        </article>
       </div>
     </div>
   </section>
 
-  <!-- EARLY ACCESS REGISTRATION -->
-  <section id="early-access" class="form-section">
-    <div class="container">
-      <div class="form-container">
-        <h2 class="section-title">Register for Early Access</h2>
-        <p class="section-subtitle" style="margin-bottom: 20px;">Be among the first business owners to launch Bubble5.</p>
-        <form onsubmit="handleEarlyAccess(event)">
-          <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;height:0;width:0;opacity:0;">
-          <div class="form-group">
-            <label for="fullName">Full Name</label>
-            <input type="text" id="fullName" required placeholder="Jane Doe">
-          </div>
-          <div class="form-group">
-            <label for="businessEmail">Business Email</label>
-            <input type="email" id="businessEmail" required placeholder="jane@company.com">
-          </div>
-          <div class="form-group">
-            <label for="companyName">Company Name</label>
-            <input type="text" id="companyName" required placeholder="Acme Inc.">
-          </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Registration</button>
-          <p class="form-status" role="status" aria-live="polite"></p>
-        </form>
+  <section class="section contact-section" id="contact">
+    <div class="wrap contact-wrap">
+      <div class="contact-intro">
+        <h2>Contact us</h2>
+        <p>Want a chatbot for your business, or have a question about pricing? Send us a message and we'll reply by email.</p>
       </div>
-    </div>
-  </section>
-
-  <!-- CONTACT SECTION -->
-  <section id="contact" class="form-section" style="background-color: var(--gray-100);">
-    <div class="container">
-      <div class="form-container">
-        <h2 class="section-title">Contact Us</h2>
-        <p class="section-subtitle" style="margin-bottom: 20px;">Have questions? Reach out to our team directly.</p>
+      <div class="form-card">
         <form onsubmit="handleContact(event)">
           <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;height:0;width:0;opacity:0;">
           <div class="form-group">
-            <label for="contactName">Name</label>
-            <input type="text" id="contactName" required>
+            <label for="contactName">Your name</label>
+            <input type="text" id="contactName" required autocomplete="name">
           </div>
           <div class="form-group">
-            <label for="contactEmail">Email</label>
-            <input type="email" id="contactEmail" required>
+            <label for="contactEmail">Your email</label>
+            <input type="email" id="contactEmail" required autocomplete="email">
           </div>
           <div class="form-group">
-            <label for="contactMessage">Message</label>
+            <label for="contactCompany">Your company name <span class="optional">(optional)</span></label>
+            <input type="text" id="contactCompany" autocomplete="organization">
+          </div>
+          <div class="form-group">
+            <label for="contactMessage">Your message</label>
             <textarea id="contactMessage" rows="4" required></textarea>
           </div>
-          <button type="submit" class="btn btn-outline" style="width: 100%;">Send Message</button>
+          <div id="turnstileBox" class="turnstile-box"></div>
+          <button type="submit" class="btn btn-primary btn-block">Send message</button>
           <p class="form-status" role="status" aria-live="polite"></p>
         </form>
       </div>
     </div>
   </section>
 
-  <!-- BUSINESS LOGIN MODAL -->
-  <div class="modal" id="loginModal">
+  <div class="modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
     <div class="modal-content">
-      <span class="close-modal" id="closeModal">&times;</span>
-      <h2 style="margin-bottom: 15px;">Business Owner Login</h2>
+      <button type="button" class="close-modal" id="closeModal" aria-label="Close">&times;</button>
+      <h2 id="loginTitle">Business login</h2>
       <form onsubmit="handleLogin(event)">
         <div class="form-group">
           <label for="loginEmail">Email</label>
-          <input type="email" id="loginEmail" required>
+          <input type="email" id="loginEmail" required autocomplete="email">
         </div>
         <div class="form-group">
           <label for="loginPassword">Password</label>
-          <input type="password" id="loginPassword" required>
+          <input type="password" id="loginPassword" required autocomplete="current-password">
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Log In</button>
+        <button type="submit" class="btn btn-primary btn-block">Log in</button>
       </form>
     </div>
   </div>
 
-  <!-- FOOTER -->
   <footer>
-    <div class="container">
-      <p>&copy; 2026 Bubble5 Inc. All rights reserved. | Demonstration Mode Active</p>
+    <div class="wrap footer-row">
+      <span>&copy; 2026 Bubble5. All rights reserved.</span>
+      <span>Demo mode: the bakery in the chat is fictional.</span>
     </div>
   </footer>
 
-  <!-- JAVASCRIPT -->
-  <script>
+<script>
     // DEMO CHATBOT LOGIC (talks to the Cloudflare Worker backend)
     // After deploying the Worker, set this to its URL, e.g. https://bubble5-demo.<your-subdomain>.workers.dev
     const CHAT_API_URL = "https://bubble5.mlgcostello.workers.dev/chat";
@@ -852,11 +545,49 @@
     const loginBtn = document.getElementById('loginBtn');
     const closeModal = document.getElementById('closeModal');
 
-    loginBtn.onclick = () => modal.style.display = 'flex';
+    loginBtn.onclick = () => { modal.style.display = 'flex'; navLinks.classList.remove('open'); };
     closeModal.onclick = () => modal.style.display = 'none';
     window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
 
     // FORM HANDLERS
+    // CAPTCHA (Cloudflare Turnstile). Paste your public site key below to switch it on.
+    const TURNSTILE_SITE_KEY = "REPLACE-ME";
+    let turnstileWidgetId = null;
+
+    function renderTurnstile() {
+      if (TURNSTILE_SITE_KEY.includes('REPLACE-ME') || !window.turnstile || turnstileWidgetId !== null) return;
+      turnstileWidgetId = window.turnstile.render('#turnstileBox', { sitekey: TURNSTILE_SITE_KEY });
+    }
+    function turnstileToken() {
+      return (turnstileWidgetId !== null && window.turnstile) ? window.turnstile.getResponse(turnstileWidgetId) : '';
+    }
+    function resetTurnstile() {
+      if (turnstileWidgetId !== null && window.turnstile) window.turnstile.reset(turnstileWidgetId);
+    }
+    if (!TURNSTILE_SITE_KEY.includes('REPLACE-ME')) {
+      const ts = document.createElement('script');
+      ts.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      ts.async = true;
+      ts.onload = renderTurnstile;
+      document.head.appendChild(ts);
+    }
+
+    // MOBILE MENU
+    const menuBtn = document.getElementById('menuBtn');
+    const navLinks = document.getElementById('navLinks');
+    menuBtn.addEventListener('click', () => {
+      const open = navLinks.classList.toggle('open');
+      menuBtn.setAttribute('aria-expanded', String(open));
+      menuBtn.textContent = open ? 'Close' : 'Menu';
+    });
+    navLinks.addEventListener('click', (e) => {
+      if (e.target.tagName === 'A') {
+        navLinks.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+        menuBtn.textContent = 'Menu';
+      }
+    });
+
     async function submitLead(e, kind, fields, okMessage) {
       e.preventDefault();
       const form = e.target;
@@ -874,15 +605,17 @@
         const res = await fetch(LEAD_API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ kind, website: form.elements['website'].value, ...fields })
+          body: JSON.stringify({ kind, website: form.elements['website'].value, turnstile: turnstileToken(), ...fields })
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
         status.classList.add('ok');
         status.textContent = okMessage;
         form.reset();
+        resetTurnstile();
       } catch (err) {
         status.classList.add('err');
+        resetTurnstile();
         status.textContent = err.message === 'Failed to fetch'
           ? 'Could not reach the server. Please check your connection and try again.'
           : err.message;
@@ -891,20 +624,13 @@
       }
     }
 
-    function handleEarlyAccess(e) {
-      submitLead(e, 'early_access', {
-        name: document.getElementById('fullName').value,
-        email: document.getElementById('businessEmail').value,
-        company: document.getElementById('companyName').value
-      }, "Thanks! You're on the early access list. We'll be in touch soon.");
-    }
-
     function handleContact(e) {
       submitLead(e, 'contact', {
         name: document.getElementById('contactName').value,
         email: document.getElementById('contactEmail').value,
+        company: document.getElementById('contactCompany').value,
         message: document.getElementById('contactMessage').value
-      }, "Message sent! We'll get back to you shortly.");
+      }, "Thanks! Your message is on its way. We'll reply by email.");
     }
 
     function handleLogin(e) {

@@ -13,7 +13,7 @@ remote = true
 [[d1_databases]]
 binding = "DB"
 database_name = "bubble5-leads"
-database_id = "REPLACE-WITH-D1-DATABASE-ID"
+database_id = "948f1e23-6bcf-4388-b381-8307ad2a297b"
 
 [vars]
 # Where new-lead emails go (optional; needs the RESEND_API_KEY secret too).

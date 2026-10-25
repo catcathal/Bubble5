@@ -22,7 +22,7 @@ NOTIFY_EMAIL = ""
 AI_SEARCH_INSTANCE = "bubble5-demo"
 # Comma-separated list of sites allowed to call this Worker from a browser.
 # Add your GitHub Pages / custom domain here.
-ALLOWED_ORIGINS = "https://catcathal.github.io,http://localhost:8080,http://127.0.0.1:8080"
+ALLOWED_ORIGINS = "https://catcathal.github.io,https://bubble5.online,https://www.bubble5.online,http://localhost:8080,http://127.0.0.1:8080"
 
 # Billing (Stripe). Put your Stripe Price IDs here as JSON once you have created them, e.g.
 # STRIPE_PRICES = '{"starter":{"monthly":"price_...","annual":"price_..."},"pro":{"monthly":"price_...","annual":"price_..."}}'

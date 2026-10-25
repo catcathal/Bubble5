@@ -20,3 +20,18 @@ Landing page and live AI chatbot demo for Bubble5.
 6. In `index.html`, set `CHAT_API_URL` to `https://<your-worker-url>/chat` and `LEAD_API_URL` to `https://<your-worker-url>/lead`, commit and push.
 
 To demo a prospect's own business, edit the documents in `worker/src/kb.js` (and the persona in `SYSTEM_PROMPT` in `worker/src/index.js`), redeploy and re-run the seed call.
+
+## Business portal, billing and help
+
+- `app.html` is the customer portal: sign up and log in, knowledge base, billing and account settings. Accounts, sessions and documents live in the same D1 database (tables are in `worker/schema.sql`; run it again after pulling updates, it is safe to repeat).
+- `help.html` is a public troubleshooting page with a guided diagnosis and live system check (`GET /health` on the Worker).
+- Passwords are hashed with PBKDF2 and never stored in clear text. Login is rate limited.
+
+### Switching on online billing (Stripe)
+1. In Stripe, create products Starter, Pro (and Enterprise if you want) with a monthly and an annual recurring price.
+2. Put the price IDs into `STRIPE_PRICES` in `worker/wrangler.toml` (see the comment there).
+3. Add Worker secrets `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`.
+4. In Stripe, add a webhook to `https://<worker-url>/stripe-webhook` for `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted` and `invoice.payment_failed`.
+5. In Stripe, turn on the Customer Portal (Settings, Billing, Customer portal) so customers can change plan, update cards and cancel.
+
+Until these are set, the Billing page tells customers payments are being switched on and points them to the contact form.

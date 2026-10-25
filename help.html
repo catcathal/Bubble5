@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bubble5 | Help and diagnostics</title>
+  <meta name="description" content="Find out what's wrong with your Bubble5 chatbot, login or billing and get the fix in a few taps.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/portal.css">
+  <style>
+    .hero { background: var(--mist); border-bottom: 1px solid var(--line); padding: 40px 0 36px; }
+    .hero p { margin-top: 10px; color: var(--ink-soft); max-width: 56ch; }
+    .section { padding: 36px 0; }
+    .section + .section { padding-top: 0; }
+    .problems { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+    .problem { text-align: left; min-height: 64px; padding: 14px 16px; border: 1.5px solid var(--line); border-radius: 16px; background: #fff; font: 600 1rem/1.35 var(--body); color: var(--ink); cursor: pointer; }
+    .problem:hover { border-color: var(--lagoon); }
+    .trail { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 6px; font-size: .88rem; }
+    .trail li { background: var(--mist); border-radius: 999px; padding: 3px 11px; }
+    .answers { display: grid; gap: 10px; margin-top: 16px; }
+    .answer { text-align: left; min-height: 52px; padding: 12px 16px; border: 1.5px solid var(--ink); border-radius: 14px; background: #fff; font: 600 1rem/1.35 var(--body); color: var(--ink); cursor: pointer; }
+    .answer:hover { background: var(--ink); color: #fff; }
+    .wiz-nav { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .diag h2 { margin: 6px 0 8px; }
+    .diag ol { margin: 12px 0 18px 1.3em; }
+    .diag li { margin-bottom: 8px; }
+    .diag .why { color: var(--ink-soft); }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .checks { list-style: none; margin-top: 14px; }
+    .check { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); }
+    .check:first-child { border-top: none; }
+    .check .name { font-weight: 700; }
+    .check .detail { color: var(--ink-soft); font-size: .93rem; }
+    .check .status-pill { flex: none; }
+    @media (max-width: 640px) { .problems { grid-template-columns: minmax(0, 1fr); } .hero { padding: 28px 0; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-row">
+      <a class="logo" href="index.html" aria-label="Bubble5 home"><span class="logo-mark" aria-hidden="true">5</span>Bubble5</a>
+      <nav class="topbar-links" aria-label="Site">
+        <a href="index.html#pricing">Pricing</a>
+        <a href="app.html#/login">Business login</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="wrap">
+      <h1>Help and diagnostics</h1>
+      <p>Tell us what you're seeing. We'll narrow it down, show you the likely cause and the fix, and check that Bubble5 itself is running.</p>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <section class="section" aria-labelledby="wizTitle">
+      <h2 id="wizTitle">What's going wrong?</h2>
+      <div id="wizard" aria-live="polite"></div>
+    </section>
+
+    <section class="section" aria-labelledby="checkTitle">
+      <div class="card">
+        <h2 id="checkTitle">Check that everything is running</h2>
+        <p class="muted">Runs a quick test of the Bubble5 servers from your device. It takes a few seconds.</p>
+        <button class="btn btn-primary" id="runChecks">Run system check</button>
+        <div id="checkOut" aria-live="polite" style="margin-top:16px"></div>
+      </div>
+    </section>
+  </main>
+
+<script>
+(function () {
+  "use strict";
+  const API = "https://bubble5.mlgcostello.workers.dev";
+
+  /* ---------- the diagnosis tree ---------- */
+  const PROBLEMS = [
+    { id: "wrong", label: "The chatbot gives wrong or made-up answers", start: "wrong" },
+    { id: "slow", label: "The chatbot is slow or doesn't reply", start: "slow" },
+    { id: "missing", label: "The chatbot doesn't show on my website", start: "missing" },
+    { id: "limit", label: "I've hit my chat limit, or usage looks too high", start: "limit" },
+    { id: "login", label: "I can't log in", start: "login" },
+    { id: "billing", label: "A payment, invoice or plan problem", start: "billing" },
+    { id: "other", label: "Something else", start: "other" }
+  ];
+
+  const KB = { label: "Open knowledge base", href: "app.html#/knowledge" };
+  const BILL = { label: "Open billing", href: "app.html#/billing" };
+  const LOGIN = { label: "Go to login", href: "app.html#/login" };
+
+  const NODES = {
+    /* wrong answers */
+    wrong: { q: "Is the correct answer written in your knowledge base?", options: [
+      ["I'm not sure", "d_kb_missing"], ["Yes, it's there but the bot still gets it wrong", "d_kb_wording"], ["The information in it is out of date", "d_kb_old"]] },
+    d_kb_missing: { title: "The chatbot can only answer from what you've told it", why: "If a fact isn't in your documents, the chatbot has nothing to base the answer on and may guess or say it's unsure.",
+      steps: ["Open your knowledge base and look for the exact fact (price, opening hours, policy).", "If it's missing, add a short document with a clear title, such as \"Delivery fees\".", "Write it the way a customer would ask. Plain sentences work best.", "Ask the chatbot the same question again to check."], actions: [KB] },
+    d_kb_wording: { title: "The right answer is there but hard to find", why: "Two documents that disagree, or a key fact buried in a long document, make answers less reliable.",
+      steps: ["Look for two documents that mention the same thing differently and keep only one.", "Put the key fact in the first sentence under a clear title.", "Split long documents so each one covers a single topic.", "Test again with the exact question that went wrong."], actions: [KB] },
+    d_kb_old: { title: "An out-of-date document is still being used", why: "The chatbot answers from the version you last saved.",
+      steps: ["Edit the document and replace the old fact. Check other documents for the same fact.", "Save it.", "Tell us you've updated your information so we can refresh your chatbot."], actions: [KB] },
+
+    /* slow */
+    slow: { q: "When does it happen?", options: [
+      ["The first message after it's been quiet", "d_warm"], ["Every message is slow", "d_slow_all"], ["It says it's unavailable or shows an error", "d_unavail"]] },
+    d_warm: { title: "The first reply after a quiet spell can take longer", why: "The chatbot's services wake up when someone starts a conversation. The demo may say it is getting ready the first time.",
+      steps: ["Wait about a minute, then send your message again.", "Later messages in the same conversation should be quick.", "If every first message takes more than 30 seconds, run the system check below and send us the results."], check: true },
+    d_slow_all: { title: "Slow replies on every message", why: "This is usually the network between your device and Bubble5, or a problem on our side that the system check can show.",
+      steps: ["Run the system check below. Slow connection time points to your network.", "Switch between Wi-Fi and mobile data and try again.", "Very long messages take longer. Try a short question.", "If the check is all green and it's still slow, contact us with the time it happened and your device."], check: true },
+    d_unavail: { title: "The chatbot reports it's unavailable", why: "Either one of our services is having a problem, or the request is being blocked.",
+      steps: ["Run the system check below. A red line means the problem is on our side.", "If everything is green, turn off any ad blocker or VPN for this site and try again.", "Try again in a few minutes. Most problems clear on their own.", "If it keeps happening, contact us with the results."], check: true },
+
+    /* missing widget */
+    missing: { q: "Where are you stuck?", options: [
+      ["I haven't received the install code yet", "d_nocode"], ["I added the code but nothing appears", "d_blocked"], ["It shows on some pages but not others", "d_pages"]] },
+    d_nocode: { title: "Your chatbot needs to be set up first", why: "We set up each chatbot with you and send the code for your website once your information and plan are ready.",
+      steps: ["Add your business information in the knowledge base.", "Choose a plan in Billing.", "Ask us to set up your chatbot. We'll send the code and check it works on your site."], actions: [KB, BILL], contactNote: "Please set up my chatbot." },
+    d_blocked: { title: "Your website address may not be approved yet", why: "For security, the chatbot only loads on website addresses we've approved for your account.",
+      steps: ["Check the exact address in your browser bar, including https and whether it starts with www.", "Send us that exact address. We'll approve it.", "Clear your browser's saved data for the site or open it in a private tab.", "Turn off ad blockers for your site while testing."], contactNote: "My chatbot doesn't appear on my site. The address is: " },
+    d_pages: { title: "The code isn't on every page", why: "The install code has to be on each page where you want the chatbot to appear.",
+      steps: ["Put the code in your site's shared footer or template instead of on single pages.", "If your site builder has a \"site-wide code\" setting, use that.", "Check the pages where it's missing for a different template."], contactNote: "My chatbot only shows on some pages. " },
+
+    /* limits */
+    limit: { q: "What are you seeing?", options: [
+      ["A message says I've reached my limit", "d_limit_hit"], ["Usage is higher than I expected", "d_usage_high"]] },
+    d_limit_hit: { title: "You've used all the chats in your plan", why: "Each plan includes a number of chats a month. Usage counts from the start of each calendar month.",
+      steps: ["Open your dashboard to see how many chats you've used.", "If you'll keep reaching the limit, move up a plan in Billing.", "Unlimited chats are available on Enterprise. Contact us to discuss it."], actions: [{ label: "Open dashboard", href: "app.html#/dashboard" }, BILL] },
+    d_usage_high: { title: "More chats than expected", why: "Test conversations, returning visitors and automated traffic all count as chats.",
+      steps: ["Remember that your own test conversations count too.", "Check the date range: usage resets each calendar month.", "If numbers still look wrong, contact us with the dates and we'll look at the logs."], actions: [{ label: "Open dashboard", href: "app.html#/dashboard" }] },
+
+    /* login */
+    login: { q: "What happens when you try to log in?", options: [
+      ["It says my email and password don't match", "d_pw"], ["It says too many attempts", "d_locked"], ["It says my session ended", "d_session"], ["I don't have an account yet", "d_signup"]] },
+    d_pw: { title: "Email or password doesn't match", why: "For security the message is the same whether the email or the password is wrong.",
+      steps: ["Check Caps Lock and that your keyboard language is right.", "Use the email address you signed up with. Try any other address you might have used.", "If you pasted the password, check it didn't include a space at the end.", "Still no luck? Contact us and we'll reset your password."], actions: [LOGIN], contactNote: "I can't log in and need a password reset. My account email is: " },
+    d_locked: { title: "Login is paused after several wrong attempts", why: "After 8 failed attempts we pause login for 15 minutes to protect your account.",
+      steps: ["Stop trying for 15 minutes. More attempts can extend the wait.", "Then log in carefully with the email and password you signed up with.", "If you don't remember the password, contact us and we'll reset it."], contactNote: "My login is locked and I need a password reset. My account email is: " },
+    d_session: { title: "You were signed out", why: "Login lasts 30 days on a device. Changing your password signs out your other devices, and clearing browser data removes the login.",
+      steps: ["Log in again with your email and password.", "If it keeps happening, check that your browser isn't set to clear site data when you close it.", "Private tabs forget your login when you close them."], actions: [LOGIN] },
+    d_signup: { title: "Create your business account", why: "It takes under a minute.", steps: ["Open the sign-up page.", "Enter your name, email and a password with at least 8 characters.", "Add your business information and choose a plan."], actions: [{ label: "Create account", href: "app.html#/signup" }] },
+
+    /* billing */
+    billing: { q: "What's the issue?", options: [
+      ["A payment failed", "d_failed"], ["I need an invoice or receipt", "d_invoice"], ["I was charged the wrong amount", "d_charge"], ["I want to change or cancel my plan", "d_change"], ["It says online payments aren't ready", "d_notready"]] },
+    d_failed: { title: "Your card payment didn't go through", why: "Common causes are an expired card, a spending limit, or your bank asking for extra confirmation.",
+      steps: ["Open Billing and choose Manage billing.", "Update your card or choose a different one.", "Approve any confirmation request from your bank.", "If the card keeps failing, try another card or contact your bank, then tell us."], actions: [BILL] },
+    d_invoice: { title: "Download your invoices", why: "Invoices are listed on the Billing page after each payment.",
+      steps: ["Open Billing and scroll to Invoices.", "Choose View next to the invoice you need.", "Need your company name or tax number on it? Update it in Manage billing, or contact us."], actions: [BILL] },
+    d_charge: { title: "The amount looks wrong", why: "The usual reasons are annual versus monthly billing, or a plan change part-way through a period.",
+      steps: ["Open Billing and check which plan and interval you're on.", "Compare it with the invoice. Annual plans bill 12 months at once.", "Plan changes can create a partial charge for the days left in the period.", "If it still doesn't add up, contact us with the invoice number."], actions: [BILL], contactNote: "I think I was charged the wrong amount. Invoice number: " },
+    d_change: { title: "Change or cancel your plan", why: "You manage your subscription in the secure billing portal.",
+      steps: ["Open Billing and choose Manage billing.", "Pick a new plan, or cancel.", "The portal shows the date your plan ends or changes."], actions: [BILL] },
+    d_notready: { title: "Online payments are still being switched on", why: "We can start your plan by hand while that's finished.",
+      steps: ["Contact us with the plan you want and whether you prefer monthly or annual billing.", "We'll confirm the price and send you a payment link."], actions: [BILL], contactNote: "I'd like to start a Bubble5 plan. Plan and billing interval: " },
+
+    /* other */
+    other: { title: "Let's check the basics", why: "If your problem isn't listed, a system check often shows the cause.",
+      steps: ["Run the system check below.", "Contact us and describe what you did, what you expected and what happened.", "Include the time it happened and your device, plus the check results."], check: true }
+  };
+
+  /* ---------- wizard ---------- */
+  const wizard = document.getElementById("wizard");
+  let path = [];       // [{label}] answers chosen so far
+  let current = null;  // node id
+  let problemLabel = "";
+  let lastResults = ""; // text of the last system check
+
+  function esc(v) { return String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+  function contactHref(node) {
+    const lines = ["Help request: " + problemLabel];
+    if (path.length) lines.push("What I chose: " + path.map((p) => p.label).join(" > "));
+    if (node && node.title) lines.push("Likely cause shown: " + node.title);
+    if (lastResults) lines.push("System check: " + lastResults);
+    let msg = lines.join("\n");
+    if (node && node.contactNote) msg = node.contactNote + "\n\n" + msg;
+    return "index.html?msg=" + encodeURIComponent(msg.slice(0, 1800)) + "#contact";
+  }
+
+  function renderStart() {
+    path = []; current = null; problemLabel = "";
+    wizard.innerHTML = `<p class="muted">Choose the closest match.</p><div class="problems">${PROBLEMS.map((p) => `<button type="button" class="problem" data-id="${p.id}">${esc(p.label)}</button>`).join("")}</div>`;
+    wizard.querySelectorAll(".problem").forEach((b) => b.onclick = () => {
+      const p = PROBLEMS.find((x) => x.id === b.dataset.id);
+      problemLabel = p.label; go(p.start);
+    });
+  }
+
+  function trail() {
+    const items = [problemLabel].concat(path.map((p) => p.label));
+    return `<ul class="trail" aria-label="Your answers so far">${items.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>`;
+  }
+
+  function go(id) {
+    current = id;
+    const node = NODES[id];
+    if (node.options) {
+      wizard.innerHTML = `<div class="card">${trail()}<h3 style="margin-top:10px">${esc(node.q)}</h3>
+        <div class="answers">${node.options.map((o, i) => `<button type="button" class="answer" data-i="${i}">${esc(o[0])}</button>`).join("")}</div>
+        <div class="wiz-nav"><button type="button" class="btn btn-outline btn-small" id="startOver">Start over</button></div></div>`;
+      wizard.querySelectorAll(".answer").forEach((b) => b.onclick = () => { const o = node.options[Number(b.dataset.i)]; path.push({ label: o[0] }); go(o[1]); });
+      document.getElementById("startOver").onclick = renderStart;
+    } else {
+      wizard.innerHTML = `<div class="card diag">${trail()}<span class="status-pill warn">Likely cause</span><h2>${esc(node.title)}</h2>
+        <p class="why">${esc(node.why)}</p>
+        <h3>Try this</h3><ol>${node.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
+        <div class="actions">
+          ${(node.actions || []).map((a) => `<a class="btn btn-primary" href="${esc(a.href)}">${esc(a.label)}</a>`).join("")}
+          ${node.check ? '<a class="btn btn-primary" href="#checkTitle" id="toCheck">Run the system check</a>' : ""}
+          <a class="btn btn-outline" href="${contactHref(node)}" id="contactLink">Still stuck? Contact us</a>
+          <button type="button" class="btn btn-outline" id="startOver">Start over</button>
+        </div></div>`;
+      document.getElementById("startOver").onclick = renderStart;
+      const tc = document.getElementById("toCheck");
+      if (tc) tc.onclick = () => { setTimeout(runChecks, 400); };
+    }
+    wizard.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  /* ---------- system check ---------- */
+  const checkOut = document.getElementById("checkOut");
+  const runBtn = document.getElementById("runChecks");
+
+  function item(name, level, label, detail) {
+    return { name, level, label, detail };
+  }
+
+  async function runChecks() {
+    runBtn.disabled = true; runBtn.textContent = "Checking";
+    checkOut.innerHTML = '<span class="spinner"></span>';
+    const results = [];
+    let health = null, ms = null;
+    const t0 = performance.now();
+    try {
+      const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 12000);
+      const res = await fetch(API + "/health", { cache: "no-store", signal: ctl.signal }); clearTimeout(timer);
+      ms = Math.round(performance.now() - t0);
+      if (!res.ok) throw new Error("status " + res.status);
+      health = await res.json();
+      results.push(item("Connection to Bubble5", ms > 3000 ? "warn" : "ok", ms > 3000 ? "Slow" : "Working", `Reply in ${ms} ms.` + (ms > 3000 ? " Your connection or ours is slow right now." : "")));
+    } catch (e) {
+      results.push(item("Connection to Bubble5", "err", "Can't connect", "Your device couldn't reach our servers. Check your internet connection, turn off any VPN or ad blocker, and try again."));
+    }
+    if (health) {
+      const c = health.checks || {}, f = health.features || {};
+      results.push(item("Accounts and data", c.database === "ok" ? "ok" : "err", c.database === "ok" ? "Working" : "Problem on our side", c.database === "ok" ? "Logins and your saved information are available." : "We can't reach the account database. Please wait a few minutes, then contact us if it continues."));
+      results.push(item("Chatbot AI service", c.ai_search === "ok" ? "ok" : "err", c.ai_search === "ok" ? "Working" : "Problem on our side", c.ai_search === "ok" ? "The AI that answers questions is responding." : "The AI service isn't responding. Chatbot replies may fail until it recovers."));
+      results.push(item("Online payments", f.billing === "on" ? "ok" : "warn", f.billing === "on" ? "On" : "Not switched on yet", f.billing === "on" ? "You can subscribe and manage billing online." : "To start a plan now, contact us and we'll set it up by hand."));
+      results.push(item("Spam protection on forms", f.captcha === "on" ? "ok" : "info", f.captcha === "on" ? "On" : "Off", f.captcha === "on" ? "Forms use a captcha. If it doesn't show, disable ad blockers." : "Forms rely on basic spam filtering."));
+    }
+    let token = ""; try { token = localStorage.getItem("b5_token") || ""; } catch (e) { /* storage blocked */ }
+    if (!token) {
+      results.push(item("Your login", "info", "Not logged in", "Log in to check your account from here."));
+    } else if (health) {
+      try {
+        const r = await fetch(API + "/me", { headers: { Authorization: "Bearer " + token }, cache: "no-store" });
+        if (r.ok) { const me = await r.json(); results.push(item("Your login", "ok", "Logged in", "Signed in as " + me.user.email + ".")); }
+        else if (r.status === 401) results.push(item("Your login", "warn", "Session ended", "Log in again to continue."));
+        else results.push(item("Your login", "err", "Couldn't check", "Something went wrong checking your account."));
+      } catch (e) { results.push(item("Your login", "err", "Couldn't check", "Something went wrong checking your account.")); }
+    }
+    const problems = results.filter((r) => r.level === "err").length;
+    const warns = results.filter((r) => r.level === "warn").length;
+    lastResults = results.map((r) => `${r.name}: ${r.label}`).join("; ");
+    const banner = problems ? `<div class="notice err" role="alert">We found ${problems} problem${problems > 1 ? "s" : ""}. Details below.</div>`
+      : warns ? '<div class="notice warn" role="status">Everything works, with something to note.</div>'
+      : '<div class="notice ok" role="status">Everything is working.</div>';
+    const cls = { ok: "ok", warn: "warn", err: "err", info: "" };
+    checkOut.innerHTML = banner + `<ul class="checks">${results.map((r) => `<li class="check"><div><div class="name">${esc(r.name)}</div><div class="detail">${esc(r.detail)}</div></div><span class="status-pill ${cls[r.level]}">${esc(r.label)}</span></li>`).join("")}</ul>
+      <div class="actions" style="margin-top:14px"><button class="btn btn-outline btn-small" id="copyRes">Copy results</button>
+      <a class="btn btn-outline btn-small" href="index.html?msg=${encodeURIComponent("System check results (" + new Date().toISOString() + "): " + lastResults)}#contact">Send results to us</a></div>`;
+    document.getElementById("copyRes").onclick = async (e) => {
+      const text = "Bubble5 system check " + new Date().toISOString() + "\n" + results.map((r) => `${r.name}: ${r.label} - ${r.detail}`).join("\n");
+      try { await navigator.clipboard.writeText(text); e.target.textContent = "Copied"; } catch (err) { e.target.textContent = "Copy not available"; }
+    };
+    runBtn.disabled = false; runBtn.textContent = "Run again";
+    // keep the "Contact us" link in an open diagnosis up to date with the new results
+    if (current && NODES[current] && !NODES[current].options) { const l = document.getElementById("contactLink"); if (l) l.href = contactHref(NODES[current]); }
+  }
+  runBtn.onclick = runChecks;
+
+  /* ---------- start (supports help.html#login etc.) ---------- */
+  renderStart();
+  const deep = (location.hash || "").replace("#", "");
+  const p = PROBLEMS.find((x) => x.id === deep);
+  if (p) { problemLabel = p.label; go(p.start); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bubble5 | Business portal</title>
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/portal.css">
+  <style>
+    .auth-wrap { min-height: calc(100vh - 62px); display: flex; align-items: flex-start; justify-content: center; padding: 40px 20px 60px; background: var(--mist); }
+    .auth-card { width: 100%; max-width: 440px; background: #fff; border: 1.5px solid var(--line); border-radius: 22px; padding: 28px 24px; }
+    .auth-card h1 { font-size: 1.7rem; margin-bottom: 6px; }
+    .tabs { display: flex; gap: 6px; padding: 4px; background: var(--mist); border-radius: 999px; margin: 18px 0 22px; }
+    .tabs button { flex: 1; min-height: 42px; border: none; border-radius: 999px; background: transparent; font: 600 .98rem var(--body); color: var(--ink-soft); cursor: pointer; }
+    .tabs button[aria-selected="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(15,42,46,.18); }
+
+    .shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 32px; padding-top: 28px; padding-bottom: 60px; }
+    .side { position: sticky; top: 90px; align-self: start; }
+    .side a { display: flex; align-items: center; min-height: 44px; padding: 0 14px; margin-bottom: 4px; border-radius: 12px; color: var(--ink); text-decoration: none; font-weight: 600; }
+    .side a:hover { background: var(--mist); }
+    .side a[aria-current="page"] { background: var(--ink); color: #fff; }
+    .tabbar { display: none; }
+    .view > h1 { margin-bottom: 4px; }
+    .view > .lead { color: var(--ink-soft); margin-bottom: 22px; }
+    .view:focus { outline: none; }
+
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
+    .stat { background: #fff; border: 1.5px solid var(--line); border-radius: 18px; padding: 18px; }
+    .stat .label { font-size: .9rem; color: var(--ink-soft); }
+    .stat .value { margin-top: 4px; font: 800 1.7rem/1.15 var(--display); letter-spacing: -0.02em; }
+    .stat .sub { margin-top: 4px; font-size: .88rem; color: var(--ink-soft); }
+    .bar { height: 10px; border-radius: 999px; background: var(--mist); overflow: hidden; margin-top: 10px; }
+    .bar > span { display: block; height: 100%; background: var(--lagoon); border-radius: 999px; }
+    .bar.high > span { background: #C77700; }
+    .bar.full > span { background: var(--danger); }
+
+    .steps { list-style: none; }
+    .steps li { display: flex; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); }
+    .steps li:first-child { border-top: none; padding-top: 4px; }
+    .tick { flex: none; width: 28px; height: 28px; margin-top: 2px; border-radius: 50%; border: 2px solid var(--line); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; }
+    .steps li.done .tick { background: var(--ok); border-color: var(--ok); }
+    .steps li.done .step-title { text-decoration: line-through; color: var(--ink-soft); }
+    .step-title { font-weight: 700; }
+    .step-actions { margin-top: 8px; }
+
+    .doc-list { list-style: none; }
+    .doc { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 16px 0; border-top: 1px solid var(--line); }
+    .doc:first-child { border-top: none; }
+    .doc-main { min-width: 0; }
+    .doc-title { font-weight: 700; overflow-wrap: anywhere; }
+    .doc-snippet { color: var(--ink-soft); font-size: .93rem; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .doc-actions { display: flex; gap: 8px; flex: none; }
+    .empty { text-align: center; padding: 28px 12px; color: var(--ink-soft); }
+    .page-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+
+    .interval { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 18px; font-weight: 600; color: var(--ink-soft); }
+    .interval .on { color: var(--ink); }
+    .switch { position: relative; width: 56px; height: 32px; flex: none; border: 2px solid var(--ink); border-radius: 999px; background: var(--paper); cursor: pointer; }
+    .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); transition: transform .2s; }
+    .switch[aria-checked="true"] { background: var(--sun); }
+    .switch[aria-checked="true"]::after { transform: translateX(24px); }
+    .plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .plan { display: flex; flex-direction: column; background: #fff; border: 1.5px solid var(--line); border-radius: 18px; padding: 20px; }
+    .plan.current { border-color: var(--lagoon); box-shadow: 0 0 0 3px rgba(14,124,123,.15); }
+    .plan .price { margin: 10px 0 2px; font: 800 2.2rem/1 var(--display); letter-spacing: -0.03em; }
+    .plan .price small { font: 500 .95rem var(--body); color: var(--ink-soft); letter-spacing: 0; }
+    .plan ul { list-style: none; margin: 14px 0 18px; flex: 1; font-size: .95rem; }
+    .plan li { padding: 3px 0 3px 22px; position: relative; }
+    .plan li::before { content: ""; position: absolute; left: 2px; top: .7em; width: 11px; height: 6px; border-left: 2.5px solid var(--lagoon); border-bottom: 2.5px solid var(--lagoon); transform: rotate(-45deg); }
+    table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+    th, td { text-align: left; padding: 10px 8px; border-top: 1px solid var(--line); }
+    th { font-weight: 600; color: var(--ink-soft); border-top: none; }
+    td:first-child, td:last-child { white-space: nowrap; }
+    .table-scroll { overflow-x: auto; }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .danger-zone { border-color: #E9B7B1; }
+    .loading { display: flex; align-items: center; gap: 12px; padding: 40px 0; color: var(--ink-soft); }
+
+    @media (max-width: 899px) {
+      .shell { display: block; padding-top: 22px; padding-bottom: 96px; }
+      .side { display: none; }
+      .tabbar { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: #fff; border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+      .tabbar a { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 58px; font-size: .78rem; font-weight: 600; color: var(--ink-soft); text-decoration: none; gap: 2px; }
+      .tabbar a[aria-current="page"] { color: var(--lagoon-dark); box-shadow: inset 0 3px 0 var(--lagoon); }
+      .tabbar svg { width: 22px; height: 22px; }
+      .stats, .plans { grid-template-columns: minmax(0, 1fr); }
+      .row-2 { grid-template-columns: 1fr; }
+      .topbar-links .hide-sm { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-row">
+      <a class="logo" href="index.html" aria-label="Bubble5 home"><span class="logo-mark" aria-hidden="true">5</span>Bubble5</a>
+      <nav class="topbar-links" aria-label="Site">
+        <a href="help.html">Help</a>
+        <a href="index.html" class="hide-sm">Website</a>
+        <button type="button" class="link-btn" id="logoutBtn" hidden>Log out</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="root"><div class="wrap"><div class="loading"><span class="spinner"></span> Loading your account</div></div></main>
+
+  <nav class="tabbar" id="tabbar" aria-label="Portal" hidden>
+    <a href="#/dashboard" data-route="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Home</a>
+    <a href="#/knowledge" data-route="knowledge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/><path d="M9 8h6"/></svg>Knowledge</a>
+    <a href="#/billing" data-route="billing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/></svg>Billing</a>
+    <a href="#/settings" data-route="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account</a>
+  </nav>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- configuration ---------- */
+  const API = "https://bubble5.mlgcostello.workers.dev";
+  const TURNSTILE_SITE_KEY = "REPLACE-ME"; // paste your Cloudflare Turnstile site key to switch the captcha on
+  const PLAN_INFO = {
+    starter: { name: "Starter", monthly: 29, annual: 23, features: ["1 chatbot agent", "Up to 1,000 chats a month", "Basic AI training", "Email support"] },
+    pro: { name: "Pro", monthly: 79, annual: 63, features: ["3 chatbot agents", "Up to 10,000 chats a month", "Custom knowledge base integration", "Priority support"] },
+    enterprise: { name: "Enterprise", monthly: 199, annual: 159, features: ["Unlimited chatbot agents", "Unlimited chats", "Dedicated AI backend", "24/7 account manager"] }
+  };
+
+  /* ---------- tiny helpers ---------- */
+  const root = document.getElementById("root");
+  const tabbar = document.getElementById("tabbar");
+  const logoutBtn = document.getElementById("logoutBtn");
+  let memoryToken = "";
+  let state = { me: null, billingInterval: "monthly", docs: null };
+
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function getToken() { try { return localStorage.getItem("b5_token") || memoryToken; } catch (e) { return memoryToken; } }
+  function setToken(t) { memoryToken = t || ""; try { if (t) localStorage.setItem("b5_token", t); else localStorage.removeItem("b5_token"); } catch (e) { /* storage unavailable */ } }
+  function fmtDate(iso) { if (!iso) return ""; const d = new Date(iso.includes("T") ? iso : iso.replace(" ", "T") + "Z"); return isNaN(d) ? "" : d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }); }
+  function money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: "currency", currency: cur || "USD" }).format(n); } catch (e) { return "$" + n; } }
+  function supportLink(msg) { return "index.html?msg=" + encodeURIComponent(msg) + "#contact"; }
+  function notice(kind, text) { return `<div class="notice ${kind}" role="${kind === "err" ? "alert" : "status"}">${text}</div>`; }
+
+  async function api(method, path, body) {
+    const headers = { "Content-Type": "application/json" };
+    const t = getToken();
+    if (t) headers.Authorization = "Bearer " + t;
+    let res;
+    try {
+      res = await fetch(API + path, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+    } catch (e) {
+      const err = new Error("We couldn't reach the server. Check your connection and try again.");
+      err.network = true;
+      throw err;
+    }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const err = new Error(data.error || "Something went wrong. Please try again.");
+      err.status = res.status;
+      err.code = data.code;
+      if (res.status === 401 && t && path !== "/auth/login") { setToken(""); state.me = null; location.hash = "#/login?expired=1"; }
+      throw err;
+    }
+    return data;
+  }
+
+  /* ---------- captcha (optional) ---------- */
+  let tsWidget = null;
+  function loadTurnstile(cb) {
+    if (TURNSTILE_SITE_KEY.includes("REPLACE-ME")) return;
+    if (window.turnstile) return cb();
+    if (document.getElementById("tsScript")) return;
+    const s = document.createElement("script");
+    s.id = "tsScript"; s.async = true;
+    s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+  function mountTurnstile() {
+    const box = document.getElementById("tsBox");
+    if (!box || TURNSTILE_SITE_KEY.includes("REPLACE-ME")) return;
+    loadTurnstile(() => { tsWidget = window.turnstile.render(box, { sitekey: TURNSTILE_SITE_KEY }); });
+  }
+  function tsToken() { return tsWidget !== null && window.turnstile ? window.turnstile.getResponse(tsWidget) : ""; }
+  function tsReset() { if (tsWidget !== null && window.turnstile) window.turnstile.reset(tsWidget); }
+
+  /* ---------- routing ---------- */
+  function parseRoute() {
+    const raw = (location.hash || "").replace(/^#\/?/, "");
+    const [name, query] = raw.split("?");
+    return { name: name || "", params: new URLSearchParams(query || "") };
+  }
+
+  async function route() {
+    const { name, params } = parseRoute();
+    const authed = !!getToken();
+    if (!authed) {
+      tabbar.hidden = true; logoutBtn.hidden = true; state.me = null;
+      return renderAuth(name === "signup" ? "signup" : "login", params);
+    }
+    if (name === "login" || name === "signup" || name === "") { location.hash = "#/dashboard"; return; }
+    logoutBtn.hidden = false;
+    if (!state.me) {
+      renderLoading();
+      try { state.me = await api("GET", "/me"); }
+      catch (e) { if (e.status === 401) return; return renderError(e.message); }
+    }
+    const views = { dashboard: renderDashboard, knowledge: renderKnowledge, billing: renderBilling, settings: renderSettings };
+    const view = views[name];
+    if (!view) { location.hash = "#/dashboard"; return; }
+    renderShell(name);
+    const main = document.getElementById("view");
+    main.innerHTML = '<div class="loading"><span class="spinner"></span> Loading</div>';
+    try { await view(main, params); }
+    catch (e) { if (e.status !== 401) main.innerHTML = notice("err", esc(e.message)); }
+    main.focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+  }
+
+  function renderLoading() { root.innerHTML = '<div class="wrap"><div class="loading"><span class="spinner"></span> Loading your account</div></div>'; }
+  function renderError(msg) { root.innerHTML = '<div class="wrap" style="padding-top:28px">' + notice("err", esc(msg)) + '<button class="btn btn-primary" id="retry">Try again</button></div>'; document.getElementById("retry").onclick = route; }
+
+  function renderShell(active) {
+    const links = [["dashboard", "Dashboard"], ["knowledge", "Knowledge base"], ["billing", "Billing"], ["settings", "Account settings"]];
+    root.innerHTML = `<div class="wrap shell">
+      <aside class="side" aria-label="Portal">${links.map(([r, t]) => `<a href="#/${r}" ${r === active ? 'aria-current="page"' : ""}>${t}</a>`).join("")}
+        <a href="help.html">Help and diagnostics</a></aside>
+      <section class="view" id="view" tabindex="-1"></section></div>`;
+    tabbar.hidden = false;
+    tabbar.querySelectorAll("a").forEach((a) => { if (a.dataset.route === active) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    document.title = "Bubble5 | " + (links.find((l) => l[0] === active) || ["", "Portal"])[1];
+  }
+
+  /* ---------- sign in / sign up ---------- */
+  function renderAuth(mode, params) {
+    const signup = mode === "signup";
+    document.title = "Bubble5 | " + (signup ? "Create account" : "Log in");
+    root.innerHTML = `<div class="auth-wrap"><div class="auth-card">
+      <h1>${signup ? "Create your business account" : "Welcome back"}</h1>
+      <p class="muted">${signup ? "Set up your account, add your business information and choose a plan." : "Log in to manage your chatbot, knowledge base and billing."}</p>
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" aria-selected="${!signup}" data-mode="login">Log in</button>
+        <button type="button" role="tab" aria-selected="${signup}" data-mode="signup">Create account</button>
+      </div>
+      <div id="authMsg">${params.get("expired") ? notice("info", "Your session ended. Please log in again.") : ""}</div>
+      <form id="authForm" novalidate>
+        ${signup ? `<div class="form-group"><label for="aName">Your name</label><input id="aName" autocomplete="name" required></div>` : ""}
+        <div class="form-group"><label for="aEmail">Email</label><input id="aEmail" type="email" autocomplete="email" inputmode="email" required></div>
+        ${signup ? `<div class="form-group"><label for="aCompany">Company name <span class="muted">(optional)</span></label><input id="aCompany" autocomplete="organization"></div>` : ""}
+        <div class="form-group"><label for="aPass">Password</label><input id="aPass" type="password" autocomplete="${signup ? "new-password" : "current-password"}" required>
+          ${signup ? '<p class="hint">At least 8 characters.</p>' : ""}</div>
+        ${signup ? '<div id="tsBox" style="margin-bottom:16px"></div>' : ""}
+        <button class="btn btn-primary btn-block" type="submit" id="authBtn">${signup ? "Create account" : "Log in"}</button>
+      </form>
+      <p class="small muted" style="margin-top:16px">${signup ? "By creating an account you agree to be contacted about your Bubble5 setup." : `Forgot your password? <a href="${supportLink("I can't log in to my Bubble5 account. Please help me reset my password. My account email is: ")}">Contact us</a> and we'll reset it.`}</p>
+    </div></div>`;
+    root.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => { location.hash = "#/" + b.dataset.mode; }));
+    if (signup) mountTurnstile();
+    const form = document.getElementById("authForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById("authMsg");
+      const btn = document.getElementById("authBtn");
+      const email = document.getElementById("aEmail").value.trim();
+      const password = document.getElementById("aPass").value;
+      msg.innerHTML = "";
+      if (!email || !password) { msg.innerHTML = notice("err", "Enter your email and password."); return; }
+      btn.disabled = true; btn.textContent = signup ? "Creating account" : "Logging in";
+      try {
+        const body = signup
+          ? { name: document.getElementById("aName").value, email, company: document.getElementById("aCompany").value, password, turnstile: tsToken() }
+          : { email, password };
+        const out = await api("POST", signup ? "/auth/signup" : "/auth/login", body);
+        setToken(out.token);
+        state.me = null;
+        location.hash = "#/dashboard";
+      } catch (err) {
+        msg.innerHTML = notice("err", esc(err.message));
+        if (signup) tsReset();
+        btn.disabled = false; btn.textContent = signup ? "Create account" : "Log in";
+      }
+    });
+  }
+
+  logoutBtn.addEventListener("click", async () => {
+    try { await api("POST", "/auth/logout"); } catch (e) { /* ignore: token is removed locally either way */ }
+    setToken(""); state.me = null; state.docs = null;
+    location.hash = "#/login";
+  });
+
+  /* ---------- dashboard ---------- */
+  const isActive = (u) => ["active", "trialing", "past_due"].includes(u.status);
+
+  function statusPill(u) {
+    const map = { active: ["ok", "Active"], trialing: ["ok", "Trial"], past_due: ["warn", "Payment overdue"], canceled: ["err", "Canceled"], inactive: ["", "No plan yet"] };
+    const [cls, label] = map[u.status] || ["", u.status];
+    return `<span class="status-pill ${cls}">${label}</span>`;
+  }
+
+  async function renderDashboard(el) {
+    state.me = await api("GET", "/me");
+    const { user, usage, kb } = state.me;
+    const first = (user.name || "").split(" ")[0] || "there";
+    const hasPlan = isActive(user) && user.plan !== "none";
+    const pct = usage.limit ? Math.min(100, Math.round((usage.chats / usage.limit) * 100)) : 0;
+    const barClass = pct >= 100 ? "full" : pct >= 80 ? "high" : "";
+    const planName = { none: "No plan", starter: "Starter", pro: "Pro", enterprise: "Enterprise" }[user.plan] || user.plan;
+    const chatsSub = usage.limit === null ? "Unlimited on your plan" : usage.limit === 0 ? "Choose a plan to start" : `of ${usage.limit.toLocaleString()} included`;
+    const steps = [
+      { done: kb.count > 0, title: "Add your business information", text: "Hours, prices, policies and common questions. Your chatbot answers from these.", cta: ["Open knowledge base", "#/knowledge"] },
+      { done: hasPlan, title: "Choose a plan", text: "Pick the plan that fits your volume. You can change it any time.", cta: ["See plans", "#/billing"] },
+      { done: false, title: "Launch your chatbot", text: "We set up your chatbot with you and send the code to add to your website.", cta: ["Ask us to set it up", supportLink("Hi, I'd like to launch my Bubble5 chatbot. My company is " + (user.company || "") + ".")] }
+    ];
+    el.innerHTML = `<h1>Welcome, ${esc(first)}</h1>
+      <p class="lead">${esc(user.company || user.email)}</p>
+      ${user.status === "past_due" ? notice("warn", 'Your last payment didn\'t go through. <a href="#/billing">Update your payment method</a> to keep your plan.') : ""}
+      <div class="stats">
+        <div class="stat"><div class="label">Plan</div><div class="value">${esc(planName)}</div><div class="sub">${statusPill(user)}</div></div>
+        <div class="stat"><div class="label">Chats this month</div><div class="value">${usage.chats.toLocaleString()}</div><div class="sub">${chatsSub}</div>
+          ${usage.limit ? `<div class="bar ${barClass}" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Chat usage"><span style="width:${pct}%"></span></div>` : ""}</div>
+        <div class="stat"><div class="label">Knowledge documents</div><div class="value">${kb.count}</div><div class="sub">of ${kb.limit} allowed</div></div>
+      </div>
+      <div class="card"><h2>Get your chatbot live</h2><p class="muted">Three steps from sign-up to answering customers.</p>
+        <ul class="steps">${steps.map((s) => `<li class="${s.done ? "done" : ""}"><span class="tick" aria-hidden="true">${s.done ? "&#10003;" : ""}</span>
+          <div><div class="step-title">${s.title}</div><div class="muted small">${s.text}</div>
+          ${s.done ? "" : `<div class="step-actions"><a class="btn btn-outline btn-small" href="${s.cta[1]}">${s.cta[0]}</a></div>`}</div></li>`).join("")}</ul></div>
+      <div class="card"><h2>Something not working?</h2><p class="muted">Our help page walks you through the most common problems and checks that everything is running.</p>
+        <a class="btn btn-outline" href="help.html">Diagnose a problem</a></div>`;
+  }
+
+  /* ---------- knowledge base ---------- */
+  async function renderKnowledge(el) {
+    const data = await api("GET", "/kb");
+    state.docs = data.docs;
+    const full = data.docs.length >= data.limit;
+    function list() {
+      if (!data.docs.length) return `<div class="empty"><p><strong>No documents yet.</strong></p><p>Add your opening hours, prices, delivery rules or FAQs. Plain text is fine.</p></div>`;
+      return `<ul class="doc-list">${data.docs.map((d) => `<li class="doc"><div class="doc-main"><div class="doc-title">${esc(d.title)}</div>
+        <div class="doc-snippet">${esc(d.content)}</div><div class="muted small">Updated ${esc(fmtDate(d.updated_at))}</div></div>
+        <div class="doc-actions"><button class="btn btn-outline btn-small" data-edit="${d.id}">Edit</button><button class="btn btn-danger btn-small" data-del="${d.id}" aria-label="Delete ${esc(d.title)}">Delete</button></div></li>`).join("")}</ul>`;
+    }
+    el.innerHTML = `<h1>Knowledge base</h1><p class="lead">What your chatbot knows about your business.</p>
+      <div id="kbMsg"></div>
+      <div class="page-actions"><span class="muted">${data.docs.length} of ${data.limit} documents</span>
+        <button class="btn btn-primary" id="addDoc" ${full ? "disabled" : ""}>Add document</button></div>
+      ${full ? notice("warn", 'You\'ve reached your plan\'s document limit. Delete one or <a href="#/billing">change plan</a>.') : ""}
+      <div id="editor"></div>
+      <div class="card" id="docs">${list()}</div>`;
+    const msg = document.getElementById("kbMsg");
+    function openEditor(doc) {
+      const ed = document.getElementById("editor");
+      ed.innerHTML = `<form class="card" id="docForm"><h2>${doc ? "Edit document" : "New document"}</h2>
+        <div class="form-group"><label for="dTitle">Title</label><input id="dTitle" maxlength="120" placeholder="Opening hours" value="${esc(doc ? doc.title : "")}" required></div>
+        <div class="form-group"><label for="dBody">What should the chatbot know?</label><textarea id="dBody" placeholder="Monday to Friday 9am to 6pm. Closed on public holidays." required>${esc(doc ? doc.content : "")}</textarea>
+          <p class="hint"><span id="count">0</span> / ${data.max_chars.toLocaleString()} characters</p></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" type="submit">Save document</button><button class="btn btn-outline" type="button" id="cancelDoc">Cancel</button></div></form>`;
+      const body = document.getElementById("dBody"), count = document.getElementById("count");
+      const upd = () => { count.textContent = body.value.length.toLocaleString(); }; upd(); body.addEventListener("input", upd);
+      document.getElementById("dTitle").focus();
+      document.getElementById("cancelDoc").onclick = () => { ed.innerHTML = ""; };
+      document.getElementById("docForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector("button[type=submit]"); btn.disabled = true;
+        try {
+          const payload = { title: document.getElementById("dTitle").value, content: body.value };
+          if (doc) await api("PUT", "/kb/" + doc.id, payload); else await api("POST", "/kb", payload);
+          await route();
+        } catch (err) { msg.innerHTML = notice("err", esc(err.message)); btn.disabled = false; window.scrollTo(0, 0); }
+      });
+      ed.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    document.getElementById("addDoc").onclick = () => openEditor(null);
+    el.querySelectorAll("[data-edit]").forEach((b) => b.onclick = () => openEditor(data.docs.find((d) => String(d.id) === b.dataset.edit)));
+    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => {
+      const doc = data.docs.find((d) => String(d.id) === b.dataset.del);
+      if (!confirm(`Delete "${doc.title}"? Your chatbot will stop using it.`)) return;
+      b.disabled = true;
+      try { await api("DELETE", "/kb/" + doc.id); await route(); } catch (err) { msg.innerHTML = notice("err", esc(err.message)); b.disabled = false; }
+    });
+  }
+
+  /* ---------- billing ---------- */
+  let pollTimer = null;
+  async function renderBilling(el, params) {
+    const bill = await api("GET", "/billing");
+    const u = state.me.user;
+    const checkout = params.get("checkout");
+    const annual = state.billingInterval === "annual";
+    const subscribed = bill.status && ["active", "trialing", "past_due"].includes(bill.status) && bill.plan !== "none";
+    let invoices = [];
+    if (bill.has_billing) { try { invoices = (await api("GET", "/billing/invoices")).invoices; } catch (e) { invoices = null; } }
+
+    const current = subscribed
+      ? `<div class="card"><h2>Your plan</h2>
+          <p style="font:800 1.8rem/1.2 var(--display);margin:6px 0">${esc(bill.plan_name)} <span class="muted" style="font:500 1rem var(--body)">${bill.interval === "annual" ? "billed annually" : "billed monthly"}</span></p>
+          <p>${statusPill({ status: bill.status })} ${bill.period_end ? `<span class="muted small">${bill.status === "canceled" ? "Ends" : "Renews"} ${esc(fmtDate(bill.period_end))}</span>` : ""}</p>
+          <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" id="portalBtn">Manage billing</button></div>
+          <p class="hint">Change plan, update your card, download invoices or cancel in the secure billing portal.</p></div>`
+      : `<div class="card"><h2>Your plan</h2><p class="muted" style="margin-bottom:0">You don't have a plan yet. Choose one below to launch your chatbot.</p>${bill.status === "canceled" ? '<p class="small muted" style="margin-top:8px">Your previous subscription has ended.</p>' : ""}</div>`;
+
+    const plans = subscribed ? "" : `<div class="card"><h2>Choose a plan</h2><p class="muted">Change or cancel any time.</p>
+      <div class="interval"><span class="${annual ? "" : "on"}">Monthly</span>
+        <button type="button" class="switch" id="intervalSwitch" role="switch" aria-checked="${annual}" aria-label="Bill annually"></button>
+        <span class="${annual ? "on" : ""}">Annual <span class="status-pill ok">Save 20%</span></span></div>
+      <div class="plans">${Object.entries(PLAN_INFO).map(([id, p]) => `<div class="plan ${bill.plan === id ? "current" : ""}"><h3>${p.name}</h3>
+        <div class="price">$${annual ? p.annual : p.monthly}<small>/mo</small></div>
+        <div class="muted small">${annual ? "Billed annually ($" + p.annual * 12 + "/yr)" : "Billed monthly"}</div>
+        <ul>${p.features.map((f) => `<li>${f}</li>`).join("")}</ul>
+        ${id === "enterprise" ? `<a class="btn btn-outline btn-block" href="${supportLink("I'm interested in the Enterprise plan for " + (u.company || "my company") + ".")}">Contact sales</a>`
+          : `<button class="btn ${id === "pro" ? "btn-primary" : "btn-outline"} btn-block" data-plan="${id}">Choose ${p.name}</button>`}</div>`).join("")}</div></div>`;
+
+    const inv = !bill.has_billing ? "" : `<div class="card"><h2>Invoices</h2>
+      ${invoices === null ? '<p class="muted">We couldn\'t load your invoices right now. Try again in a moment.</p>' : !invoices.length ? '<p class="muted">Your invoices will appear here after your first payment.</p>'
+        : `<div class="table-scroll"><table><thead><tr><th>Date</th><th>Number</th><th>Amount</th><th>Status</th><th></th></tr></thead><tbody>${invoices.map((i) => `<tr><td>${esc(fmtDate(i.date))}</td><td>${esc(i.number || "")}</td><td>${esc(money(i.amount, i.currency))}</td><td>${esc(i.status || "")}</td><td>${i.url ? `<a href="${esc(i.url)}" target="_blank" rel="noopener">View</a>` : ""}</td></tr>`).join("")}</tbody></table></div>`}</div>`;
+
+    el.innerHTML = `<h1>Billing</h1><p class="lead">Your plan, payment details and invoices.</p><div id="billMsg">
+      ${checkout === "success" ? notice("ok", "Thanks! Your payment went through. Your plan is updating now.") : ""}
+      ${checkout === "cancelled" ? notice("info", "Checkout was cancelled. You haven't been charged.") : ""}
+      ${bill.status === "past_due" ? notice("warn", "Your last payment failed. Open Manage billing to update your payment method.") : ""}
+      ${!bill.billing_ready && !subscribed ? notice("info", `Online payments are still being switched on. To start a plan now, <a href="${supportLink("I'd like to start a Bubble5 plan. Plan: ")}">contact us</a> and we'll set it up by hand.`) : ""}
+      </div>${current}${plans}${inv}`;
+
+    const msg = document.getElementById("billMsg");
+    const sw = document.getElementById("intervalSwitch");
+    if (sw) sw.onclick = () => { state.billingInterval = annual ? "monthly" : "annual"; renderBilling(el, params); };
+    async function go(path, body, btn, label) {
+      btn.disabled = true; const old = btn.textContent; btn.textContent = label;
+      try {
+        const out = await api("POST", path, { ...body, return_url: location.origin + location.pathname });
+        location.href = out.url;
+      } catch (err) {
+        const text = err.code === "billing_not_ready" ? `Online payments are still being switched on. <a href="${supportLink("I'd like to start a Bubble5 plan. Plan: " + (body.plan || ""))}">Contact us</a> and we'll set up your plan by hand.` : esc(err.message);
+        msg.innerHTML = notice(err.code === "billing_not_ready" ? "info" : "err", text);
+        btn.disabled = false; btn.textContent = old; window.scrollTo(0, 0);
+      }
+    }
+    el.querySelectorAll("[data-plan]").forEach((b) => b.onclick = () => go("/billing/checkout", { plan: b.dataset.plan, interval: state.billingInterval }, b, "Opening checkout"));
+    const pb = document.getElementById("portalBtn");
+    if (pb) pb.onclick = () => go("/billing/portal", {}, pb, "Opening billing portal");
+
+    // After returning from checkout, the plan updates when Stripe confirms. Refresh a few times.
+    clearTimeout(pollTimer);
+    if (checkout === "success" && !subscribed) {
+      let tries = 0;
+      pollTimer = setTimeout(async function tick() {
+        if (parseRoute().name !== "billing" || ++tries > 6) return;
+        try { state.me = await api("GET", "/me"); const b = await api("GET", "/billing"); if (b.plan !== "none") return renderBilling(el, params); } catch (e) { /* keep trying */ }
+        pollTimer = setTimeout(tick, 2500);
+      }, 2500);
+    }
+  }
+
+  /* ---------- settings ---------- */
+  async function renderSettings(el) {
+    const u = state.me.user;
+    el.innerHTML = `<h1>Account settings</h1><p class="lead">${esc(u.email)}</p>
+      <form class="card" id="profileForm"><h2>Profile</h2><p class="muted">Used on invoices and when we contact you.</p><div id="pMsg"></div>
+        <div class="row-2"><div class="form-group"><label for="sName">Your name</label><input id="sName" value="${esc(u.name)}" autocomplete="name" required></div>
+        <div class="form-group"><label for="sCompany">Company name</label><input id="sCompany" value="${esc(u.company)}" autocomplete="organization"></div></div>
+        <div class="form-group"><label for="sEmail">Email</label><input id="sEmail" value="${esc(u.email)}" disabled><p class="hint">To change your email, <a href="${supportLink("Please change the email on my Bubble5 account from " + u.email + " to: ")}">contact us</a>.</p></div>
+        <button class="btn btn-primary" type="submit">Save changes</button></form>
+      <form class="card" id="pwForm"><h2>Password</h2><p class="muted">Changing it signs you out on your other devices.</p><div id="wMsg"></div>
+        <div class="form-group"><label for="curPw">Current password</label><input id="curPw" type="password" autocomplete="current-password" required></div>
+        <div class="form-group"><label for="newPw">New password</label><input id="newPw" type="password" autocomplete="new-password" required><p class="hint">At least 8 characters.</p></div>
+        <button class="btn btn-outline" type="submit">Change password</button></form>
+      <div class="card"><h2>Session</h2><p class="muted">Log out of Bubble5 on this device.</p><button class="btn btn-outline" id="logoutBtn2">Log out</button></div>
+      <form class="card danger-zone" id="delForm"><h2>Delete account</h2><p class="muted">Permanently removes your account and knowledge base. This can't be undone. Cancel any subscription first.</p><div id="dMsg"></div>
+        <div class="form-group"><label for="delPw">Enter your password to confirm</label><input id="delPw" type="password" autocomplete="current-password" required></div>
+        <button class="btn btn-danger" type="submit">Delete my account</button></form>`;
+    function wire(id, msgId, fn, okText) {
+      document.getElementById(id).addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const msg = document.getElementById(msgId), btn = e.target.querySelector("button[type=submit]");
+        msg.innerHTML = ""; btn.disabled = true;
+        try { await fn(); if (okText) msg.innerHTML = notice("ok", okText); } catch (err) { msg.innerHTML = notice("err", esc(err.message)); }
+        btn.disabled = false;
+      });
+    }
+    wire("profileForm", "pMsg", async () => { const out = await api("PATCH", "/me", { name: document.getElementById("sName").value, company: document.getElementById("sCompany").value }); state.me.user = out.user; }, "Saved.");
+    wire("pwForm", "wMsg", async () => { await api("POST", "/me/password", { current_password: document.getElementById("curPw").value, new_password: document.getElementById("newPw").value }); document.getElementById("pwForm").reset(); }, "Password changed. Other devices have been signed out.");
+    wire("delForm", "dMsg", async () => {
+      if (!confirm("Delete your account and everything in it? This can't be undone.")) return;
+      await api("DELETE", "/me", { password: document.getElementById("delPw").value });
+      setToken(""); state.me = null; location.hash = "#/signup";
+    });
+    document.getElementById("logoutBtn2").onclick = () => logoutBtn.click();
+  }
+
+  window.addEventListener("hashchange", route);
+  route();
+})();
+</script>
+</body>
+</html>

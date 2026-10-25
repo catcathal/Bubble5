@@ -24,5 +24,9 @@ AI_SEARCH_INSTANCE = "bubble5-demo"
 # Add your GitHub Pages / custom domain here.
 ALLOWED_ORIGINS = "https://catcathal.github.io,http://localhost:8080,http://127.0.0.1:8080"
 
+# Billing (Stripe). Put your Stripe Price IDs here as JSON once you have created them, e.g.
+# STRIPE_PRICES = '{"starter":{"monthly":"price_...","annual":"price_..."},"pro":{"monthly":"price_...","annual":"price_..."}}'
+# Secrets for billing: STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET (webhook URL: <worker-url>/stripe-webhook)
+
 # Secrets: TURNSTILE_SECRET (enables the captcha check on the contact form), ADMIN_TOKEN (seeding) and optionally RESEND_API_KEY (email alerts)
 # One-time seeding secret (set with: npx wrangler secret put ADMIN_TOKEN)

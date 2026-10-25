@@ -1,4 +1,5 @@
 import { DEMO_DOCS } from "./kb.js";
+import { handleApp, turnstileOk } from "./app.js";
 
 const SYSTEM_PROMPT = `You are the Bubble5 demo assistant, answering as the website assistant for Maple & Co. Bakery, a fictional business used to show prospects what a Bubble5 chatbot can do.
 Answer ONLY from the provided context. Be friendly, concise (1 to 4 sentences), and specific.
@@ -16,8 +17,8 @@ function corsHeaders(request, env) {
     .map((s) => s.trim())
     .filter(Boolean);
   const headers = {
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",
   };
@@ -77,19 +78,6 @@ async function notifyByEmail(env, lead) {
     }),
   });
   if (!res.ok) console.error("Email notify failed", res.status, await res.text());
-}
-
-// Cloudflare Turnstile (CAPTCHA). Enforced only when the TURNSTILE_SECRET secret is set.
-async function turnstileOk(env, token, ip) {
-  if (!env.TURNSTILE_SECRET) return true;
-  if (!token || typeof token !== "string") return false;
-  const form = new FormData();
-  form.append("secret", env.TURNSTILE_SECRET);
-  form.append("response", token);
-  if (ip) form.append("remoteip", ip);
-  const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: form });
-  const data = await res.json().catch(() => ({}));
-  return data.success === true;
 }
 
 async function handleLead(request, env, cors) {
@@ -237,6 +225,9 @@ export default {
         return json({ error: "The demo assistant is unavailable right now." }, 502, cors);
       }
     }
+
+    const appResponse = await handleApp(request, env, url, cors);
+    if (appResponse) return appResponse;
 
     return json({ error: "Not found" }, 404, cors);
   },

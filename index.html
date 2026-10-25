@@ -194,12 +194,6 @@
     .form-status.ok { color: var(--ok); }
     .form-status.err { color: var(--danger); }
 
-    /* ---------- Modal ---------- */
-    .modal { display: none; position: fixed; inset: 0; z-index: 100; align-items: center; justify-content: center; padding: 20px; background: rgba(15,42,46,.6); }
-    .modal-content { position: relative; width: 100%; max-width: 420px; background: #fff; border-radius: 20px; padding: 32px 28px 28px; }
-    .modal-content h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 20px; padding-right: 40px; }
-    .close-modal { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border: none; border-radius: 50%; background: var(--mist); color: var(--ink); font-size: 1.5rem; line-height: 1; cursor: pointer; }
-
     /* ---------- Footer ---------- */
     footer { padding: 32px 0 40px; color: var(--ink-soft); font-size: .92rem; }
     .footer-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
@@ -253,7 +247,8 @@
           <li><a href="#demo">Demo</a></li>
           <li><a href="#pricing">Pricing</a></li>
           <li><a href="#contact">Contact</a></li>
-          <li><button class="btn btn-outline" id="loginBtn" type="button">Business login</button></li>
+          <li><a href="help.html">Help</a></li>
+          <li><a class="btn btn-outline" id="loginBtn" href="app.html#/login">Business login</a></li>
         </ul>
         <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="navLinks">Menu</button>
       </div>
@@ -390,27 +385,9 @@
     </div>
   </section>
 
-  <div class="modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
-    <div class="modal-content">
-      <button type="button" class="close-modal" id="closeModal" aria-label="Close">&times;</button>
-      <h2 id="loginTitle">Business login</h2>
-      <form onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <label for="loginEmail">Email</label>
-          <input type="email" id="loginEmail" required autocomplete="email">
-        </div>
-        <div class="form-group">
-          <label for="loginPassword">Password</label>
-          <input type="password" id="loginPassword" required autocomplete="current-password">
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">Log in</button>
-      </form>
-    </div>
-  </div>
-
   <footer>
     <div class="wrap footer-row">
-      <span>&copy; 2026 Bubble5. All rights reserved.</span>
+      <span>&copy; 2026 Bubble5. All rights reserved. <a href="help.html">Help</a></span>
       <span>Demo mode: the bakery in the chat is fictional.</span>
     </div>
   </footer>
@@ -548,15 +525,6 @@
       renderPricing();
     });
 
-    // MODAL LOGIC
-    const modal = document.getElementById('loginModal');
-    const loginBtn = document.getElementById('loginBtn');
-    const closeModal = document.getElementById('closeModal');
-
-    loginBtn.onclick = () => { modal.style.display = 'flex'; navLinks.classList.remove('open'); };
-    closeModal.onclick = () => modal.style.display = 'none';
-    window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
-
     // FORM HANDLERS
     // CAPTCHA (Cloudflare Turnstile). Paste your public site key below to switch it on.
     const TURNSTILE_SITE_KEY = "REPLACE-ME";
@@ -579,6 +547,14 @@
       ts.onload = renderTurnstile;
       document.head.appendChild(ts);
     }
+
+    // Prefill the contact message when arriving from the help page or portal (?msg=...)
+    (function () {
+      try {
+        const msg = new URLSearchParams(location.search).get('msg');
+        if (msg) document.getElementById('contactMessage').value = msg.slice(0, 2000);
+      } catch (e) { /* ignore */ }
+    })();
 
     // MOBILE MENU
     const menuBtn = document.getElementById('menuBtn');
@@ -639,13 +615,6 @@
         company: document.getElementById('contactCompany').value,
         message: document.getElementById('contactMessage').value
       }, "Thanks! Your message is on its way. We'll reply by email.");
-    }
-
-    function handleLogin(e) {
-      e.preventDefault();
-      alert('Login functionality will be enabled when backend services are active.');
-      modal.style.display = 'none';
-      e.target.reset();
     }
   </script>
 </body>

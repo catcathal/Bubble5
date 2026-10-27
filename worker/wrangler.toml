@@ -30,8 +30,9 @@ database_id = "948f1e23-6bcf-4388-b381-8307ad2a297b"
 
 [vars]
 # Where new-lead emails go (optional; needs the RESEND_API_KEY secret too).
-NOTIFY_EMAIL = ""
-# FROM_EMAIL = "Bubble5 <hello@yourdomain.com>"   # must be a domain verified in Resend
+NOTIFY_EMAIL = "mlgcostello@gmail.com"
+# After verifying bubble5.online in Resend, uncomment:
+# FROM_EMAIL = "Bubble5 <support@bubble5.online>"
 AI_SEARCH_INSTANCE = "bubble5-demo"
 # Comma-separated list of sites allowed to call this Worker from a browser.
 # Add your GitHub Pages / custom domain here.

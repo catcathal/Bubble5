@@ -38,3 +38,12 @@ Until these are set, the Billing page tells customers payments are being switche
 
 ### Website on your own domain
 The Worker also serves the website, so attaching `bubble5.online` to the Worker as a custom domain (Workers and Pages, your Worker, Settings, Domains and Routes) is enough: no GitHub Pages or A records needed. `worker/build-site.mjs` copies the site files into `worker/public` on every deploy. Do not add a `CNAME` file to the repo unless the domain points at GitHub Pages: GitHub then redirects the github.io address to it.
+
+## Customer chatbots, widget and inbox
+
+- Each account gets its own chatbot (Portal, Your chatbot). Answers come from that account's knowledge base: the Worker finds the relevant passages in D1 (BM25 search, works for Thai too) and Workers AI (`[ai]` binding, Llama 3.3 70B) writes the reply. If the documents do not contain the answer it says so and offers the visitor a form; the lead is saved and emailed to the owner (needs `RESEND_API_KEY`).
+- `assets/widget.js` is the embeddable chat bubble. Customers paste `<script src="https://<worker-url>/assets/widget.js" data-key="bk_..." defer></script>` into their site. Public endpoints: `GET /bot/:key/config`, `POST /bot/:key/chat`, `POST /bot/:key/lead`. Per-bot allowed domains, 10 messages a minute per visitor IP, monthly chat limits per plan (free trial = 50).
+- Inbox shows conversations, unanswered questions and captured leads.
+- Password reset by email needs `RESEND_API_KEY` (and a verified `FROM_EMAIL`). Without it the page tells people to contact you.
+- Give someone a plan by hand (before Stripe is set up): `curl -X POST https://<worker-url>/admin/plan -H "X-Admin-Token: <ADMIN_TOKEN>" -H "Content-Type: application/json" -d '{"email":"them@example.com","plan":"starter"}'`
+- After pulling, re-run `schema.sql` on the database (safe to repeat).

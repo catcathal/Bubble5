@@ -23,6 +23,22 @@
     .side a:hover { background: var(--mist); }
     .side a[aria-current="page"] { background: var(--ink); color: #fff; }
     .tabbar { display: none; }
+    .two-col { display: grid; grid-template-columns: minmax(0,1fr); gap: 16px; align-items: start; }
+    @media (min-width: 900px) { .two-col { grid-template-columns: minmax(0,1fr) minmax(0,1fr); } }
+    .two-col > * { min-width: 0; }
+    .form-group select { appearance: auto; }
+    .testlog { height: 260px; overflow-y: auto; background: var(--mist); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+    .tm { max-width: 88%; padding: 8px 12px; border-radius: 14px; font-size: .95rem; line-height: 1.4; white-space: pre-wrap; word-wrap: break-word; }
+    .tm.a { background: #fff; border: 1px solid var(--line); align-self: flex-start; }
+    .tm.u { background: var(--lagoon); color: #fff; align-self: flex-end; }
+    .tm.flag { border-color: var(--warn); }
+    .testform { display: flex; gap: 8px; }
+    .testform input { flex: 1; min-width: 0; min-height: 42px; padding: 8px 12px; border: 1.5px solid var(--line); border-radius: 999px; font: inherit; }
+    .conv { border-top: 1px solid var(--line); padding: 10px 0; }
+    .conv summary { cursor: pointer; font-weight: 600; }
+    .conv .tm { margin-top: 8px; }
+    .conv[open] { display: block; } .conv[open] > .tm { display: block; }
+
     .view > h1 { margin-bottom: 4px; }
     .view > .lead { color: var(--ink-soft); margin-bottom: 22px; }
     .view:focus { outline: none; }
@@ -82,8 +98,8 @@
     @media (max-width: 899px) {
       .shell { display: block; padding-top: 22px; padding-bottom: 96px; }
       .side { display: none; }
-      .tabbar { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: #fff; border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
-      .tabbar a { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 58px; font-size: .78rem; font-weight: 600; color: var(--ink-soft); text-decoration: none; gap: 2px; }
+      .tabbar { display: grid; grid-template-columns: repeat(6, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: #fff; border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+      .tabbar a { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 58px; font-size: .7rem; font-weight: 600; color: var(--ink-soft); text-decoration: none; gap: 2px; }
       .tabbar a[aria-current="page"] { color: var(--lagoon-dark); box-shadow: inset 0 3px 0 var(--lagoon); }
       .tabbar svg { width: 22px; height: 22px; }
       .stats, .plans { grid-template-columns: minmax(0, 1fr); }
@@ -109,6 +125,8 @@
   <nav class="tabbar" id="tabbar" aria-label="Portal" hidden>
     <a href="#/dashboard" data-route="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Home</a>
     <a href="#/knowledge" data-route="knowledge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/><path d="M9 8h6"/></svg>Knowledge</a>
+    <a href="#/chatbot" data-route="chatbot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>Chatbot</a>
+    <a href="#/inbox" data-route="inbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 3h6l1-3h5"/></svg>Inbox</a>
     <a href="#/billing" data-route="billing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/></svg>Billing</a>
     <a href="#/settings" data-route="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account</a>
   </nav>
@@ -198,6 +216,8 @@
     const authed = !!getToken();
     if (!authed) {
       tabbar.hidden = true; logoutBtn.hidden = true; state.me = null;
+      if (name === "forgot") return renderForgot();
+      if (name === "reset") return renderReset(params.get("token") || "");
       return renderAuth(name === "signup" ? "signup" : "login", params);
     }
     if (name === "login" || name === "signup" || name === "") { location.hash = "#/dashboard"; return; }
@@ -207,7 +227,7 @@
       try { state.me = await api("GET", "/me"); }
       catch (e) { if (e.status === 401) return; return renderError(e.message); }
     }
-    const views = { dashboard: renderDashboard, knowledge: renderKnowledge, billing: renderBilling, settings: renderSettings };
+    const views = { dashboard: renderDashboard, knowledge: renderKnowledge, chatbot: renderChatbot, inbox: renderInbox, billing: renderBilling, settings: renderSettings };
     const view = views[name];
     if (!view) { location.hash = "#/dashboard"; return; }
     renderShell(name);
@@ -223,7 +243,7 @@
   function renderError(msg) { root.innerHTML = '<div class="wrap" style="padding-top:28px">' + notice("err", esc(msg)) + '<button class="btn btn-primary" id="retry">Try again</button></div>'; document.getElementById("retry").onclick = route; }
 
   function renderShell(active) {
-    const links = [["dashboard", "Dashboard"], ["knowledge", "Knowledge base"], ["billing", "Billing"], ["settings", "Account settings"]];
+    const links = [["dashboard", "Dashboard"], ["knowledge", "Knowledge base"], ["chatbot", "Your chatbot"], ["inbox", "Inbox"], ["billing", "Billing"], ["settings", "Account settings"]];
     root.innerHTML = `<div class="wrap shell">
       <aside class="side" aria-label="Portal">${links.map(([r, t]) => `<a href="#/${r}" ${r === active ? 'aria-current="page"' : ""}>${t}</a>`).join("")}
         <a href="help.html">Help and diagnostics</a></aside>
@@ -244,7 +264,7 @@
         <button type="button" role="tab" aria-selected="${!signup}" data-mode="login">Log in</button>
         <button type="button" role="tab" aria-selected="${signup}" data-mode="signup">Create account</button>
       </div>
-      <div id="authMsg">${params.get("expired") ? notice("info", "Your session ended. Please log in again.") : ""}</div>
+      <div id="authMsg">${params.get("expired") ? notice("info", "Your session ended. Please log in again.") : params.get("reset") ? notice("ok", "Password changed. Log in with your new password.") : ""}</div>
       <form id="authForm" novalidate>
         ${signup ? `<div class="form-group"><label for="aName">Your name</label><input id="aName" autocomplete="name" required></div>` : ""}
         <div class="form-group"><label for="aEmail">Email</label><input id="aEmail" type="email" autocomplete="email" inputmode="email" required></div>
@@ -254,7 +274,7 @@
         ${signup ? '<div id="tsBox" style="margin-bottom:16px"></div>' : ""}
         <button class="btn btn-primary btn-block" type="submit" id="authBtn">${signup ? "Create account" : "Log in"}</button>
       </form>
-      <p class="small muted" style="margin-top:16px">${signup ? "By creating an account you agree to be contacted about your Bubble5 setup." : `Forgot your password? <a href="${supportLink("I can't log in to my Bubble5 account. Please help me reset my password. My account email is: ")}">Contact us</a> and we'll reset it.`}</p>
+      <p class="small muted" style="margin-top:16px">${signup ? "By creating an account you agree to be contacted about your Bubble5 setup." : `<a href="#/forgot">Forgot your password?</a>`}</p>
     </div></div>`;
     root.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => { location.hash = "#/" + b.dataset.mode; }));
     if (signup) mountTurnstile();
@@ -284,6 +304,45 @@
     });
   }
 
+
+  function renderForgot() {
+    document.title = "Bubble5 | Reset password";
+    root.innerHTML = `<div class="auth-wrap"><div class="auth-card"><h1>Reset your password</h1>
+      <p class="muted">Enter your account email and we will send you a link to choose a new password.</p>
+      <div id="fMsg"></div>
+      <form id="fForm" novalidate><div class="form-group"><label for="fEmail">Email</label><input id="fEmail" type="email" autocomplete="email" inputmode="email" required></div>
+      <button class="btn btn-primary btn-block" type="submit" id="fBtn">Send reset link</button></form>
+      <p class="small muted" style="margin-top:16px"><a href="#/login">Back to log in</a></p></div></div>`;
+    document.getElementById("fForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById("fMsg"), btn = document.getElementById("fBtn");
+      btn.disabled = true;
+      try {
+        const out = await api("POST", "/auth/forgot", { email: document.getElementById("fEmail").value.trim() });
+        msg.innerHTML = out.emailed
+          ? notice("ok", "If that email has an account, a reset link is on its way. It works for one hour.")
+          : notice("info", 'Automatic reset emails are not switched on yet. <a href="' + supportLink("Please reset my Bubble5 password. My account email is: " + document.getElementById("fEmail").value) + '">Contact us</a> and we will do it for you.');
+      } catch (err) { msg.innerHTML = notice("err", esc(err.message)); }
+      btn.disabled = false;
+    });
+  }
+
+  function renderReset(token) {
+    document.title = "Bubble5 | New password";
+    root.innerHTML = `<div class="auth-wrap"><div class="auth-card"><h1>Choose a new password</h1><div id="rMsg"></div>
+      <form id="rForm" novalidate><div class="form-group"><label for="rPass">New password</label><input id="rPass" type="password" autocomplete="new-password" required><p class="hint">At least 8 characters.</p></div>
+      <button class="btn btn-primary btn-block" type="submit" id="rBtn">Save new password</button></form></div></div>`;
+    document.getElementById("rForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById("rMsg"), btn = document.getElementById("rBtn");
+      btn.disabled = true;
+      try {
+        await api("POST", "/auth/reset", { token, new_password: document.getElementById("rPass").value });
+        location.hash = "#/login?reset=1";
+      } catch (err) { msg.innerHTML = notice("err", esc(err.message) + ' <a href="#/forgot">Request a new link</a>'); btn.disabled = false; }
+    });
+  }
+
   logoutBtn.addEventListener("click", async () => {
     try { await api("POST", "/auth/logout"); } catch (e) { /* ignore: token is removed locally either way */ }
     setToken(""); state.me = null; state.docs = null;
@@ -306,12 +365,13 @@
     const hasPlan = isActive(user) && user.plan !== "none";
     const pct = usage.limit ? Math.min(100, Math.round((usage.chats / usage.limit) * 100)) : 0;
     const barClass = pct >= 100 ? "full" : pct >= 80 ? "high" : "";
-    const planName = { none: "No plan", starter: "Starter", pro: "Pro", enterprise: "Enterprise" }[user.plan] || user.plan;
-    const chatsSub = usage.limit === null ? "Unlimited on your plan" : usage.limit === 0 ? "Choose a plan to start" : `of ${usage.limit.toLocaleString()} included`;
+    const planName = { none: "Free trial", starter: "Starter", pro: "Pro", enterprise: "Enterprise" }[user.plan] || user.plan;
+    const chatsSub = usage.limit === null ? "Unlimited on your plan" : `of ${usage.limit.toLocaleString()} ${user.plan === "none" ? "in your free trial" : "included"}`;
     const steps = [
-      { done: kb.count > 0, title: "Add your business information", text: "Hours, prices, policies and common questions. Your chatbot answers from these.", cta: ["Open knowledge base", "#/knowledge"] },
-      { done: hasPlan, title: "Choose a plan", text: "Pick the plan that fits your volume. You can change it any time.", cta: ["See plans", "#/billing"] },
-      { done: false, title: "Launch your chatbot", text: "We set up your chatbot with you and send the code to add to your website.", cta: ["Ask us to set it up", supportLink("Hi, I'd like to launch my Bubble5 chatbot. My company is " + (user.company || "") + ".")] }
+      { done: kb.count > 0, title: "Add your business information", text: "Hours, prices, policies and common questions. Your chatbot answers only from these.", cta: ["Open knowledge base", "#/knowledge"] },
+      { done: usage.chats > 0, title: "Try your chatbot", text: "Ask it the questions your customers ask and check the answers.", cta: ["Test it now", "#/chatbot"] },
+      { done: false, title: "Add it to your website", text: "Copy one line of code into your site. We can do it for you if you prefer.", cta: ["Get the code", "#/chatbot"] },
+      { done: hasPlan, title: "Choose a plan", text: "The free trial includes 50 chats. Pick a plan when you are ready to go live.", cta: ["See plans", "#/billing"] }
     ];
     el.innerHTML = `<h1>Welcome, ${esc(first)}</h1>
       <p class="lead">${esc(user.company || user.email)}</p>
@@ -322,7 +382,7 @@
           ${usage.limit ? `<div class="bar ${barClass}" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Chat usage"><span style="width:${pct}%"></span></div>` : ""}</div>
         <div class="stat"><div class="label">Knowledge documents</div><div class="value">${kb.count}</div><div class="sub">of ${kb.limit} allowed</div></div>
       </div>
-      <div class="card"><h2>Get your chatbot live</h2><p class="muted">Three steps from sign-up to answering customers.</p>
+      <div class="card"><h2>Get your chatbot live</h2><p class="muted">Four steps from sign-up to answering customers.</p>
         <ul class="steps">${steps.map((s) => `<li class="${s.done ? "done" : ""}"><span class="tick" aria-hidden="true">${s.done ? "&#10003;" : ""}</span>
           <div><div class="step-title">${s.title}</div><div class="muted small">${s.text}</div>
           ${s.done ? "" : `<div class="step-actions"><a class="btn btn-outline btn-small" href="${s.cta[1]}">${s.cta[0]}</a></div>`}</div></li>`).join("")}</ul></div>
@@ -379,6 +439,88 @@
       b.disabled = true;
       try { await api("DELETE", "/kb/" + doc.id); await route(); } catch (err) { msg.innerHTML = notice("err", esc(err.message)); b.disabled = false; }
     });
+  }
+
+
+  /* ---------- chatbot: settings, test, install ---------- */
+  async function renderChatbot(el) {
+    const { bot } = await api("GET", "/bot");
+    const snippet = `<script src="${API}/assets/widget.js" data-key="${bot.public_key}" defer><\/script>`;
+    const kbCount = state.me.kb.count;
+    el.innerHTML = `<h1>Your chatbot</h1><p class="lead">Set how it looks, try it, then put it on your website.</p>
+      ${kbCount === 0 ? notice("warn", 'Your chatbot has nothing to answer from yet. <a href="#/knowledge">Add your business information</a> first.') : ""}
+      <div class="two-col">
+      <form class="card" id="botForm"><h2>Appearance and behaviour</h2><div id="botMsg" style="margin-top:12px"></div>
+        <div class="form-group"><label for="bName">Assistant name</label><input id="bName" maxlength="40" value="${esc(bot.name)}"></div>
+        <div class="form-group"><label for="bBiz">Business name</label><input id="bBiz" maxlength="100" value="${esc(bot.business)}"></div>
+        <div class="form-group"><label for="bGreet">Greeting</label><input id="bGreet" maxlength="300" value="${esc(bot.greeting)}"></div>
+        <div class="form-group"><label for="bTone">Tone of voice</label><select id="bTone">
+          ${[["friendly", "Friendly"], ["professional", "Professional"], ["playful", "Playful"]].map(([v, t]) => `<option value="${v}" ${bot.tone === v ? "selected" : ""}>${t}</option>`).join("")}</select></div>
+        <div class="form-group"><label for="bColor">Brand colour</label><input id="bColor" type="color" value="${esc(bot.color)}" style="min-height:48px;padding:4px"></div>
+        <div class="form-group"><label for="bMail">Send unanswered questions to</label><input id="bMail" type="email" value="${esc(bot.handoff_email)}" placeholder="you@yourbusiness.com">
+          <p class="hint">When the chatbot does not know, it asks the visitor for their email and forwards it here (also saved in your Inbox).</p></div>
+        <div class="form-group"><label for="bDom">Only allow on these websites <span class="muted">(optional)</span></label><input id="bDom" value="${esc(bot.allowed_domains.split(",").join(", "))}" placeholder="yourbusiness.com, shop.yourbusiness.com">
+          <p class="hint">Stops other sites from using your chatbot and your chat allowance. Leave empty to allow any site.</p></div>
+        <label style="display:flex;gap:10px;align-items:center;margin-bottom:16px"><input type="checkbox" id="bOn" ${bot.enabled ? "checked" : ""}> Chatbot is switched on</label>
+        <button class="btn btn-primary" type="submit">Save changes</button></form>
+      <div>
+        <div class="card"><h2>Try it</h2><p class="muted">This is exactly what your visitors will get.</p>
+          <div class="testlog" id="testLog" aria-live="polite"></div>
+          <form id="testForm" class="testform"><input id="testIn" placeholder="Ask a question\u2026" aria-label="Test question" maxlength="500" autocomplete="off"><button class="btn btn-primary btn-small" type="submit">Send</button></form></div>
+        <div class="card"><h2>Add it to your website</h2><p class="muted">Paste this just before the closing &lt;/body&gt; tag of every page. Works on WordPress, Wix, Squarespace, Shopify and plain HTML.</p>
+          <textarea id="snip" readonly rows="4" style="width:100%;font:.85rem ui-monospace,Menlo,monospace;padding:12px;border:1.5px solid var(--line);border-radius:12px" aria-label="Install code">${esc(snippet)}</textarea>
+          <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-outline btn-small" id="copySnip" type="button">Copy code</button>
+          <a class="btn btn-outline btn-small" href="${supportLink("Please help me add my Bubble5 chatbot to my website: ")}">Ask us to do it</a></div></div>
+      </div></div>`;
+    const msg = document.getElementById("botMsg");
+    document.getElementById("botForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector("button[type=submit]"); btn.disabled = true; msg.innerHTML = "";
+      try {
+        await api("PATCH", "/bot", { name: val("bName"), business: val("bBiz"), greeting: val("bGreet"), tone: val("bTone"), color: val("bColor"), handoff_email: val("bMail"), allowed_domains: val("bDom"), enabled: document.getElementById("bOn").checked });
+        msg.innerHTML = notice("ok", "Saved.");
+      } catch (err) { msg.innerHTML = notice("err", esc(err.message)); }
+      btn.disabled = false;
+    });
+    function val(id) { return document.getElementById(id).value; }
+    document.getElementById("copySnip").onclick = async (e) => {
+      const t = document.getElementById("snip"); t.select();
+      try { await navigator.clipboard.writeText(t.value); e.target.textContent = "Copied"; } catch (x) { document.execCommand("copy"); e.target.textContent = "Copied"; }
+      setTimeout(() => { e.target.textContent = "Copy code"; }, 2000);
+    };
+    // test chat (uses the live endpoint, counted as normal chats)
+    const log = document.getElementById("testLog"); const hist = [];
+    const bubble = (cls, t) => { const d = document.createElement("div"); d.className = "tm " + cls; d.textContent = t; log.appendChild(d); log.scrollTop = log.scrollHeight; return d; };
+    bubble("a", bot.greeting);
+    document.getElementById("testForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const inp = document.getElementById("testIn"); const q = inp.value.trim(); if (!q) return; inp.value = "";
+      bubble("u", q); hist.push({ role: "user", content: q }); const w = bubble("a", "\u2026");
+      try {
+        const res = await fetch(API + "/bot/" + bot.public_key + "/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ visitor: "test-" + state.me.user.id, messages: hist.slice(-8) }) });
+        const j = await res.json();
+        if (res.ok) { w.textContent = j.answer; hist.push({ role: "assistant", content: j.answer }); } else { w.textContent = j.message || j.error; hist.pop(); }
+      } catch (err) { w.textContent = "Could not reach the chatbot."; hist.pop(); }
+    });
+  }
+
+  /* ---------- inbox: conversations, unanswered questions, leads ---------- */
+  async function renderInbox(el) {
+    const [conv, leads] = await Promise.all([api("GET", "/bot/conversations"), api("GET", "/bot/leads")]);
+    const st = conv.stats;
+    const answeredPct = st.questions ? Math.round(((st.questions - st.unanswered) / st.questions) * 100) : null;
+    el.innerHTML = `<h1>Inbox</h1><p class="lead">What your customers are asking, in the last 30 days.</p>
+      <div class="stats">
+        <div class="stat"><div class="label">Questions</div><div class="value">${st.questions}</div><div class="sub">from ${st.visitors} visitor${st.visitors === 1 ? "" : "s"}</div></div>
+        <div class="stat"><div class="label">Answered</div><div class="value">${answeredPct === null ? "-" : answeredPct + "%"}</div><div class="sub">${st.unanswered} could not be answered</div></div>
+        <div class="stat"><div class="label">Leads captured</div><div class="value">${leads.leads.length}</div><div class="sub">visitors who left their email</div></div>
+      </div>
+      <div class="card"><h2>Leads</h2>${leads.leads.length ? `<ul class="doc-list">${leads.leads.map((l) => `<li class="doc"><div class="doc-main"><div class="doc-title">${esc(l.name || "Visitor")} &middot; <a href="mailto:${esc(l.email)}">${esc(l.email)}</a></div>
+        <div class="doc-snippet">${esc(l.message || "")}</div><div class="muted small">${esc(fmtDate(l.created_at))}</div></div></li>`).join("")}</ul>` : '<div class="empty"><p>No leads yet. When your chatbot cannot answer, it asks the visitor for their email and it shows up here.</p></div>'}</div>
+      <div class="card"><h2>Questions it could not answer</h2><p class="muted">Add these answers to your knowledge base and your chatbot gets better.</p>
+        ${conv.unanswered.length ? `<ul class="doc-list">${conv.unanswered.map((u) => `<li class="doc"><div class="doc-main"><div class="doc-title">${esc(u.question)}</div><div class="muted small">asked ${u.n} time${u.n === 1 ? "" : "s"}</div></div><div class="doc-actions"><a class="btn btn-outline btn-small" href="#/knowledge">Add answer</a></div></li>`).join("")}</ul>` : '<div class="empty"><p>Nothing unanswered. Nice.</p></div>'}</div>
+      <div class="card"><h2>Recent conversations</h2>${conv.conversations.length ? conv.conversations.map((c) => `<details class="conv"><summary>${esc(c.messages[0].content.slice(0, 70))} <span class="muted small">&middot; ${esc(fmtDate(c.last))}${c.unanswered ? " &middot; needs attention" : ""}</span></summary>
+        ${c.messages.map((m) => `<div class="tm ${m.role === "user" ? "u" : "a"}${m.unanswered ? " flag" : ""}">${esc(m.content)}</div>`).join("")}</details>`).join("") : '<div class="empty"><p>No conversations yet. Try the chatbot, or add it to your website.</p></div>'}</div>`;
   }
 
   /* ---------- billing ---------- */

@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bubble5 | AI Chatbots for Modern Businesses</title>
   <meta name="description" content="Bubble5 builds AI chatbots that answer customer questions from your own business information. Try the live demo.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4C16 4 4 15 4 30s12 26 28 26c3 0 6-.4 8-1l14 7-3-13c5-5 8-11 8-19C59 15 47 4 32 4z' fill='%230E7C7B'/%3E%3Ctext x='32' y='41' font-size='28' font-weight='800' text-anchor='middle' fill='%23FFC53D' font-family='Arial,sans-serif'%3E5%3C/text%3E%3C/svg%3E">
+  <meta name="theme-color" content="#0E7C7B">
+  <meta property="og:title" content="Bubble5 | AI chatbots that answer from your own business info">
+  <meta property="og:description" content="A website chatbot for small businesses. It only answers from what you tell it, captures leads, and hands over to you when it is unsure.">
+  <meta property="og:type" content="website">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
@@ -236,6 +241,25 @@
       * { transition: none !important; }
       .live-dot, .dots i { animation: none !important; }
     }
+
+    /* ---------- Added sections ---------- */
+    .steps3 { display: grid; grid-template-columns: minmax(0,1fr); gap: 16px; margin-top: 32px; counter-reset: st; }
+    .steps3 > li { list-style: none; background: #fff; border: 1.5px solid var(--line); border-radius: 18px; padding: 24px; position: relative; min-width: 0; }
+    .steps3 > li::before { counter-increment: st; content: counter(st); display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50% 50% 50% 6px; background: var(--lagoon); color: var(--sun); font: 800 1.1rem var(--display); margin-bottom: 14px; }
+    .steps3 h3 { font-size: 1.25rem; margin-bottom: 6px; }
+    .steps3 p, .feat p, .uses p { color: var(--ink-soft); }
+    .feats { display: grid; grid-template-columns: minmax(0,1fr); gap: 16px; margin-top: 32px; }
+    .feat { background: var(--mist); border-radius: 18px; padding: 22px; min-width: 0; }
+    .feat h3 { font-size: 1.15rem; margin-bottom: 6px; }
+    .uses { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+    .uses span { background: #fff; border: 1.5px solid var(--line); border-radius: 999px; padding: 9px 16px; font-weight: 600; }
+    .alt { background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .faq { max-width: 760px; margin: 28px auto 0; }
+    .faq details { border-bottom: 1px solid var(--line); padding: 16px 0; }
+    .faq summary { cursor: pointer; font-weight: 700; font-size: 1.05rem; }
+    .faq details p { margin-top: 10px; color: var(--ink-soft); }
+    .trial-note { text-align: center; margin-top: 8px; color: var(--ink-soft); }
+    @media (min-width: 760px) { .steps3 { grid-template-columns: repeat(3, minmax(0,1fr)); } .feats { grid-template-columns: repeat(3, minmax(0,1fr)); } }
   </style>
 </head>
 <body>
@@ -245,7 +269,9 @@
       <div class="nav-actions">
         <ul class="nav-links" id="navLinks">
           <li><a href="#demo">Demo</a></li>
+          <li><a href="#how">How it works</a></li>
           <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#faq">FAQ</a></li>
           <li><a href="#contact">Contact</a></li>
           <li><a href="help.html">Help</a></li>
           <li><a class="btn btn-outline" id="loginBtn" href="app.html#/login">Business login</a></li>
@@ -261,8 +287,8 @@
         <h1>A chatbot that answers from your own business info</h1>
         <p class="hero-lead">Bubble5 builds AI chatbots for small businesses. Customers get accurate answers any hour of the day, and you stop answering the same questions twice.</p>
         <div class="hero-actions">
-          <a href="#contact" class="btn btn-primary">Contact us</a>
-          <a href="#pricing" class="btn btn-outline">See pricing</a>
+          <a href="app.html#/signup" class="btn btn-primary">Start free</a>
+          <a href="#contact" class="btn btn-outline">Talk to us</a>
         </div>
         <p class="demo-note">Try the live demo: it answers as a made-up bakery, using only the information we gave it.</p>
       </div>
@@ -293,6 +319,40 @@
     </div>
   </header>
 
+  <section id="how" class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Live in an afternoon</h2>
+        <p>No developers needed. If you can write down your opening hours, you can set up Bubble5.</p>
+      </div>
+      <ol class="steps3">
+        <li><h3>Tell it about your business</h3><p>Paste in your hours, prices, policies and common questions. Plain text is fine, in any language.</p></li>
+        <li><h3>Check the answers</h3><p>Ask it what your customers ask. Pick your colours, tone of voice and where to send questions it cannot answer.</p></li>
+        <li><h3>Paste one line on your site</h3><p>Works on WordPress, Wix, Squarespace, Shopify and plain HTML. Or we will add it for you.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="why" class="section alt">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Built so you can trust it</h2>
+        <p>A chatbot that makes things up is worse than no chatbot. Bubble5 is built to stay honest.</p>
+      </div>
+      <div class="feats">
+        <div class="feat"><h3>Answers only from your info</h3><p>It does not guess prices, hours or policies. If your documents do not say it, it does not say it.</p></div>
+        <div class="feat"><h3>Hands over to you</h3><p>When it is unsure, it offers to take the visitor's email and forwards the question to you. Every one is saved as a lead.</p></div>
+        <div class="feat"><h3>Shows you what customers want</h3><p>See every question, what it could not answer, and add the missing answer in one click.</p></div>
+        <div class="feat"><h3>Speaks your customers' language</h3><p>It replies in the language the visitor writes in, including Thai, English and many more.</p></div>
+        <div class="feat"><h3>Locked to your website</h3><p>Limit it to your own domains so nobody else can use your chats.</p></div>
+        <div class="feat"><h3>Private by design</h3><p>Your documents are only used to answer your own customers. Delete your data any time.</p></div>
+      </div>
+      <div class="uses" aria-label="Works for">
+        <span>Cafes and restaurants</span><span>Salons and spas</span><span>Clinics and dentists</span><span>Hotels and tours</span><span>Online shops</span><span>Gyms and studios</span><span>Trades and services</span><span>Schools and classes</span>
+      </div>
+    </div>
+  </section>
+
   <section id="pricing" class="section">
     <div class="wrap">
       <div class="section-head">
@@ -318,7 +378,7 @@
             <li>Basic AI training</li>
             <li>Email support</li>
           </ul>
-          <a href="#contact" class="btn btn-outline">Choose Starter</a>
+          <a href="app.html#/signup" class="btn btn-outline">Start with Starter</a>
         </article>
 
         <article class="pricing-card popular">
@@ -332,7 +392,7 @@
             <li>Custom knowledge base integration</li>
             <li>Priority support</li>
           </ul>
-          <a href="#contact" class="btn btn-primary">Choose Pro</a>
+          <a href="app.html#/signup" class="btn btn-primary">Start with Pro</a>
         </article>
 
         <article class="pricing-card">
@@ -348,6 +408,21 @@
           </ul>
           <a href="#contact" class="btn btn-outline">Contact sales</a>
         </article>
+      </div>
+      <p class="trial-note">Every new account starts with a free trial of 50 chats. No card needed.</p>
+    </div>
+  </section>
+
+  <section id="faq" class="section alt">
+    <div class="wrap">
+      <div class="section-head"><h2>Questions</h2></div>
+      <div class="faq">
+        <details><summary>Do I need to be technical?</summary><p>No. You type your information into a form and paste one line of code on your website. If you would rather not, ask us and we will do it for you.</p></details>
+        <details><summary>What if the chatbot does not know the answer?</summary><p>It says so honestly, offers to take the visitor's email, and sends you the question. It will not invent an answer.</p></details>
+        <details><summary>What counts as a chat?</summary><p>One question from a visitor and the reply to it. Starter includes 1,000 a month, Pro 10,000. If you hit your limit the chatbot pauses politely until next month, or you can upgrade.</p></details>
+        <details><summary>Can I try it first?</summary><p>Yes. Every new account includes a free trial of 50 chats, no card needed.</p></details>
+        <details><summary>Can I cancel any time?</summary><p>Yes. Cancel from your Billing page and your plan runs to the end of the period you paid for.</p></details>
+        <details><summary>Which languages does it support?</summary><p>It answers in the language your visitor uses. Write your documents in your own language for best results.</p></details>
       </div>
     </div>
   </section>

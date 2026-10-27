@@ -62,3 +62,42 @@ CREATE TABLE IF NOT EXISTS login_attempts (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_attempts ON login_attempts (kind, key, created_at);
+
+-- Per-business chatbot (one per account)
+CREATE TABLE IF NOT EXISTS bots (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL UNIQUE,
+  public_key TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL DEFAULT 'Assistant',
+  business TEXT,
+  greeting TEXT NOT NULL DEFAULT 'Hi! How can I help you today?',
+  tone TEXT NOT NULL DEFAULT 'friendly',      -- friendly | professional | playful
+  color TEXT NOT NULL DEFAULT '#6d4aff',
+  allowed_domains TEXT NOT NULL DEFAULT '',   -- comma separated hostnames; empty = any site
+  handoff_email TEXT,
+  enabled INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS bot_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  bot_id INTEGER NOT NULL,
+  visitor TEXT NOT NULL,
+  role TEXT NOT NULL,                         -- user | assistant
+  content TEXT NOT NULL,
+  unanswered INTEGER NOT NULL DEFAULT 0,
+  ip_hash TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_botmsg_bot ON bot_messages (bot_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_botmsg_ip ON bot_messages (ip_hash, created_at);
+
+CREATE TABLE IF NOT EXISTS bot_leads (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  bot_id INTEGER NOT NULL,
+  name TEXT,
+  email TEXT NOT NULL,
+  message TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_botleads_bot ON bot_leads (bot_id, created_at);

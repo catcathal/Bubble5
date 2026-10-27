@@ -17,6 +17,10 @@ binding = "AI_SEARCH"
 namespace = "default"
 remote = true
 
+# Workers AI: writes the answers for customer chatbots.
+[ai]
+binding = "AI"
+
 # D1 database that stores form submissions (see schema.sql).
 # Create it with: npx wrangler d1 create bubble5-leads  -> paste the database_id below.
 [[d1_databases]]

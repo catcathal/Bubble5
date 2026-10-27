@@ -1,14 +1,12 @@
 // Business accounts: sign up / log in, knowledge base, billing (Stripe-ready) and health checks.
 // Everything here is stored in the D1 database bound as env.DB (see schema.sql).
 
-const enc = new TextEncoder();
+import { PLANS } from "./plans.js";
+import { botGet, botUpdate, botConversations, botLeads, botDeleteData } from "./bot.js";
+import { sendEmail } from "./mail.js";
 
-export const PLANS = {
-  none: { name: "No plan", chats: 0, docs: 5 },
-  starter: { name: "Starter", chats: 1000, docs: 10 },
-  pro: { name: "Pro", chats: 10000, docs: 50 },
-  enterprise: { name: "Enterprise", chats: null, docs: 200 },
-};
+const enc = new TextEncoder();
+export { PLANS };
 
 const SESSION_DAYS = 30;
 const PBKDF2_ITERATIONS = 100000; // the maximum Cloudflare Workers allows
@@ -229,6 +227,7 @@ async function overview(env, user, cors) {
       usage: { chats: usage ? usage.chats : 0, limit: plan.chats },
       kb: { count: docs ? docs.n : 0, limit: plan.docs, max_chars: MAX_DOC_CHARS },
       billing_ready: !!env.STRIPE_SECRET_KEY,
+      email_ready: !!env.RESEND_API_KEY,
     },
     200,
     cors
@@ -272,7 +271,9 @@ async function deleteAccount(request, env, user, cors) {
   if (ACTIVE_STATUSES.includes(user.sub_status)) {
     return fail("Cancel your subscription in Billing before deleting your account.", 409, cors);
   }
+  const botStmts = await botDeleteData(env, user.id);
   await env.DB.batch([
+    ...botStmts,
     env.DB.prepare("DELETE FROM kb_docs WHERE user_id = ?").bind(user.id),
     env.DB.prepare("DELETE FROM usage WHERE user_id = ?").bind(user.id),
     env.DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(user.id),
@@ -529,6 +530,66 @@ async function stripeWebhook(request, env) {
   return new Response("ok", { status: 200 });
 }
 
+/* ---------- password reset by email ---------- */
+
+async function forgotPassword(request, env, cors, ctx) {
+  const b = await readJson(request);
+  if (!b) return fail("Invalid request.", 400, cors);
+  const email = clean(b.email, 200).toLowerCase();
+  const generic = reply({ ok: true, emailed: !!env.RESEND_API_KEY }, 200, cors);
+  if (!EMAIL_RE.test(email)) return generic;
+  const key = await ipKey(request);
+  const recent = await env.DB.prepare(
+    "SELECT COUNT(*) AS n FROM login_attempts WHERE kind = 'reset' AND key = ? AND created_at > datetime('now','-1 hour')"
+  ).bind(key).first();
+  if (recent && recent.n >= 5) return fail("Too many requests. Please try again later.", 429, cors);
+  await env.DB.prepare("INSERT INTO login_attempts (key, kind) VALUES (?, 'reset')").bind(key).run();
+  const user = await env.DB.prepare("SELECT id, name FROM users WHERE email = ?").bind(email).first();
+  if (!user || !env.RESEND_API_KEY) return generic;
+  const token = randomToken(32);
+  await env.DB.prepare("INSERT INTO sessions (user_id, token_hash, expires_at) VALUES (?, ?, datetime('now','+1 hour'))")
+    .bind(user.id, "reset:" + (await sha256Hex(token))).run();
+  const origin = request.headers.get("Origin");
+  const base = (origin && allowedOrigins(env).includes(origin) ? origin : "https://bubble5.online") + "/app.html#/reset?token=" + token;
+  const mail = sendEmail(env, {
+    to: email,
+    subject: "Reset your Bubble5 password",
+    html: `<p>Hi ${String(user.name).replace(/[<>&]/g, "")},</p><p>Use this link to choose a new password. It works for one hour.</p><p><a href="${base}">Reset my password</a></p><p>If you did not ask for this, you can ignore this email.</p>`,
+  });
+  if (ctx && ctx.waitUntil) ctx.waitUntil(mail);
+  return generic;
+}
+
+async function resetPassword(request, env, cors) {
+  const b = await readJson(request);
+  if (!b) return fail("Invalid request.", 400, cors);
+  const next = String(b.new_password || "");
+  if (next.length < 8) return fail("Use a new password with at least 8 characters.", 400, cors);
+  if (next.length > 200) return fail("That password is too long.", 400, cors);
+  const th = "reset:" + (await sha256Hex(String(b.token || "")));
+  const row = await env.DB.prepare("SELECT id, user_id FROM sessions WHERE token_hash = ? AND expires_at > datetime('now')").bind(th).first();
+  if (!row) return fail("This reset link has expired. Request a new one.", 400, cors);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const hash = await derivePassword(next, salt);
+  await env.DB.batch([
+    env.DB.prepare("UPDATE users SET pw_hash = ?, pw_salt = ? WHERE id = ?").bind(hash, toB64Url(salt), row.user_id),
+    env.DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(row.user_id),
+  ]);
+  return reply({ ok: true }, 200, cors);
+}
+
+/* ---------- owner tools (ADMIN_TOKEN) ---------- */
+
+async function adminSetPlan(request, env, cors) {
+  const supplied = request.headers.get("X-Admin-Token");
+  if (!env.ADMIN_TOKEN || !supplied || !safeEqual(supplied, env.ADMIN_TOKEN)) return fail("Unauthorized", 401, cors);
+  const b = await readJson(request);
+  if (!b || !PLANS[b.plan]) return fail("Send {email, plan} with plan none, starter, pro or enterprise.", 400, cors);
+  const res = await env.DB.prepare("UPDATE users SET plan = ?, sub_status = ? WHERE email = ?")
+    .bind(b.plan, b.plan === "none" ? "inactive" : "active", clean(b.email, 200).toLowerCase()).run();
+  return reply({ ok: true, updated: res.meta.changes }, 200, cors);
+}
+
 /* ---------- health ---------- */
 
 async function health(env, cors) {
@@ -564,15 +625,16 @@ async function health(env, cors) {
 
 /* ---------- router ---------- */
 
-export async function handleApp(request, env, url, cors) {
+export async function handleApp(request, env, url, cors, ctx) {
   const path = url.pathname;
   const method = request.method;
 
   if (path === "/stripe-webhook" && method === "POST") return stripeWebhook(request, env);
   if (path === "/health" && method === "GET") return health(env, cors);
+  if (path === "/admin/plan" && method === "POST" && env.DB) return adminSetPlan(request, env, cors);
 
   const isAccountRoute =
-    path.startsWith("/auth/") || path === "/me" || path.startsWith("/me/") || path.startsWith("/kb") || path.startsWith("/billing");
+    path.startsWith("/auth/") || path === "/me" || path.startsWith("/me/") || path.startsWith("/kb") || path.startsWith("/billing") || path.startsWith("/bot");
   if (!isAccountRoute) return null;
   if (!env.DB) return fail("The account service is not available.", 503, cors);
 
@@ -580,6 +642,8 @@ export async function handleApp(request, env, url, cors) {
     if (path === "/auth/signup" && method === "POST") return await signup(request, env, cors);
     if (path === "/auth/login" && method === "POST") return await login(request, env, cors);
     if (path === "/auth/logout" && method === "POST") return await logout(request, env, cors);
+    if (path === "/auth/forgot" && method === "POST") return await forgotPassword(request, env, cors, ctx);
+    if (path === "/auth/reset" && method === "POST") return await resetPassword(request, env, cors);
 
     const user = await currentUser(request, env);
     if (!user) return fail("Please log in to continue.", 401, cors, { code: "unauthorized" });
@@ -596,6 +660,11 @@ export async function handleApp(request, env, url, cors) {
     const m = path.match(/^\/kb\/(\d+)$/);
     if (m && method === "PUT") return await kbSave(request, env, user, cors, Number(m[1]));
     if (m && method === "DELETE") return await kbDelete(env, user, cors, Number(m[1]));
+
+    if (path === "/bot" && method === "GET") return await botGet(env, user, cors);
+    if (path === "/bot" && method === "PATCH") return await botUpdate(request, env, user, cors);
+    if (path === "/bot/conversations" && method === "GET") return await botConversations(env, user, cors);
+    if (path === "/bot/leads" && method === "GET") return await botLeads(env, user, cors);
 
     if (path === "/billing" && method === "GET") return await billingInfo(env, user, cors);
     if (path === "/billing/checkout" && method === "POST") return await billingCheckout(request, env, user, cors);

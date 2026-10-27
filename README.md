@@ -35,3 +35,6 @@ To demo a prospect's own business, edit the documents in `worker/src/kb.js` (and
 5. In Stripe, turn on the Customer Portal (Settings, Billing, Customer portal) so customers can change plan, update cards and cancel.
 
 Until these are set, the Billing page tells customers payments are being switched on and points them to the contact form.
+
+### Website on your own domain
+The Worker also serves the website, so attaching `bubble5.online` to the Worker as a custom domain (Workers and Pages, your Worker, Settings, Domains and Routes) is enough: no GitHub Pages or A records needed. `worker/build-site.mjs` copies the site files into `worker/public` on every deploy. Do not add a `CNAME` file to the repo unless the domain points at GitHub Pages: GitHub then redirects the github.io address to it.

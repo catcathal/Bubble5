@@ -2,6 +2,15 @@ name = "bubble5-demo"
 main = "src/index.js"
 compatibility_date = "2026-10-01"
 
+# Serve the website (index.html, app.html, help.html, assets/) from this Worker too,
+# so bubble5.online shows the site. API paths (/chat, /lead, /me, /kb, /billing, /auth/*...) are not
+# files, so they fall through to the Worker code below.
+[build]
+command = "node build-site.mjs"
+
+[assets]
+directory = "./public"
+
 # AI Search namespace binding. The Worker uses the instance named in AI_SEARCH_INSTANCE.
 [[ai_search_namespaces]]
 binding = "AI_SEARCH"

@@ -53,8 +53,9 @@ a { color: var(--lagoon-dark); }
 .topbar { position: sticky; top: 0; z-index: 40; background: rgba(251,253,252,.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
 .topbar-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 62px; }
 .logo { font: 800 1.3rem/1 var(--display); letter-spacing: -0.03em; color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
-.logo-mark { position: relative; width: 38px; height: 30px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 11px; background: var(--lagoon); color: var(--sun); font: 800 1.2rem/1 var(--display); letter-spacing: 0; margin-bottom: 7px; }
-.logo-mark::after { content: ""; position: absolute; left: 7px; bottom: -7px; width: 0; height: 0; border-style: solid; border-width: 8px 8px 0 0; border-color: var(--lagoon) transparent transparent transparent; }
+.logo-mark { position: relative; isolation: isolate; width: 38px; height: 38px; flex: none; display: inline-flex; align-items: center; justify-content: center; background: none; color: var(--sun); font: 800 1.15rem/1 var(--display); letter-spacing: 0; padding-bottom: 3px; }
+.logo-mark::before { content: ""; position: absolute; z-index: -1; left: 3%; top: 2%; width: 89%; height: 89%; border-radius: 50%; background: var(--lagoon); }
+.logo-mark::after { content: ""; position: absolute; z-index: -1; inset: 0; background: var(--lagoon); clip-path: polygon(21% 73%, 8% 96%, 40% 88%); }
 .topbar-links { display: flex; align-items: center; gap: 18px; font-weight: 500; }
 .topbar-links a { color: var(--ink); text-decoration: none; }
 .topbar-links a:hover { text-decoration: underline; text-underline-offset: 4px; }

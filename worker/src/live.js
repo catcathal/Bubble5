@@ -76,7 +76,7 @@ export async function handleLivePublic(request, env, url, cors, ctx) {
       if (!chat) return json({ error: "gone" }, 404, cors);
       const after = Number(url.searchParams.get("after")) || 0;
       await env.DB.prepare("UPDATE live_chats SET visitor_seen = datetime('now') WHERE id = ?").bind(chat.id).run();
-      const rows = await env.DB.prepare("SELECT id, sender, body, created_at FROM live_messages WHERE chat_id = ? AND id > ? ORDER BY id LIMIT 100").bind(chat.id, after).all();
+      const rows = await env.DB.prepare("SELECT id, sender, body, created_at FROM live_messages WHERE chat_id = ? AND id > ? AND sender != 'note' ORDER BY id LIMIT 100").bind(chat.id, after).all();
       return json({ messages: rows.results || [], online: await adminOnline(env), status: chat.status }, 200, cors);
     }
 
@@ -107,9 +107,15 @@ export async function handleLivePublic(request, env, url, cors, ctx) {
         chat = await verifyChat(env, b.chat_id, b.token);
         if (!chat) return json({ error: "gone" }, 404, cors);
       }
+      let transcript = "";
+      if (path === "/live/start" && Array.isArray(b.transcript)) {
+        transcript = b.transcript.filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+          .slice(-8).map((m) => (m.role === "user" ? "Visitor: " : "AI: ") + clean(m.content, 400)).join("\n");
+        if (transcript) await env.DB.prepare("INSERT INTO live_messages (chat_id, sender, body) VALUES (?, 'note', ?)").bind(chat.id, "Handed over from the AI assistant. Earlier conversation:\n" + transcript).run();
+      }
       const ins = await env.DB.prepare("INSERT INTO live_messages (chat_id, sender, body, ip_hash) VALUES (?, 'visitor', ?, ?)").bind(chat.id, body, ip).run();
       await env.DB.prepare("UPDATE live_chats SET unread_admin = unread_admin + 1, last_message_at = datetime('now'), status = 'open', visitor_seen = datetime('now') WHERE id = ?").bind(chat.id).run();
-      await notifyOwner(env, ctx, chat, body);
+      await notifyOwner(env, ctx, chat, transcript ? body + "\n\n---\nEarlier with the AI:\n" + transcript : body);
       return json({ ok: true, chat_id: chat.id, token: chat._token, message_id: ins.meta.last_row_id, online: await adminOnline(env) }, 200, cors);
     }
   } catch (e) {

@@ -54,3 +54,9 @@ The Worker also serves the website, so attaching `bubble5.online` to the Worker 
 - You reply from the portal: sign up at `app.html` using the same email as `NOTIFY_EMAIL` (or list emails in `ADMIN_EMAILS`) and a **Live chat** link appears in the header. You show as "online" for visitors while the portal is open in a browser tab.
 - New visitor messages are emailed to `NOTIFY_EMAIL` (needs `RESEND_API_KEY`). If a visitor has left the site and gave an email, your reply is also emailed to them.
 - Re-run `schema.sql` on the database after pulling (safe to repeat).
+
+## AI support assistant and "Try it" sandbox
+
+- The "Ask Bubble5" bubble answers with AI first (`POST /support/chat`, knowledge in `worker/src/supportkb.js`; edit that file to change what it knows). When it is unsure, or the visitor taps "Talk to a person", the conversation moves to live chat and the AI transcript is attached for you as a note.
+- `POST /try/start` and `POST /try/:key/chat` let anyone paste business text and chat with it, no account. Sessions delete after a day and are rate limited per IP.
+- The AI model is Workers AI Llama 3.3 70B. To switch models without code changes, set a text variable `AI_MODEL` (for example another `@cf/...` model from the Workers AI catalogue).

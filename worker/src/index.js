@@ -2,6 +2,7 @@ import { DEMO_DOCS } from "./kb.js";
 import { handleApp, turnstileOk } from "./app.js";
 import { handlePublicBot } from "./bot.js";
 import { handleLivePublic } from "./live.js";
+import { handleTry } from "./try.js";
 
 const SYSTEM_PROMPT = `You are the Bubble5 demo assistant, answering as the website assistant for Maple & Co. Bakery, a fictional business used to show prospects what a Bubble5 chatbot can do.
 Answer ONLY from the provided context. Be warm, a little playful, concise (1 to 4 sentences), and specific.
@@ -169,6 +170,9 @@ export default {
     const cors = corsHeaders(request, env);
 
     // Customer chatbots are called from any website, so they handle their own CORS (including preflight).
+    const tryResponse = await handleTry(request, env, url);
+    if (tryResponse) return tryResponse;
+
     const botResponse = await handlePublicBot(request, env, url, ctx);
     if (botResponse) return botResponse;
 

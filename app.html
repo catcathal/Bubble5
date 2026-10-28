@@ -46,6 +46,7 @@
     .tm.a { background: #fff; border: 1px solid var(--line); align-self: flex-start; }
     .tm.u { background: var(--lagoon); color: #fff; align-self: flex-end; }
     .tm.flag { border-color: var(--warn); }
+    .tm.note { background: #fff7e0; border: 1px dashed #d9a400; max-width: 100%; align-self: stretch; font-size: .88rem; color: var(--ink-soft); }
     .testform { display: flex; gap: 8px; }
     .testform input { flex: 1; min-width: 0; min-height: 42px; padding: 8px 12px; border: 1.5px solid var(--line); border-radius: 999px; font: inherit; }
     .conv { border-top: 1px solid var(--line); padding: 10px 0; }
@@ -663,7 +664,7 @@
       document.getElementById("lhead").innerHTML = esc(d.chat.name || "Visitor");
       document.getElementById("lsub").innerHTML = (d.chat.email ? `<a href="mailto:${esc(d.chat.email)}">${esc(d.chat.email)}</a> &middot; ` : "") + (d.chat.here ? "on the site now" : "not on the site") + (d.chat.status === "closed" ? " &middot; closed" : "");
       const box = document.getElementById("lmsgs"); const stick = box.scrollTop + box.clientHeight >= box.scrollHeight - 40;
-      d.messages.forEach((m) => { lastMsg = Math.max(lastMsg, m.id); const div = document.createElement("div"); div.className = "tm " + (m.sender === "agent" ? "u" : "a"); div.textContent = m.body; box.appendChild(div); });
+      d.messages.forEach((m) => { lastMsg = Math.max(lastMsg, m.id); const div = document.createElement("div"); div.className = "tm " + (m.sender === "note" ? "note" : m.sender === "agent" ? "u" : "a"); div.textContent = m.body; box.appendChild(div); });
       if (stick || d.messages.length && lastMsg === d.messages[d.messages.length - 1].id) box.scrollTop = box.scrollHeight;
     }
     await Promise.all([refreshList(), refreshThread()]);

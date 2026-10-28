@@ -135,3 +135,21 @@ CREATE TABLE IF NOT EXISTS live_meta (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
+
+-- Try-it sandbox (temporary bots made from pasted text, deleted after a day) and simple rate limiting
+CREATE TABLE IF NOT EXISTS try_sessions (
+  key TEXT PRIMARY KEY,
+  business TEXT,
+  tone TEXT NOT NULL DEFAULT 'friendly',
+  text TEXT NOT NULL,
+  msgs INTEGER NOT NULL DEFAULT 0,
+  ip_hash TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_try_ip ON try_sessions (ip_hash, created_at);
+
+CREATE TABLE IF NOT EXISTS rate_hits (
+  key TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_rate_hits ON rate_hits (key, created_at);

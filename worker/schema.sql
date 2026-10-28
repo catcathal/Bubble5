@@ -101,3 +101,37 @@ CREATE TABLE IF NOT EXISTS bot_leads (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_botleads_bot ON bot_leads (bot_id, created_at);
+
+-- Live chat between website visitors and the Bubble5 owner
+CREATE TABLE IF NOT EXISTS live_chats (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  visitor TEXT NOT NULL,
+  name TEXT,
+  email TEXT,
+  token_hash TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'open',        -- open | closed
+  unread_admin INTEGER NOT NULL DEFAULT 0,
+  last_message_at TEXT NOT NULL DEFAULT (datetime('now')),
+  visitor_seen TEXT,
+  last_notified TEXT,
+  ip_hash TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_livechats_last ON live_chats (last_message_at);
+CREATE INDEX IF NOT EXISTS idx_livechats_ip ON live_chats (ip_hash, created_at);
+
+CREATE TABLE IF NOT EXISTS live_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  chat_id INTEGER NOT NULL,
+  sender TEXT NOT NULL,                       -- visitor | agent
+  body TEXT NOT NULL,
+  ip_hash TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_livemsg_chat ON live_messages (chat_id, id);
+CREATE INDEX IF NOT EXISTS idx_livemsg_ip ON live_messages (ip_hash, created_at);
+
+CREATE TABLE IF NOT EXISTS live_meta (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);

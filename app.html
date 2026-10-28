@@ -23,6 +23,20 @@
     .side a:hover { background: var(--mist); }
     .side a[aria-current="page"] { background: var(--ink); color: #fff; }
     .tabbar { display: none; }
+    .pillbadge { background: var(--sun); color: var(--ink); border-radius: 999px; padding: 1px 8px; font-size: .8rem; font-weight: 700; }
+    .live-grid { display: grid; grid-template-columns: minmax(0,1fr); gap: 16px; align-items: start; }
+    .live-grid > * { min-width: 0; }
+    @media (min-width: 900px) { .live-grid { grid-template-columns: 340px minmax(0,1fr); } }
+    @media (max-width: 899px) { .live-grid.has-thread #liveList { display: none; } .live-grid:not(.has-thread) #liveThread { display: none; } }
+    .lchat { display: block; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 12px 4px; cursor: pointer; font: inherit; color: inherit; }
+    .lchat[aria-current="true"] { background: var(--mist); }
+    .lchat .top { display: flex; justify-content: space-between; gap: 8px; font-weight: 700; }
+    .lchat .snip { color: var(--ink-soft); font-size: .92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .here { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #2fbf71; margin-right: 6px; }
+    .lthread { height: 36vh; min-height: 220px; overflow-y: auto; background: var(--mist); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+    .lform { display: flex; gap: 8px; align-items: flex-end; }
+    .lform textarea { flex: 1; min-width: 0; min-height: 46px; max-height: 120px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 12px; font: inherit; resize: none; }
+
     .two-col { display: grid; grid-template-columns: minmax(0,1fr); gap: 16px; align-items: start; }
     @media (min-width: 900px) { .two-col { grid-template-columns: minmax(0,1fr) minmax(0,1fr); } }
     .two-col > * { min-width: 0; }
@@ -113,6 +127,7 @@
     <div class="wrap topbar-row">
       <a class="logo" href="index.html" aria-label="Bubble5 home"><span class="logo-mark" aria-hidden="true">5</span>Bubble5</a>
       <nav class="topbar-links" aria-label="Site">
+        <a href="#/live" id="liveLink" hidden>Live chat <span class="pillbadge" id="liveBadge" hidden>0</span></a>
         <a href="help.html">Help</a>
         <a href="index.html" class="hide-sm">Website</a>
         <button type="button" class="link-btn" id="logoutBtn" hidden>Log out</button>
@@ -212,10 +227,11 @@
   }
 
   async function route() {
+    clearInterval(liveTimer);
     const { name, params } = parseRoute();
     const authed = !!getToken();
     if (!authed) {
-      tabbar.hidden = true; logoutBtn.hidden = true; state.me = null;
+      tabbar.hidden = true; logoutBtn.hidden = true; state.me = null; stopUnread();
       if (name === "forgot") return renderForgot();
       if (name === "reset") return renderReset(params.get("token") || "");
       return renderAuth(name === "signup" ? "signup" : "login", params);
@@ -227,7 +243,8 @@
       try { state.me = await api("GET", "/me"); }
       catch (e) { if (e.status === 401) return; return renderError(e.message); }
     }
-    const views = { dashboard: renderDashboard, knowledge: renderKnowledge, chatbot: renderChatbot, inbox: renderInbox, billing: renderBilling, settings: renderSettings };
+    startUnread();
+    const views = { dashboard: renderDashboard, knowledge: renderKnowledge, chatbot: renderChatbot, inbox: renderInbox, live: renderLive, billing: renderBilling, settings: renderSettings };
     const view = views[name];
     if (!view) { location.hash = "#/dashboard"; return; }
     renderShell(name);
@@ -243,7 +260,7 @@
   function renderError(msg) { root.innerHTML = '<div class="wrap" style="padding-top:28px">' + notice("err", esc(msg)) + '<button class="btn btn-primary" id="retry">Try again</button></div>'; document.getElementById("retry").onclick = route; }
 
   function renderShell(active) {
-    const links = [["dashboard", "Dashboard"], ["knowledge", "Knowledge base"], ["chatbot", "Your chatbot"], ["inbox", "Inbox"], ["billing", "Billing"], ["settings", "Account settings"]];
+    const links = [["dashboard", "Dashboard"], ["knowledge", "Knowledge base"], ["chatbot", "Your chatbot"], ["inbox", "Inbox"], ...(state.me && state.me.admin ? [["live", "Live chat"]] : []), ["billing", "Billing"], ["settings", "Account settings"]];
     root.innerHTML = `<div class="wrap shell">
       <aside class="side" aria-label="Portal">${links.map(([r, t]) => `<a href="#/${r}" ${r === active ? 'aria-current="page"' : ""}>${t}</a>`).join("")}
         <a href="help.html">Help and diagnostics</a></aside>
@@ -581,6 +598,76 @@
         ${conv.unanswered.length ? `<ul class="doc-list">${conv.unanswered.map((u) => `<li class="doc"><div class="doc-main"><div class="doc-title">${esc(u.question)}</div><div class="muted small">asked ${u.n} time${u.n === 1 ? "" : "s"}</div></div><div class="doc-actions"><a class="btn btn-outline btn-small" href="#/knowledge">Add answer</a></div></li>`).join("")}</ul>` : '<div class="empty"><p>Nothing unanswered. Nice.</p></div>'}</div>
       <div class="card"><h2>Recent conversations</h2>${conv.conversations.length ? conv.conversations.map((c) => `<details class="conv"><summary>${esc(c.messages[0].content.slice(0, 70))} <span class="muted small">&middot; ${esc(fmtDate(c.last))}${c.unanswered ? " &middot; needs attention" : ""}</span></summary>
         ${c.messages.map((m) => `<div class="tm ${m.role === "user" ? "u" : "a"}${m.unanswered ? " flag" : ""}">${esc(m.content)}</div>`).join("")}</details>`).join("") : '<div class="empty"><p>No conversations yet. Try the chatbot, or add it to your website.</p></div>'}</div>`;
+  }
+
+
+  /* ---------- live chat (owner only) ---------- */
+  let liveTimer = null, unreadTimer = null;
+  function ago(iso) {
+    if (!iso) return "";
+    const d = new Date(iso.replace(" ", "T") + "Z"); const sec = Math.max(0, (Date.now() - d) / 1000);
+    if (sec < 60) return "just now"; if (sec < 3600) return Math.floor(sec / 60) + " min ago"; if (sec < 86400) return Math.floor(sec / 3600) + " h ago";
+    return fmtDate(iso);
+  }
+  function setUnread(n) {
+    const b = document.getElementById("liveBadge"); if (!b) return;
+    b.textContent = n; b.hidden = !n;
+    document.title = document.title.replace(/^\(\d+\) /, "");
+    if (n) document.title = "(" + n + ") " + document.title;
+  }
+  async function pollUnread() {
+    try { const d = await api("GET", "/admin/live"); setUnread(d.unread); } catch (e) { /* ignore */ }
+  }
+  function startUnread() {
+    const link = document.getElementById("liveLink");
+    if (!state.me || !state.me.admin) { if (link) link.hidden = true; return; }
+    link.hidden = false;
+    if (!unreadTimer) { pollUnread(); unreadTimer = setInterval(pollUnread, 15000); }
+  }
+  function stopUnread() { clearInterval(unreadTimer); unreadTimer = null; const l = document.getElementById("liveLink"); if (l) l.hidden = true; setUnread(0); }
+
+  async function renderLive(el, params) {
+    if (!state.me.admin) { el.innerHTML = notice("err", "This page is for the Bubble5 owner."); return; }
+    const sel = Number(params.get("c")) || 0;
+    el.innerHTML = `<h1>Live chat</h1><p class="lead">Messages from visitors on your website. You show as online while this page or the portal is open.</p>
+      <div class="live-grid ${sel ? "has-thread" : ""}"><div class="card" id="liveList"></div><div class="card" id="liveThread"></div></div>`;
+    const listEl = document.getElementById("liveList"), thEl = document.getElementById("liveThread");
+    let lastMsg = 0, built = false;
+
+    async function refreshList() {
+      const d = await api("GET", "/admin/live"); setUnread(sel ? 0 : d.unread);
+      listEl.innerHTML = `<h2>Conversations</h2>` + (d.chats.length ? d.chats.map((c) => `<button class="lchat" data-id="${c.id}" ${c.id === sel ? 'aria-current="true"' : ""}>
+        <div class="top"><span>${c.here ? '<span class="here" title="On the site now"></span>' : ""}${esc(c.name || c.email || "Visitor")}</span>${c.unread_admin ? `<span class="pillbadge">${c.unread_admin}</span>` : `<span class="muted small">${esc(ago(c.last_message_at))}</span>`}</div>
+        <div class="snip">${c.last_sender === "agent" ? "You: " : ""}${esc(c.last_body || "")}${c.status === "closed" ? " (closed)" : ""}</div></button>`).join("") : '<div class="empty"><p>No chats yet. When someone uses the Chat with us bubble on your website, it shows up here and you get an email.</p></div>');
+      listEl.querySelectorAll(".lchat").forEach((b) => b.onclick = () => { location.hash = "#/live?c=" + b.dataset.id; });
+    }
+    async function refreshThread() {
+      if (!sel) { thEl.innerHTML = '<div class="empty"><p>Pick a conversation.</p></div>'; return; }
+      const d = await api("GET", "/admin/live/" + sel + "?after=" + lastMsg);
+      if (!built) {
+        built = true;
+        thEl.innerHTML = `<a class="small" href="#/live" style="display:inline-block;margin-bottom:8px">&larr; All conversations</a>
+          <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><div><h2 id="lhead"></h2><div class="muted small" id="lsub"></div></div><button class="btn btn-outline btn-small" id="lclose">Close chat</button></div>
+          <div class="lthread" id="lmsgs" aria-live="polite"></div>
+          <form class="lform" id="lform"><textarea id="lbody" rows="1" maxlength="1000" placeholder="Type your reply" aria-label="Your reply"></textarea><button class="btn btn-primary" type="submit">Send</button></form><div id="lmsg" style="margin-top:8px"></div>`;
+        document.getElementById("lclose").onclick = async () => { await api("POST", "/admin/live/" + sel + "/close"); location.hash = "#/live"; };
+        const ta = document.getElementById("lbody");
+        ta.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); document.getElementById("lform").requestSubmit(); } });
+        document.getElementById("lform").addEventListener("submit", async (e) => {
+          e.preventDefault(); const t = ta.value.trim(); if (!t) return; ta.value = "";
+          try { const out = await api("POST", "/admin/live/" + sel, { message: t }); document.getElementById("lmsg").innerHTML = out.emailed ? notice("info", "They are not on the site, so we also emailed your reply.") : ""; await refreshThread(); refreshList(); }
+          catch (err) { ta.value = t; document.getElementById("lmsg").innerHTML = notice("err", esc(err.message)); }
+        });
+        ta.focus();
+      }
+      document.getElementById("lhead").innerHTML = esc(d.chat.name || "Visitor");
+      document.getElementById("lsub").innerHTML = (d.chat.email ? `<a href="mailto:${esc(d.chat.email)}">${esc(d.chat.email)}</a> &middot; ` : "") + (d.chat.here ? "on the site now" : "not on the site") + (d.chat.status === "closed" ? " &middot; closed" : "");
+      const box = document.getElementById("lmsgs"); const stick = box.scrollTop + box.clientHeight >= box.scrollHeight - 40;
+      d.messages.forEach((m) => { lastMsg = Math.max(lastMsg, m.id); const div = document.createElement("div"); div.className = "tm " + (m.sender === "agent" ? "u" : "a"); div.textContent = m.body; box.appendChild(div); });
+      if (stick || d.messages.length && lastMsg === d.messages[d.messages.length - 1].id) box.scrollTop = box.scrollHeight;
+    }
+    await Promise.all([refreshList(), refreshThread()]);
+    liveTimer = setInterval(() => { refreshList().catch(() => {}); refreshThread().catch(() => {}); }, 4000);
   }
 
   /* ---------- billing ---------- */

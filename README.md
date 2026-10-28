@@ -47,3 +47,10 @@ The Worker also serves the website, so attaching `bubble5.online` to the Worker 
 - Password reset by email needs `RESEND_API_KEY` (and a verified `FROM_EMAIL`). Without it the page tells people to contact you.
 - Give someone a plan by hand (before Stripe is set up): `curl -X POST https://<worker-url>/admin/plan -H "X-Admin-Token: <ADMIN_TOKEN>" -H "Content-Type: application/json" -d '{"email":"them@example.com","plan":"starter"}'`
 - After pulling, re-run `schema.sql` on the database (safe to repeat).
+
+## Live chat (visitors talk to you)
+
+- The "Chat with us" bubble is `assets/live.js` (included on `index.html` and `help.html`). Messages go to the same Worker and D1 database, no extra Worker needed.
+- You reply from the portal: sign up at `app.html` using the same email as `NOTIFY_EMAIL` (or list emails in `ADMIN_EMAILS`) and a **Live chat** link appears in the header. You show as "online" for visitors while the portal is open in a browser tab.
+- New visitor messages are emailed to `NOTIFY_EMAIL` (needs `RESEND_API_KEY`). If a visitor has left the site and gave an email, your reply is also emailed to them.
+- Re-run `schema.sql` on the database after pulling (safe to repeat).

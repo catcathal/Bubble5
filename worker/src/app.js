@@ -4,6 +4,7 @@
 import { PLANS } from "./plans.js";
 import { botGet, botUpdate, botConversations, botLeads, botDeleteData } from "./bot.js";
 import { sendEmail } from "./mail.js";
+import { isAdmin, adminList, adminThread, adminReply, adminClose } from "./live.js";
 
 const enc = new TextEncoder();
 export { PLANS };
@@ -228,6 +229,7 @@ async function overview(env, user, cors) {
       kb: { count: docs ? docs.n : 0, limit: plan.docs, max_chars: MAX_DOC_CHARS },
       billing_ready: !!env.STRIPE_SECRET_KEY,
       email_ready: !!env.RESEND_API_KEY,
+      admin: isAdmin(env, user),
     },
     200,
     cors
@@ -634,7 +636,7 @@ export async function handleApp(request, env, url, cors, ctx) {
   if (path === "/admin/plan" && method === "POST" && env.DB) return adminSetPlan(request, env, cors);
 
   const isAccountRoute =
-    path.startsWith("/auth/") || path === "/me" || path.startsWith("/me/") || path.startsWith("/kb") || path.startsWith("/billing") || path.startsWith("/bot");
+    path.startsWith("/auth/") || path === "/me" || path.startsWith("/me/") || path.startsWith("/kb") || path.startsWith("/billing") || path.startsWith("/bot") || path.startsWith("/admin/live");
   if (!isAccountRoute) return null;
   if (!env.DB) return fail("The account service is not available.", 503, cors);
 
@@ -660,6 +662,15 @@ export async function handleApp(request, env, url, cors, ctx) {
     const m = path.match(/^\/kb\/(\d+)$/);
     if (m && method === "PUT") return await kbSave(request, env, user, cors, Number(m[1]));
     if (m && method === "DELETE") return await kbDelete(env, user, cors, Number(m[1]));
+
+    if (path.startsWith("/admin/live")) {
+      if (!isAdmin(env, user)) return fail("Not allowed.", 403, cors);
+      if (path === "/admin/live" && method === "GET") return await adminList(env, cors);
+      const lm = path.match(/^\/admin\/live\/(\d+)(\/close)?$/);
+      if (lm && !lm[2] && method === "GET") return await adminThread(env, Number(lm[1]), Number(url.searchParams.get("after")) || 0, cors);
+      if (lm && !lm[2] && method === "POST") return await adminReply(request, env, ctx, Number(lm[1]), cors);
+      if (lm && lm[2] && method === "POST") return await adminClose(env, Number(lm[1]), cors);
+    }
 
     if (path === "/bot" && method === "GET") return await botGet(env, user, cors);
     if (path === "/bot" && method === "PATCH") return await botUpdate(request, env, user, cors);

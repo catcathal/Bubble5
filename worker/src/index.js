@@ -1,6 +1,7 @@
 import { DEMO_DOCS } from "./kb.js";
 import { handleApp, turnstileOk } from "./app.js";
 import { handlePublicBot } from "./bot.js";
+import { handleLivePublic } from "./live.js";
 
 const SYSTEM_PROMPT = `You are the Bubble5 demo assistant, answering as the website assistant for Maple & Co. Bakery, a fictional business used to show prospects what a Bubble5 chatbot can do.
 Answer ONLY from the provided context. Be warm, a little playful, concise (1 to 4 sentences), and specific.
@@ -231,6 +232,9 @@ export default {
         return json({ error: "The demo assistant is unavailable right now." }, 502, cors);
       }
     }
+
+    const liveResponse = await handleLivePublic(request, env, url, cors, ctx);
+    if (liveResponse) return liveResponse;
 
     const appResponse = await handleApp(request, env, url, cors, ctx);
     if (appResponse) return appResponse;

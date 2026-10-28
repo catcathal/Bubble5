@@ -390,6 +390,42 @@
         <a class="btn btn-outline" href="help.html">Diagnose a problem</a></div>`;
   }
 
+
+  /* ---------- file reading helpers ---------- */
+  function splitText(text, max) {
+    text = String(text || "").trim();
+    if (text.length <= max) return [text];
+    const parts = []; let buf = "";
+    for (const para of text.split(/\n{2,}/)) {
+      let p = para;
+      while (p.length > max) { if (buf) { parts.push(buf); buf = ""; } parts.push(p.slice(0, max)); p = p.slice(max); }
+      if ((buf ? buf.length + 2 : 0) + p.length > max) { parts.push(buf); buf = p; } else buf = buf ? buf + "\n\n" + p : p;
+    }
+    if (buf) parts.push(buf);
+    return parts.filter((x) => x.trim());
+  }
+  const PDFJS_VER = "6.2.108";
+  let pdfjsPromise = null;
+  function loadPdfjs() {
+    if (!pdfjsPromise) pdfjsPromise = import("https://cdn.jsdelivr.net/npm/pdfjs-dist@" + PDFJS_VER + "/build/pdf.min.mjs").then((m) => {
+      m.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@" + PDFJS_VER + "/build/pdf.worker.min.mjs"; return m;
+    });
+    return pdfjsPromise;
+  }
+  async function pdfToText(file) {
+    const pdfjs = await loadPdfjs();
+    const pdf = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+    const pages = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const content = await (await pdf.getPage(i)).getTextContent();
+      let line = "", out = "";
+      for (const it of content.items) { line += it.str; if (it.hasEOL) { out += line.trim() + "\n"; line = ""; } else if (it.str && !/\s$/.test(it.str)) line += " "; }
+      out += line.trim();
+      pages.push(out.replace(/[ \t]+/g, " ").trim());
+    }
+    return pages.filter(Boolean).join("\n\n");
+  }
+
   /* ---------- knowledge base ---------- */
   async function renderKnowledge(el) {
     const data = await api("GET", "/kb");
@@ -413,19 +449,43 @@
       const ed = document.getElementById("editor");
       ed.innerHTML = `<form class="card" id="docForm"><h2>${doc ? "Edit document" : "New document"}</h2>
         <div class="form-group"><label for="dTitle">Title</label><input id="dTitle" maxlength="120" placeholder="Opening hours" value="${esc(doc ? doc.title : "")}" required></div>
+        ${doc ? "" : `<div class="form-group"><label for="dFile">Upload a PDF or text file <span class="muted">(optional)</span></label><input id="dFile" type="file" accept=".pdf,.txt,.md,.csv,application/pdf,text/plain" style="padding:10px"><p class="hint" id="fileNote">We read the text from the file in your browser. Nothing is sent until you press Save.</p></div>`}
         <div class="form-group"><label for="dBody">What should the chatbot know?</label><textarea id="dBody" placeholder="Monday to Friday 9am to 6pm. Closed on public holidays." required>${esc(doc ? doc.content : "")}</textarea>
-          <p class="hint"><span id="count">0</span> / ${data.max_chars.toLocaleString()} characters</p></div>
+          <p class="hint"><span id="count">0</span> / ${data.max_chars.toLocaleString()} characters <span id="splitNote"></span></p></div>
         <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" type="submit">Save document</button><button class="btn btn-outline" type="button" id="cancelDoc">Cancel</button></div></form>`;
       const body = document.getElementById("dBody"), count = document.getElementById("count");
-      const upd = () => { count.textContent = body.value.length.toLocaleString(); }; upd(); body.addEventListener("input", upd);
+      const splitNote = document.getElementById("splitNote");
+      const upd = () => {
+        count.textContent = body.value.length.toLocaleString();
+        const n = doc ? 1 : splitText(body.value, data.max_chars).length;
+        splitNote.textContent = n > 1 ? `. Too long for one document, so it will be saved as ${n} documents.` : "";
+      }; upd(); body.addEventListener("input", upd);
+      const fileIn = document.getElementById("dFile");
+      if (fileIn) fileIn.addEventListener("change", async () => {
+        const f = fileIn.files[0]; const note = document.getElementById("fileNote"); if (!f) return;
+        if (f.size > 15 * 1024 * 1024) { note.textContent = "That file is over 15 MB. Try a smaller one."; return; }
+        note.textContent = "Reading " + f.name + "\u2026";
+        try {
+          const text = /\.pdf$/i.test(f.name) || f.type === "application/pdf" ? await pdfToText(f) : await f.text();
+          if (!text.trim()) { note.textContent = "No text found. If this is a scanned PDF (a photo of pages), it needs to be converted to text first."; return; }
+          body.value = text; upd();
+          const t = document.getElementById("dTitle"); if (!t.value.trim()) t.value = f.name.replace(/\.[^.]+$/, "").slice(0, 120);
+          note.textContent = "Loaded " + text.length.toLocaleString() + " characters. Check it looks right, then save.";
+        } catch (err) { note.textContent = "Could not read that file. Try another, or paste the text instead."; }
+      });
       document.getElementById("dTitle").focus();
       document.getElementById("cancelDoc").onclick = () => { ed.innerHTML = ""; };
       document.getElementById("docForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const btn = e.target.querySelector("button[type=submit]"); btn.disabled = true;
         try {
-          const payload = { title: document.getElementById("dTitle").value, content: body.value };
-          if (doc) await api("PUT", "/kb/" + doc.id, payload); else await api("POST", "/kb", payload);
+          const title = document.getElementById("dTitle").value;
+          if (doc) await api("PUT", "/kb/" + doc.id, { title, content: body.value });
+          else {
+            const parts = splitText(body.value, data.max_chars);
+            if (parts.length > 1 && data.docs.length + parts.length > data.limit) throw new Error(`This would make ${parts.length} documents, but your plan has room for ${Math.max(0, data.limit - data.docs.length)} more. Shorten the text or change plan.`);
+            for (let i = 0; i < parts.length; i++) await api("POST", "/kb", { title: parts.length > 1 ? `${title} (${i + 1}/${parts.length})` : title, content: parts[i] });
+          }
           await route();
         } catch (err) { msg.innerHTML = notice("err", esc(err.message)); btn.disabled = false; window.scrollTo(0, 0); }
       });

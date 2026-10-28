@@ -113,7 +113,7 @@
         .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
         .then(function (res) {
           wait.remove();
-          if (res.ok) { add("assistant", res.j.answer); history.push({ role: "assistant", content: res.j.answer }); if (res.j.handoff) leadForm(); }
+          if (res.ok) { add("assistant", res.j.answer); history.push({ role: "assistant", content: res.j.answer }); if (res.j.handoff && !log.querySelector(".lead")) leadForm(); }
           else { add("assistant", res.j.message || res.j.error || "Sorry, something went wrong."); history.pop(); }
         })
         .catch(function () { wait.remove(); add("assistant", "Sorry, I could not reach the assistant. Please try again."); history.pop(); })

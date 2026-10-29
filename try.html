@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bubble5 | Try a chatbot for your business</title>
+  <meta name="description" content="Paste your business info and chat with your own AI assistant in seconds. No sign-up needed.">
+  <meta name="theme-color" content="#0E7C7B">
+  <meta property="og:title" content="Try a Bubble5 chatbot on your own business">
+  <meta property="og:image" content="https://bubble5.online/assets/brand/cover.png">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 170 170'%3E%3Cg fill='%230E7C7B'%3E%3Ccircle cx='85' cy='80' r='76'/%3E%3Cpath d='M36 124L14 164l54-14z'/%3E%3C/g%3E%3Ctext x='85' y='112' font-size='92' font-weight='800' text-anchor='middle' fill='%23FFC53D' font-family='Arial,sans-serif'%3E5%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/portal.css">
+  <style>
+    .hero { background: var(--mist); border-bottom: 1px solid var(--line); padding: 36px 0 30px; }
+    .hero p { margin-top: 10px; color: var(--ink-soft); max-width: 58ch; }
+    .section { padding: 28px 0 60px; }
+    .starters { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 18px; }
+    .starter { border: 1.5px solid var(--line); background: #fff; border-radius: 999px; padding: 9px 16px; font: 600 .98rem var(--body); color: var(--ink); cursor: pointer; }
+    .starter:hover { border-color: var(--lagoon); }
+    .starter[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .setup-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .row2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    @media (min-width: 700px) { .row2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+    .demo { display: none; }
+    .demo.on { display: block; }
+    .chatcard { background: #fff; border: 2px solid var(--ink); border-radius: 22px; box-shadow: 6px 6px 0 var(--ink); overflow: hidden; max-width: 760px; margin: 0 auto; }
+    .chathead { background: var(--ink); color: #fff; padding: 14px 18px; display: flex; align-items: center; gap: 12px; }
+    .chathead .av { width: 38px; height: 38px; border-radius: 50%; background: var(--lagoon); color: var(--sun); display: grid; place-items: center; font: 800 1.1rem var(--display); flex: none; }
+    .chathead b { display: block; font-size: 1.02rem; }
+    .chathead small { opacity: .85; font-size: .85rem; }
+    .chathead .left { margin-left: auto; font-size: .82rem; opacity: .85; white-space: nowrap; }
+    .tlog { height: min(52vh, 460px); min-height: 280px; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; background: var(--mist); }
+    .tm { max-width: 86%; padding: 10px 14px; border-radius: 18px; font-size: 1rem; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
+    .tm.a { background: #fff; border: 1px solid var(--line); border-bottom-left-radius: 6px; align-self: flex-start; }
+    .tm.u { background: var(--lagoon); color: #fff; border-bottom-right-radius: 6px; align-self: flex-end; }
+    .tm.n { align-self: stretch; max-width: 100%; background: var(--warn-bg); color: var(--warn); border-radius: 12px; font-size: .92rem; }
+    .src { align-self: flex-start; max-width: 86%; margin: -4px 0 0 4px; font-size: .84rem; color: var(--ink-soft); }
+    .src summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--lagoon-dark); }
+    .src summary::-webkit-details-marker { display: none; }
+    .src blockquote { margin-top: 6px; padding: 8px 12px; border-left: 3px solid var(--sun); background: #fff; border-radius: 0 10px 10px 0; font-style: italic; }
+    .dots span { display: inline-block; width: 8px; height: 8px; margin: 0 2px; border-radius: 50%; background: #9aa; animation: bn 1.2s infinite; }
+    .dots span:nth-child(2) { animation-delay: .15s; } .dots span:nth-child(3) { animation-delay: .3s; }
+    @keyframes bn { 0%,60%,100% { transform: translateY(0); opacity: .5; } 30% { transform: translateY(-4px); opacity: 1; } }
+    .tchips { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px; background: #fff; border-top: 1px solid var(--line); }
+    .tchips button { border: 1.5px solid var(--line); background: #fff; border-radius: 999px; padding: 7px 13px; font: 500 .92rem var(--body); cursor: pointer; color: var(--ink); }
+    .tchips button:hover { border-color: var(--lagoon); }
+    .tform { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--line); background: #fff; }
+    .tform input { flex: 1; min-width: 0; min-height: 48px; padding: 0 16px; border: 1.5px solid var(--line); border-radius: 999px; font: 1rem var(--body); color: var(--ink); }
+    .cta { max-width: 760px; margin: 22px auto 0; background: var(--ink); color: #fff; border-radius: 18px; padding: 20px; display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+    .cta b { font: 700 1.15rem var(--display); display: block; }
+    .cta span { opacity: .85; font-size: .95rem; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; max-width: 760px; margin: 0 auto 14px; }
+    @media (prefers-reduced-motion: reduce) { .dots span { animation: none; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-row">
+      <a class="logo" href="index.html" aria-label="Bubble5 home"><span class="logo-mark" aria-hidden="true">5</span>Bubble5</a>
+      <nav class="topbar-links" aria-label="Site">
+        <a href="index.html#pricing">Pricing</a>
+        <a href="app.html#/login">Business login</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="wrap">
+      <h1>Try a chatbot built for your business</h1>
+      <p>Pick an example or paste your own opening hours, prices and FAQs. In a few seconds you can chat with an assistant that only answers from what you gave it. No sign-up.</p>
+    </div>
+  </div>
+
+  <main class="section">
+    <div class="wrap">
+      <section id="setup" aria-label="Set up your test chatbot">
+        <h2>1. Choose your business</h2>
+        <div class="starters" id="starters" role="group" aria-label="Examples"></div>
+        <div id="msg"></div>
+        <form class="card setup-grid" id="setupForm" novalidate>
+          <div class="row2">
+            <div class="form-group" style="margin:0"><label for="biz">Business name</label><input id="biz" maxlength="80" placeholder="Maple Salon"></div>
+            <div class="form-group" style="margin:0"><label for="tone">Tone of voice</label>
+              <select id="tone"><option value="friendly">Friendly</option><option value="professional">Professional</option><option value="playful">Playful</option></select></div>
+          </div>
+          <div class="form-group" style="margin:0"><label for="info">What should your chatbot know?</label>
+            <textarea id="info" maxlength="12000" placeholder="Opening hours, prices, location, policies, popular questions..."></textarea>
+            <p class="hint"><span id="cnt">0</span> / 12,000 characters. Or <label for="pdf" style="display:inline;font-weight:600;color:var(--lagoon-dark);text-decoration:underline;cursor:pointer">upload a PDF or text file</label><input id="pdf" type="file" accept=".pdf,.txt,.md,.csv,application/pdf,text/plain" style="position:absolute;left:-9999px"> <span id="fileNote"></span></p></div>
+          <div><button class="btn btn-primary" type="submit" id="startBtn">Start chatting</button></div>
+        </form>
+      </section>
+
+      <section class="demo" id="demo" aria-label="Your test chatbot">
+        <h2 style="max-width:760px;margin:0 auto 12px">2. Chat with it</h2>
+        <div class="actions"><button class="btn btn-outline btn-small" id="editBtn" type="button">&larr; Change the info</button></div>
+        <div class="chatcard">
+          <div class="chathead"><div class="av" aria-hidden="true">B</div><div><b id="botName">Assistant</b><small>Answers only from your information</small></div><div class="left" id="left"></div></div>
+          <div class="tlog" id="tlog" aria-live="polite"></div>
+          <div class="tchips" id="tchips"></div>
+          <form class="tform" id="tform"><input id="tin" maxlength="500" placeholder="Ask a question" aria-label="Your question" autocomplete="off"><button class="btn btn-primary" type="submit" id="tsend">Send</button></form>
+        </div>
+        <div class="cta"><div><b>Like it? Put it on your website.</b><span>Free trial with 50 chats. No card needed.</span></div>
+          <a class="btn btn-sun" href="app.html#/signup">Create free account</a></div>
+      </section>
+    </div>
+  </main>
+
+<script>
+(function () {
+  "use strict";
+  const API = "https://bubble5.mlgcostello.workers.dev";
+  const $ = (id) => document.getElementById(id);
+  const STARTERS = {
+    "Hair salon": { biz: "Maple Salon", info: "Maple Salon is a friendly neighbourhood hair salon at 12 Garden Street.\n\nOpening hours: Tuesday to Saturday 9am to 6pm. Thursday we stay open until 8pm. Closed Sunday and Monday.\n\nPrices: women's cut and blow dry $55, men's cut $35, children under 12 $25, colour from $90, highlights from $120, treatments from $30. Prices depend on hair length and thickness.\n\nBooking: book online or call 555 0142. Walk-ins are welcome when we have space, but booking is best on Saturdays. Please give 24 hours notice to cancel or we may charge half the price.\n\nWe use organic products and are vegan friendly. Free parking behind the building. Gift cards available." },
+    "Cafe": { biz: "Corner Cafe", info: "Corner Cafe serves coffee, breakfast and lunch at 4 Market Square.\n\nHours: Monday to Friday 7am to 4pm, Saturday and Sunday 8am to 3pm. Closed on public holidays.\n\nMenu highlights: flat white $4, cappuccino $4, iced latte $5, avocado toast $9, big breakfast $14, soup of the day $8, chicken sandwich $11. Oat, almond and soy milk are available for 50 cents extra.\n\nWe have vegetarian, vegan and gluten free options. We cannot guarantee nut free because our kitchen handles nuts.\n\nWe do not take bookings except for groups of 8 or more. Dogs are welcome on the patio. Free wifi. Catering orders need 48 hours notice." },
+    "Gym": { biz: "Pulse Fitness", info: "Pulse Fitness is a gym and studio at 88 River Road.\n\nOpen 5am to 11pm every day, staffed 7am to 8pm.\n\nMembership: standard $39 a month, premium $59 a month (includes classes and sauna), student $29 a month with ID, day pass $12. No joining fee. Cancel any time with 30 days notice.\n\nClasses: yoga, spin, HIIT, boxing and pilates, more than 40 classes a week. Book in the app. Free first class for new members.\n\nPersonal training from $60 an hour. Showers, lockers and towel service. Free parking for members. Children under 16 must be accompanied by an adult." },
+    "Dental clinic": { biz: "Bright Smile Dental", info: "Bright Smile Dental is a family dental clinic at 3 Park Lane.\n\nHours: Monday to Friday 8am to 5pm, Saturday 9am to 1pm. Emergency appointments same day if you call before 10am on 555 0199.\n\nServices: check-up and clean $95, white filling from $140, teeth whitening $350, crowns from $900, children's check-up $60. We accept most insurance and can give a price estimate before treatment.\n\nNew patients are welcome. Your first visit takes about an hour, so please arrive 10 minutes early and bring your insurance card. We offer payment plans over 6 or 12 months.\n\nWe are wheelchair accessible. If you are nervous, tell us and we will go slowly." },
+    "Online shop": { biz: "Willow Home", info: "Willow Home sells candles, ceramics and home decor online.\n\nShipping: free over $60, otherwise $6. Orders ship within 2 business days. Standard delivery takes 3 to 6 business days. We ship to the US, Canada and the UK. International orders can take up to 14 days and customers pay any customs fees.\n\nReturns: 30 days from delivery for unused items in their original packaging. We refund to your original payment method within 5 business days of receiving the return. Return shipping is paid by the customer unless the item was faulty.\n\nCandles are hand poured with soy wax and burn for about 40 hours. Ceramics are dishwasher safe but we recommend hand washing. Contact us at help@willowhome.example. We reply within 1 business day." }
+  };
+  let session = null, hist = [], busy = false;
+
+  /* ---------- starters ---------- */
+  const st = $("starters");
+  Object.keys(STARTERS).forEach((name) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "starter"; b.textContent = name; b.setAttribute("aria-pressed", "false");
+    b.onclick = () => { st.querySelectorAll(".starter").forEach((x) => x.setAttribute("aria-pressed", "false")); b.setAttribute("aria-pressed", "true"); $("biz").value = STARTERS[name].biz; $("info").value = STARTERS[name].info; cnt(); };
+    st.appendChild(b);
+  });
+  const own = document.createElement("button"); own.type = "button"; own.className = "starter"; own.textContent = "Paste my own"; own.setAttribute("aria-pressed", "false");
+  own.onclick = () => { st.querySelectorAll(".starter").forEach((x) => x.setAttribute("aria-pressed", "false")); own.setAttribute("aria-pressed", "true"); $("biz").value = ""; $("info").value = ""; cnt(); $("biz").focus(); };
+  st.appendChild(own);
+  const cnt = () => { $("cnt").textContent = $("info").value.length.toLocaleString(); };
+  $("info").addEventListener("input", cnt); cnt();
+
+  /* ---------- pdf / text upload (read in the browser) ---------- */
+  const PDFJS_VER = "6.2.108"; let pdfjsP = null;
+  const loadPdfjs = () => pdfjsP || (pdfjsP = import("https://cdn.jsdelivr.net/npm/pdfjs-dist@" + PDFJS_VER + "/build/pdf.min.mjs").then((m) => { m.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@" + PDFJS_VER + "/build/pdf.worker.min.mjs"; return m; }));
+  async function pdfToText(file) {
+    const pdfjs = await loadPdfjs();
+    const pdf = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise; const pages = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const c = await (await pdf.getPage(i)).getTextContent(); let line = "", out = "";
+      for (const it of c.items) { line += it.str; if (it.hasEOL) { out += line.trim() + "\n"; line = ""; } else if (it.str && !/\s$/.test(it.str)) line += " "; }
+      pages.push((out + line.trim()).replace(/[ \t]+/g, " ").trim());
+    }
+    return pages.filter(Boolean).join("\n\n");
+  }
+  $("pdf").addEventListener("change", async () => {
+    const f = $("pdf").files[0], note = $("fileNote"); if (!f) return;
+    if (f.size > 15 * 1024 * 1024) { note.textContent = "That file is over 15 MB."; return; }
+    note.textContent = "Reading…";
+    try {
+      const t = /\.pdf$/i.test(f.name) ? await pdfToText(f) : await f.text();
+      if (!t.trim()) { note.textContent = "No text found. Scanned PDFs need converting to text first."; return; }
+      $("info").value = t.slice(0, 12000); if (!$("biz").value) $("biz").value = f.name.replace(/\.[^.]+$/, "").slice(0, 80); cnt();
+      note.textContent = t.length > 12000 ? "Loaded the first 12,000 characters." : "Loaded.";
+    } catch (e) { note.textContent = "Could not read that file. Paste the text instead."; }
+  });
+
+  /* ---------- chat ---------- */
+  const log = $("tlog");
+  function bubble(cls, text) { const d = document.createElement("div"); d.className = "tm " + cls; d.textContent = text; log.appendChild(d); log.scrollTop = log.scrollHeight; return d; }
+  function typeInto(el, text, done) {
+    const words = text.split(/(\s+)/); let i = 0; el.textContent = "";
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = text; return done(); }
+    const t = setInterval(() => { el.textContent += words[i++] || ""; log.scrollTop = log.scrollHeight; if (i >= words.length) { clearInterval(t); done(); } }, 28);
+  }
+  function chips(list) {
+    const box = $("tchips"); box.innerHTML = "";
+    list.forEach((q) => { const b = document.createElement("button"); b.type = "button"; b.textContent = q; b.onclick = () => ask(q); box.appendChild(b); });
+    box.hidden = !list.length;
+  }
+  async function ask(q) {
+    if (busy || !session) return; busy = true; $("tsend").disabled = true; chips([]);
+    bubble("u", q); hist.push({ role: "user", content: q });
+    const w = document.createElement("div"); w.className = "tm a dots"; w.innerHTML = "<span></span><span></span><span></span>"; log.appendChild(w); log.scrollTop = log.scrollHeight;
+    try {
+      const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 40000);
+      const res = await fetch(API + "/try/" + session + "/chat", { method: "POST", headers: { "Content-Type": "application/json" }, signal: ctl.signal, body: JSON.stringify({ messages: hist.slice(-8) }) });
+      clearTimeout(to); const j = await res.json(); w.remove();
+      if (!res.ok) { bubble("n", j.message || j.error || "Something went wrong."); hist.pop(); if (res.status === 402 || res.status === 404) $("tin").disabled = true; }
+      else {
+        const a = bubble("a", ""); hist.push({ role: "assistant", content: j.answer });
+        await new Promise((r) => typeInto(a, j.answer, r));
+        if (j.unanswered) bubble("n", "In a real setup, this question would appear in your Inbox so you can add the answer.");
+        if (j.source) {
+          const d = document.createElement("details"); d.className = "src";
+          const s = document.createElement("summary"); s.textContent = "Where this came from"; const bq = document.createElement("blockquote");
+          bq.textContent = "“" + j.source.text + (j.source.text.length >= 180 ? "…" : "") + "”";
+          d.appendChild(s); d.appendChild(bq); log.appendChild(d); log.scrollTop = log.scrollHeight;
+        }
+        if (typeof j.left === "number") $("left").textContent = j.left + " messages left";
+      }
+    } catch (e) { w.remove(); bubble("n", "Could not reach the chatbot. Check your connection and try again."); hist.pop(); }
+    busy = false; $("tsend").disabled = false; if (!$("tin").disabled) $("tin").focus();
+  }
+  $("tform").addEventListener("submit", (e) => { e.preventDefault(); const q = $("tin").value.trim(); if (q) { $("tin").value = ""; ask(q); } });
+
+  $("setupForm").addEventListener("submit", async (e) => {
+    e.preventDefault(); $("msg").innerHTML = "";
+    const info = $("info").value.trim();
+    if (info.length < 40) { $("msg").innerHTML = '<div class="notice err" role="alert">Add a little more about your business (at least a few lines), or pick an example above.</div>'; return; }
+    const btn = $("startBtn"); btn.disabled = true; btn.textContent = "Setting up…";
+    try {
+      const res = await fetch(API + "/try/start", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ business: $("biz").value, tone: $("tone").value, text: info }) });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error || "Could not start. Please try again.");
+      session = j.key; hist = []; log.innerHTML = ""; $("tin").disabled = false; $("left").textContent = "";
+      $("botName").textContent = ($("biz").value.trim() || "Your") + " assistant";
+      bubble("a", j.greeting); chips(j.suggestions || []);
+      $("demo").classList.add("on"); $("setup").hidden = true; $("demo").scrollIntoView({ behavior: "smooth", block: "start" }); $("tin").focus();
+    } catch (err) { $("msg").innerHTML = '<div class="notice err" role="alert">' + String(err.message).replace(/[<>&]/g, "") + "</div>"; }
+    btn.disabled = false; btn.textContent = "Start chatting";
+  });
+  $("editBtn").onclick = () => { $("demo").classList.remove("on"); $("setup").hidden = false; session = null; window.scrollTo({ top: 0, behavior: "smooth" }); };
+  // Pre-select the first example so there is something to try straight away.
+  st.querySelector(".starter").click();
+})();
+</script>
+</body>
+</html>

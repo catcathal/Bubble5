@@ -10,7 +10,7 @@ const out = join(here, "public");
 
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
-for (const f of ["index.html", "app.html", "help.html"]) {
+for (const f of ["index.html", "app.html", "help.html", "try.html"]) {
   if (!existsSync(join(root, f))) throw new Error("Missing " + f);
   cpSync(join(root, f), join(out, f));
 }

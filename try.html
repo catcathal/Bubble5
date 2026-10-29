@@ -192,6 +192,11 @@
           bq.textContent = "“" + j.source.text + (j.source.text.length >= 180 ? "…" : "") + "”";
           d.appendChild(s); d.appendChild(bq); log.appendChild(d); log.scrollTop = log.scrollHeight;
         }
+        if (j.action === "book") {
+          const d = document.createElement("div"); d.className = "tm n";
+          d.textContent = "\u2728 On your own site, a booking card appears here. The visitor leaves their name, email and preferred time, and you get it by email and in your Inbox.";
+          log.appendChild(d); log.scrollTop = log.scrollHeight;
+        } else chips(j.chips || []);
         if (typeof j.left === "number") $("left").textContent = j.left + " messages left";
       }
     } catch (e) { w.remove(); bubble("n", "Could not reach the chatbot. Check your connection and try again."); hist.pop(); }

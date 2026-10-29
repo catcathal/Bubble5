@@ -116,7 +116,7 @@ async function tryChat(request, env, key) {
       left: MAX_CHATS_PER_SESSION - s.msgs - 1,
     });
   }
-  return json({ answer: r.answer, unanswered: false, source: r.source, left: MAX_CHATS_PER_SESSION - s.msgs - 1 });
+  return json({ answer: r.answer, unanswered: false, source: r.source, chips: r.chips || [], action: r.action || null, left: MAX_CHATS_PER_SESSION - s.msgs - 1 });
 }
 
 async function supportChat(request, env) {

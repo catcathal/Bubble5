@@ -48,7 +48,12 @@
       "button.send{border:0;border-radius:12px;background:" + color + ";color:#fff;padding:0 16px;font-weight:600;cursor:pointer;font-size:14px}button:disabled{opacity:.5;cursor:default}" +
       ".lead{background:#fff;border:1px solid #e6e6ee;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:6px;align-self:stretch}.lead input,.lead textarea{flex:none;width:100%;font-size:14px;padding:8px 10px}" +
       ".lead .ok{color:#177a3c;font-size:14px}.pw{text-align:center;font-size:11px;padding:5px;color:#8a8a9a;background:#fff}.pw a{color:inherit}" +
-      "@media(max-width:480px){.panel{right:0;bottom:0;width:100vw;max-width:100vw;height:100%;max-height:100%;border-radius:0}.fab{right:14px;bottom:14px}}" +
+      ".m{animation:in .22s ease-out}@keyframes in{from{opacity:0;transform:translateY(6px)}}" +
+      ".chips{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-start;max-width:92%}.chips button{border:1.5px solid " + color + ";background:#fff;color:" + color + ";border-radius:999px;padding:6px 12px;font-size:13.5px;font-weight:600;cursor:pointer;transition:background .12s,color .12s}.chips button:hover{background:" + color + ";color:#fff}" +
+      ".online{display:inline-block;width:8px;height:8px;border-radius:50%;background:#4ade80;margin-right:5px;vertical-align:1px}" +
+      ".teaser{position:fixed;right:84px;bottom:28px;max-width:230px;background:#fff;color:#1b1b24;border-radius:16px 16px 4px 16px;padding:11px 30px 11px 14px;font-size:14px;line-height:1.4;box-shadow:0 8px 28px rgba(0,0,0,.22);cursor:pointer;animation:in .3s ease-out}.teaser i{position:absolute;right:6px;top:3px;font-style:normal;font-size:18px;color:#8a8a9a;padding:2px 5px}" +
+      ".book{background:#fff;border:2px solid " + color + ";border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:6px;align-self:stretch}.book b{font-size:14px}.book input,.book textarea{flex:none;width:100%;font-size:14px;padding:8px 10px}" +
+      "@media(max-width:480px){.teaser{right:78px;bottom:22px}.panel{right:0;bottom:0;width:100vw;max-width:100vw;height:100%;max-height:100%;border-radius:0}.fab{right:14px;bottom:14px}}" +
       "@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}";
     root.appendChild(st);
 
@@ -58,7 +63,7 @@
     var panel = el("div", "panel"); panel.setAttribute("role", "dialog"); panel.setAttribute("aria-label", "Chat with " + cfg.name);
     var head = el("header");
     head.appendChild(el("div", "av", (cfg.name || "A").charAt(0).toUpperCase()));
-    var ht = el("div"); ht.appendChild(el("b", null, cfg.name)); ht.appendChild(el("small", null, cfg.business ? "Ask " + cfg.business : "Ask me anything")); head.appendChild(ht);
+    var ht = el("div"); ht.appendChild(el("b", null, cfg.name)); var sm = el("small"); sm.appendChild(el("span", "online")); sm.appendChild(document.createTextNode("Online \u00b7 replies instantly")); ht.appendChild(sm); head.appendChild(ht);
     var close = el("button", "x", "\u00d7"); close.setAttribute("aria-label", "Close chat"); head.appendChild(close);
     var log = el("div", "log"); log.setAttribute("aria-live", "polite");
     var form = el("form");
@@ -69,16 +74,59 @@
     panel.appendChild(head); panel.appendChild(log); panel.appendChild(form); panel.appendChild(pw);
     root.appendChild(panel); root.appendChild(fab);
 
-    function add(role, text) { var m = el("div", "m " + (role === "user" ? "u" : "a"), text); log.appendChild(m); log.scrollTop = log.scrollHeight; return m; }
+    function fmt(m, text) {
+      String(text).split("**").forEach(function (part, i) { if (!part) return; if (i % 2) m.appendChild(el("strong", null, part)); else m.appendChild(document.createTextNode(part)); });
+    }
+    function add(role, text) { var m = el("div", "m " + (role === "user" ? "u" : "a")); fmt(m, text); log.appendChild(m); log.scrollTop = log.scrollHeight; return m; }
+    var chipBox = null;
+    function showChips(list) {
+      if (chipBox) { chipBox.remove(); chipBox = null; }
+      if (!list || !list.length) return;
+      chipBox = el("div", "chips");
+      list.slice(0, 4).forEach(function (q) { var b = el("button", null, q); b.type = "button"; b.onclick = function () { ask(q); }; chipBox.appendChild(b); });
+      log.appendChild(chipBox); log.scrollTop = log.scrollHeight;
+    }
+    function bookCard() {
+      if (log.querySelector(".book")) return;
+      var box = el("div", "book");
+      box.appendChild(el("b", null, "Request a booking"));
+      var n = el("input"); n.placeholder = "Your name"; n.setAttribute("aria-label", "Your name");
+      var e = el("input"); e.type = "email"; e.placeholder = "Email"; e.setAttribute("aria-label", "Your email");
+      var ph = el("input"); ph.type = "tel"; ph.placeholder = "Phone (optional)"; ph.setAttribute("aria-label", "Your phone");
+      var t = el("textarea"); t.rows = 2; t.placeholder = "Preferred day and time, and anything we should know"; t.setAttribute("aria-label", "Preferred day and time");
+      var b = el("button", "send", "Send request"); b.type = "button"; b.style.padding = "10px";
+      var msg = el("div", "ok"); msg.style.color = "#b3261e";
+      b.onclick = function () {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.value)) { msg.textContent = "Please enter a valid email."; return; }
+        b.disabled = true;
+        var body = "BOOKING REQUEST\nWhen: " + (t.value || "not given") + (ph.value ? "\nPhone: " + ph.value : "") + "\nAsked: " + lastQ;
+        fetch(api + "/lead", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: n.value, email: e.value, message: body }) })
+          .then(function (r) { if (!r.ok) throw 0; box.innerHTML = ""; box.appendChild(el("div", "ok", "Request sent! We\u2019ll confirm by email shortly.")); })
+          .catch(function () { b.disabled = false; msg.textContent = "Could not send. Please try again."; });
+      };
+      [n, e, ph, t, b, msg].forEach(function (x) { box.appendChild(x); });
+      log.appendChild(box); log.scrollTop = log.scrollHeight;
+    }
     function save() { store("b5_h_" + key, JSON.stringify(history.slice(-12))); }
     var started = false;
     function open() {
       panel.classList.add("open"); fab.style.display = "none";
-      if (!started) { started = true; add("assistant", cfg.greeting); history.forEach(function (m) { add(m.role, m.content); }); }
+      hideTeaser();
+      if (!started) { started = true; add("assistant", cfg.greeting); history.forEach(function (m) { add(m.role, m.content); }); if (!history.length) showChips(cfg.starters); }
       setTimeout(function () { input.focus(); }, 50);
     }
     function shut() { panel.classList.remove("open"); fab.style.display = ""; fab.focus(); }
     fab.onclick = open; close.onclick = shut;
+    var teaser = null;
+    function hideTeaser() { if (teaser) { teaser.remove(); teaser = null; } store("b5_t_" + key, "1"); }
+    if (!store("b5_t_" + key) && !history.length) {
+      setTimeout(function () {
+        if (panel.classList.contains("open") || store("b5_t_" + key)) return;
+        teaser = el("div", "teaser", "\uD83D\uDC4B Got a question? Ask me, I reply instantly, any time.");
+        var x = el("i", null, "\u00d7"); x.setAttribute("aria-label", "Dismiss"); x.onclick = function (ev) { ev.stopPropagation(); hideTeaser(); }; teaser.appendChild(x);
+        teaser.onclick = open; root.appendChild(teaser);
+      }, 5000);
+    }
     root.addEventListener("keydown", function (e) { if (e.key === "Escape") shut(); });
     if (history.length) { /* returning visitor: keep the button, open on click */ }
 
@@ -102,10 +150,9 @@
     }
 
     var busy = false, lastQ = "";
-    form.onsubmit = function (ev) {
-      ev.preventDefault();
-      var q = input.value.trim(); if (!q || busy) return;
-      input.value = ""; busy = true; send.disabled = true; lastQ = q;
+    function ask(q) {
+      if (!q || busy) return;
+      busy = true; send.disabled = true; lastQ = q; showChips([]);
       add("user", q); history.push({ role: "user", content: q });
       var wait = el("div", "m a dots"); wait.innerHTML = "<span></span><span></span><span></span>"; log.appendChild(wait); log.scrollTop = log.scrollHeight;
       var ctl = new AbortController(); var to = setTimeout(function () { ctl.abort(); }, 40000);
@@ -113,11 +160,16 @@
         .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
         .then(function (res) {
           wait.remove();
-          if (res.ok) { add("assistant", res.j.answer); history.push({ role: "assistant", content: res.j.answer }); if (res.j.handoff && !log.querySelector(".lead")) leadForm(); }
-          else { add("assistant", res.j.message || res.j.error || "Sorry, something went wrong."); history.pop(); }
+          if (res.ok) {
+            add("assistant", res.j.answer); history.push({ role: "assistant", content: res.j.answer });
+            if (res.j.handoff && !log.querySelector(".lead")) leadForm();
+            else if (res.j.action === "book") bookCard();
+            else showChips(res.j.chips);
+          } else { add("assistant", res.j.message || res.j.error || "Sorry, something went wrong."); history.pop(); }
         })
         .catch(function () { wait.remove(); add("assistant", "Sorry, I could not reach the assistant. Please try again."); history.pop(); })
         .then(function () { clearTimeout(to); busy = false; send.disabled = false; save(); input.focus(); });
-    };
+    }
+    form.onsubmit = function (ev) { ev.preventDefault(); var q = input.value.trim(); if (!q) return; input.value = ""; ask(q); };
   }
 })();

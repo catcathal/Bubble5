@@ -104,6 +104,21 @@
     }
 
     /* ---------- Hero with live demo ---------- */
+    .stats { background: var(--ink); color: #fff; padding: 34px 0; }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; text-align: center; }
+    .stat b { display: block; font: 800 clamp(2.2rem, 5vw, 3.2rem)/1 var(--display); color: var(--sun); letter-spacing: -0.03em; }
+    .stat span { display: block; margin-top: 8px; color: #D7E8E5; font-size: .98rem; }
+    .stats-src { margin-top: 18px; text-align: center; font-size: .78rem; color: #9DB9B5; }
+    .stats-src a { color: inherit; }
+    .gain { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+    .gain > div { background: #fff; border: 2px solid var(--ink); border-radius: 18px; padding: 22px; box-shadow: 5px 5px 0 var(--ink); }
+    .gain .ico { display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: var(--sun); font-size: 1.4rem; margin-bottom: 12px; }
+    .gain h3 { font-size: 1.1rem; margin-bottom: 6px; }
+    .gain p { color: var(--ink-soft); font-size: .96rem; }
+    .cta-band { margin-top: 34px; background: var(--mist); border: 2px solid var(--ink); border-radius: 18px; padding: 24px; display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; justify-content: space-between; }
+    .cta-band p { font: 700 1.25rem/1.3 var(--display); max-width: 30ch; }
+    @media (max-width: 900px) { .gain { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 600px) { .stats-grid, .gain { grid-template-columns: minmax(0, 1fr); } .cta-band .btn { flex: 1 1 100%; } }
     .hero { background: var(--mist); padding: 56px 0 72px; border-bottom: 1px solid var(--line); }
     .hero-grid > * { min-width: 0; }
     .hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 56px; align-items: center; }
@@ -289,7 +304,7 @@
   <header class="hero" id="top">
     <div class="wrap hero-grid">
       <div>
-        <h1>A chatbot that answers from your own business info</h1>
+        <h1>Answer customers at 2am. Get your evenings back.</h1>
         <p class="hero-lead">Leave the work to us. We run everything on our backend and give you one snippet to add, so you are up in about 2 minutes. Customers get accurate answers any hour of the day, and you stop answering the same questions twice.</p>
         <div class="hero-actions">
           <a href="app.html#/signup" class="btn btn-primary">Start free</a>
@@ -324,7 +339,37 @@
     </div>
   </header>
 
-  <section id="how" class="section">
+  <section class="stats" aria-label="Why it matters">
+    <div class="wrap">
+      <div class="stats-grid">
+        <div class="stat"><b>38%</b><span>of customer messages arrive in the evening or overnight, when nobody is there to reply</span></div>
+        <div class="stat"><b>60%</b><span>of customers expect an answer within an hour</span></div>
+        <div class="stat"><b>40%</b><span>of after-hours enquiries have already messaged a competitor by the next morning</span></div>
+      </div>
+      <p class="stats-src">Source: <a href="https://chatmaxima.com/blog/when-do-customers-actually-message-we-analysed-100000-conversations-to-find-out/" target="_blank" rel="noopener">ChatMaxima analysis of 100,000+ conversations</a>. Figures vary by business.</p>
+    </div>
+  </section>
+
+  <section id="gain" class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>What you get back</h2>
+        <p>Bubble5 handles the repeat questions, so your time goes to the work only you can do.</p>
+      </div>
+      <div class="gain">
+        <div><span class="ico" aria-hidden="true">&#127769;</span><h3>Your evenings</h3><p>Customers get an instant, friendly answer while you are asleep, off shift or with family.</p></div>
+        <div><span class="ico" aria-hidden="true">&#9201;</span><h3>Hours every week</h3><p>Opening times, prices, delivery, parking. Answer them once and never type them again.</p></div>
+        <div><span class="ico" aria-hidden="true">&#128197;</span><h3>More bookings</h3><p>Visitors can request a booking or quote right in the chat, and it lands in your inbox.</p></div>
+        <div><span class="ico" aria-hidden="true">&#129309;</span><h3>No lost leads</h3><p>When it cannot answer, it takes the visitor's email so you can follow up. Nobody slips away.</p></div>
+      </div>
+      <div class="cta-band">
+        <p>Free to start. Plans from $29 a month.</p>
+        <a href="app.html#/signup" class="btn btn-primary">Start free</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" class="section alt">
     <div class="wrap">
       <div class="section-head">
         <h2>Leave the work to us</h2>

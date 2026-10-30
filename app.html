@@ -545,6 +545,11 @@
         <div class="card"><h2>Try it</h2><p class="muted">This is exactly what your visitors will get.</p>
           <div class="testlog" id="testLog" aria-live="polite"></div>
           <form id="testForm" class="testform"><input id="testIn" placeholder="Ask a question\u2026" aria-label="Test question" maxlength="500" autocomplete="off"><button class="btn btn-primary btn-small" type="submit">Send</button></form></div>
+        <div class="card"><h2>Share a chat link</h2><p class="muted">A page of its own for your chatbot. Send it to customers, put it in your Facebook or Instagram bio, WhatsApp, emails or a QR code. No website needed.</p>
+          <input id="shareLink" readonly value="${esc("https://bubble5.online/chat.html?b=" + bot.public_key)}" style="width:100%;font:.9rem ui-monospace,Menlo,monospace;padding:12px;border:1.5px solid var(--line);border-radius:12px" aria-label="Chat link">
+          <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-outline btn-small" id="copyLink" type="button">Copy link</button>
+          <a class="btn btn-outline btn-small" href="${esc("https://bubble5.online/chat.html?b=" + bot.public_key)}" target="_blank" rel="noopener">Open it</a>
+          <a class="btn btn-outline btn-small" href="https://wa.me/?text=${encodeURIComponent("Questions? Chat with us any time: " + "https://bubble5.online/chat.html?b=" + bot.public_key)}" target="_blank" rel="noopener">Share on WhatsApp</a></div></div>
         <div class="card"><h2>Add it to your website</h2><p class="muted">Paste this just before the closing &lt;/body&gt; tag of every page. Works on WordPress, Wix, Squarespace, Shopify and plain HTML.</p>
           <textarea id="snip" readonly rows="4" style="width:100%;font:.85rem ui-monospace,Menlo,monospace;padding:12px;border:1.5px solid var(--line);border-radius:12px" aria-label="Install code">${esc(snippet)}</textarea>
           <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-outline btn-small" id="copySnip" type="button">Copy code</button>
@@ -565,6 +570,11 @@
       const t = document.getElementById("snip"); t.select();
       try { await navigator.clipboard.writeText(t.value); e.target.textContent = "Copied"; } catch (x) { document.execCommand("copy"); e.target.textContent = "Copied"; }
       setTimeout(() => { e.target.textContent = "Copy code"; }, 2000);
+    };
+    document.getElementById("copyLink").onclick = async (e) => {
+      const t = document.getElementById("shareLink"); t.select();
+      try { await navigator.clipboard.writeText(t.value); } catch (x) { document.execCommand("copy"); }
+      e.target.textContent = "Copied"; setTimeout(() => { e.target.textContent = "Copy link"; }, 2000);
     };
     // test chat (uses the live endpoint, counted as normal chats)
     const log = document.getElementById("testLog"); const hist = [];

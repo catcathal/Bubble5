@@ -227,7 +227,8 @@ async function overview(env, user, cors) {
       user: publicUser(user),
       usage: { chats: usage ? usage.chats : 0, limit: plan.chats },
       kb: { count: docs ? docs.n : 0, limit: plan.docs, max_chars: MAX_DOC_CHARS },
-      billing_ready: !!env.STRIPE_SECRET_KEY,
+      billing_ready: !!env.STRIPE_SECRET_KEY && !!env.STRIPE_PRICES,
+      setup_needed: !!env.STRIPE_SECRET_KEY && !env.STRIPE_PRICES && isAdmin(env, user),
       email_ready: !!env.RESEND_API_KEY,
       admin: isAdmin(env, user),
     },
@@ -387,7 +388,8 @@ async function billingInfo(env, user, cors) {
       status: user.sub_status,
       period_end: user.current_period_end || null,
       has_billing: !!user.stripe_customer_id,
-      billing_ready: !!env.STRIPE_SECRET_KEY,
+      billing_ready: !!env.STRIPE_SECRET_KEY && !!env.STRIPE_PRICES,
+      setup_needed: !!env.STRIPE_SECRET_KEY && !env.STRIPE_PRICES && isAdmin(env, user),
     },
     200,
     cors
@@ -434,6 +436,7 @@ async function billingPortal(request, env, user, cors) {
   try {
     const session = await stripeCall(env, "POST", "/billing_portal/sessions", {
       customer: user.stripe_customer_id,
+      ...(env.STRIPE_PORTAL_CONFIG ? { configuration: env.STRIPE_PORTAL_CONFIG } : {}),
       return_url: `${returnBase(env, b)}#/billing`,
     });
     return reply({ url: session.url }, 200, cors);
@@ -530,6 +533,108 @@ async function stripeWebhook(request, env) {
     await env.DB.prepare("UPDATE users SET sub_status = 'past_due' WHERE stripe_customer_id = ?").bind(obj.customer).run();
   }
   return new Response("ok", { status: 200 });
+}
+
+
+/* ---------- one-click Stripe setup (admin only) ---------- */
+
+const SETUP_PLANS = [
+  { plan: "starter", name: "Bubble5 Starter", monthly: 2900, annual: 27600 },
+  { plan: "pro", name: "Bubble5 Pro", monthly: 7900, annual: 75600 },
+  { plan: "enterprise", name: "Bubble5 Enterprise", monthly: 19900, annual: 190800 },
+];
+
+async function getSettings(env) {
+  const rows = await env.DB.prepare("SELECT key, value FROM settings WHERE key LIKE 'stripe_%'").all();
+  const out = {};
+  for (const r of rows.results || []) out[r.key] = r.value;
+  return out;
+}
+async function putSetting(env, key, value) {
+  await env.DB.prepare("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(key, value).run();
+}
+// Fills in Stripe settings saved by the one-click setup, unless they were provided as Worker variables or secrets.
+async function withStripeSettings(env) {
+  if (!env.DB || !env.STRIPE_SECRET_KEY) return env;
+  try {
+    const st = await getSettings(env);
+    return {
+      ...env,
+      STRIPE_PRICES: env.STRIPE_PRICES || st.stripe_prices || "",
+      STRIPE_WEBHOOK_SECRET: env.STRIPE_WEBHOOK_SECRET || st.stripe_webhook_secret || "",
+      STRIPE_PORTAL_CONFIG: env.STRIPE_PORTAL_CONFIG || st.stripe_portal_config || "",
+    };
+  } catch {
+    return env;
+  }
+}
+
+async function billingSetup(env, user, cors) {
+  if (!env.STRIPE_SECRET_KEY) return fail("Add the STRIPE_SECRET_KEY secret to the Worker first.", 400, cors);
+  const st = await getSettings(env);
+  const prices = st.stripe_prices ? JSON.parse(st.stripe_prices) : {};
+  const products = st.stripe_products ? JSON.parse(st.stripe_products) : {};
+  const log = [];
+  for (const p of SETUP_PLANS) {
+    prices[p.plan] = prices[p.plan] || {};
+    for (const interval of ["monthly", "annual"]) {
+      const lookup = `bubble5_${p.plan}_${interval}`;
+      const found = await stripeCall(env, "GET", "/prices", { "lookup_keys[0]": lookup, active: "true" });
+      let price = found.data && found.data[0];
+      if (!price) {
+        const params = {
+          currency: "usd",
+          unit_amount: String(interval === "monthly" ? p.monthly : p.annual),
+          "recurring[interval]": interval === "monthly" ? "month" : "year",
+          lookup_key: lookup,
+          "metadata[plan]": p.plan,
+        };
+        if (products[p.plan]) params.product = products[p.plan];
+        else params["product_data[name]"] = p.name;
+        price = await stripeCall(env, "POST", "/prices", params);
+        log.push("created " + lookup);
+      }
+      products[p.plan] = typeof price.product === "string" ? price.product : price.product.id;
+      prices[p.plan][interval] = price.id;
+    }
+  }
+  await putSetting(env, "stripe_prices", JSON.stringify(prices));
+  await putSetting(env, "stripe_products", JSON.stringify(products));
+
+  if (!st.stripe_webhook_secret && !env.STRIPE_WEBHOOK_SECRET) {
+    const hook = await stripeCall(env, "POST", "/webhook_endpoints", {
+      url: "https://bubble5.online/stripe-webhook",
+      "enabled_events[0]": "checkout.session.completed",
+      "enabled_events[1]": "customer.subscription.updated",
+      "enabled_events[2]": "customer.subscription.deleted",
+      "enabled_events[3]": "invoice.payment_failed",
+      description: "Bubble5 billing",
+    });
+    await putSetting(env, "stripe_webhook_secret", hook.secret);
+    log.push("created webhook");
+  }
+
+  if (!st.stripe_portal_config) {
+    const params = {
+      "business_profile[headline]": "Manage your Bubble5 plan",
+      "features[invoice_history][enabled]": "true",
+      "features[payment_method_update][enabled]": "true",
+      "features[subscription_cancel][enabled]": "true",
+      "features[subscription_cancel][mode]": "at_period_end",
+      "features[subscription_update][enabled]": "true",
+      "features[subscription_update][default_allowed_updates][0]": "price",
+      "features[subscription_update][proration_behavior]": "create_prorations",
+    };
+    SETUP_PLANS.forEach((p, i) => {
+      params[`features[subscription_update][products][${i}][product]`] = products[p.plan];
+      params[`features[subscription_update][products][${i}][prices][0]`] = prices[p.plan].monthly;
+      params[`features[subscription_update][products][${i}][prices][1]`] = prices[p.plan].annual;
+    });
+    const cfg = await stripeCall(env, "POST", "/billing_portal/configurations", params);
+    await putSetting(env, "stripe_portal_config", cfg.id);
+    log.push("created customer portal");
+  }
+  return reply({ ok: true, done: log.length ? log : ["already set up"] }, 200, cors);
 }
 
 /* ---------- password reset by email ---------- */
@@ -630,6 +735,7 @@ async function health(env, cors) {
 export async function handleApp(request, env, url, cors, ctx) {
   const path = url.pathname;
   const method = request.method;
+  if (path.startsWith("/billing") || path === "/stripe-webhook" || path === "/me") env = await withStripeSettings(env);
 
   if (path === "/stripe-webhook" && method === "POST") return stripeWebhook(request, env);
   if (path === "/health" && method === "GET") return health(env, cors);
@@ -678,6 +784,10 @@ export async function handleApp(request, env, url, cors, ctx) {
     if (path === "/bot/leads" && method === "GET") return await botLeads(env, user, cors);
 
     if (path === "/billing" && method === "GET") return await billingInfo(env, user, cors);
+    if (path === "/billing/setup" && method === "POST") {
+      if (!isAdmin(env, user)) return fail("Not allowed.", 403, cors);
+      return await billingSetup(env, user, cors);
+    }
     if (path === "/billing/checkout" && method === "POST") return await billingCheckout(request, env, user, cors);
     if (path === "/billing/portal" && method === "POST") return await billingPortal(request, env, user, cors);
     if (path === "/billing/invoices" && method === "GET") return await billingInvoices(env, user, cors);

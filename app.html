@@ -720,7 +720,7 @@
       ${checkout === "cancelled" ? notice("info", "Checkout was cancelled. You haven't been charged.") : ""}
       ${bill.status === "past_due" ? notice("warn", "Your last payment failed. Open Manage billing to update your payment method.") : ""}
       ${!bill.billing_ready && !subscribed ? notice("info", `Online payments are still being switched on. To start a plan now, <a href="${supportLink("I'd like to start a Bubble5 plan. Plan: ")}">contact us</a> and we'll set it up by hand.`) : ""}
-      </div>${current}${plans}${inv}`;
+      </div>${bill.setup_needed ? `<div class="card"><h2>Finish billing setup</h2><p class="muted">Your Stripe key is in. One click creates your three plans, the payment webhook and the customer billing portal in Stripe. Safe to press again.</p><button class="btn btn-primary" id="setupBtn" type="button">Set up Stripe billing</button><div id="setupMsg" style="margin-top:10px"></div></div>` : ""}${current}${plans}${inv}`;
 
     const msg = document.getElementById("billMsg");
     const sw = document.getElementById("intervalSwitch");
@@ -737,6 +737,12 @@
       }
     }
     el.querySelectorAll("[data-plan]").forEach((b) => b.onclick = () => go("/billing/checkout", { plan: b.dataset.plan, interval: state.billingInterval }, b, "Opening checkout"));
+    const sb = document.getElementById("setupBtn");
+    if (sb) sb.onclick = async () => {
+      sb.disabled = true; sb.textContent = "Setting up\u2026";
+      try { const r = await api("POST", "/billing/setup", {}); document.getElementById("setupMsg").innerHTML = notice("ok", "Done: " + esc(r.done.join(", ")) + ". Reloading\u2026"); setTimeout(() => location.reload(), 1200); }
+      catch (e) { sb.disabled = false; sb.textContent = "Set up Stripe billing"; document.getElementById("setupMsg").innerHTML = notice("err", esc(e.message)); }
+    };
     const pb = document.getElementById("portalBtn");
     if (pb) pb.onclick = () => go("/billing/portal", {}, pb, "Opening billing portal");
 

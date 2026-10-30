@@ -27,7 +27,11 @@ To demo a prospect's own business, edit the documents in `worker/src/kb.js` (and
 - `help.html` is a public troubleshooting page with a guided diagnosis and live system check (`GET /health` on the Worker).
 - Passwords are hashed with PBKDF2 and never stored in clear text. Login is rate limited.
 
-### Switching on online billing (Stripe)
+### Switching on online billing (Stripe), the quick way
+1. In Stripe, copy your secret key and add it to the Worker as the secret `STRIPE_SECRET_KEY`.
+2. Sign in to the portal as the admin (the `NOTIFY_EMAIL` account), open Billing and press **Set up Stripe billing**. It creates the three plans (monthly and annual), the payment webhook and the customer billing portal, and saves the IDs in the database. Safe to press again.
+
+### Switching on online billing (Stripe), by hand
 1. In Stripe, create products Starter, Pro (and Enterprise if you want) with a monthly and an annual recurring price.
 2. Put the price IDs into `STRIPE_PRICES` in `worker/wrangler.toml` (see the comment there).
 3. Add Worker secrets `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`.

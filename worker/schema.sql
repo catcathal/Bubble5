@@ -153,3 +153,9 @@ CREATE TABLE IF NOT EXISTS rate_hits (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_rate_hits ON rate_hits (key, created_at);
+
+-- Small key/value store for settings the Worker saves itself (for example the Stripe prices created by one-click setup).
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);

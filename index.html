@@ -115,10 +115,36 @@
     .gain .ico { display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: var(--sun); font-size: 1.4rem; margin-bottom: 12px; }
     .gain h3 { font-size: 1.1rem; margin-bottom: 6px; }
     .gain p { color: var(--ink-soft); font-size: .96rem; }
+    .expect { margin-top: 34px; border: 2px dashed var(--ink); border-radius: 18px; padding: 22px 24px 18px; background: #fff; }
+    .expect-label { font-size: .78rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+    .expect-slides { position: relative; min-height: 120px; margin-top: 10px; }
+    .expect-slide { display: none; }
+    .expect-slide.on { display: block; animation: ex-in .35s ease-out; }
+    @keyframes ex-in { from { opacity: 0; transform: translateY(6px); } }
+    .expect-slide h3 { font-size: 1.25rem; margin-bottom: 6px; }
+    .expect-slide p { color: var(--ink-soft); max-width: 62ch; }
+    .expect-dots { display: flex; gap: 8px; margin-top: 10px; }
+    .expect-dots button { width: 14px; height: 14px; padding: 0; border-radius: 50%; border: 2px solid var(--ink); background: #fff; cursor: pointer; }
+    .expect-dots button[aria-current="true"] { background: var(--sun); }
+    @media (prefers-reduced-motion: reduce) { .expect-slide.on { animation: none; } }
     .cta-band { margin-top: 34px; background: var(--mist); border: 2px solid var(--ink); border-radius: 18px; padding: 24px; display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; justify-content: space-between; }
     .cta-band p { font: 700 1.25rem/1.3 var(--display); max-width: 30ch; }
     @media (max-width: 900px) { .gain { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 600px) { .stats-grid, .gain { grid-template-columns: minmax(0, 1fr); } .cta-band .btn { flex: 1 1 100%; } }
+    .love { position: relative; max-width: 760px; margin: 0 auto; text-align: center; }
+    .love-card { background: #fff; border: 2px solid var(--ink); border-radius: 22px; box-shadow: 7px 7px 0 var(--ink); padding: 34px 28px 28px; min-height: 230px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px; }
+    .love-stars { color: var(--sun); font-size: 1.5rem; letter-spacing: 3px; -webkit-text-stroke: 1px var(--ink); }
+    .love-quote { font: 700 clamp(1.15rem, 2.6vw, 1.5rem)/1.4 var(--display); color: var(--ink); margin: 0; }
+    .love-who { color: var(--ink-soft); font-size: .95rem; }
+    .love-who a { color: inherit; }
+    .love-tag { display: inline-block; margin-left: 8px; padding: 2px 9px; border-radius: 999px; background: var(--sun); color: var(--ink); font-size: .72rem; font-weight: 700; }
+    .love-dots { display: flex; justify-content: center; gap: 4px; margin-top: 18px; }
+    .love-dots button { width: 28px; height: 28px; border: 0; background: none; cursor: pointer; display: grid; place-items: center; }
+    .love-dots button::after { content: ""; width: 11px; height: 11px; border-radius: 50%; background: var(--line); border: 1.5px solid var(--ink); }
+    .love-dots button[aria-current="true"]::after { background: var(--lagoon); }
+    .love-card.swap { animation: loveIn .35s ease-out; }
+    @keyframes loveIn { from { opacity: 0; transform: translateY(8px); } }
+    @media (prefers-reduced-motion: reduce) { .love-card.swap { animation: none; } }
     .hero { background: var(--mist); padding: 56px 0 72px; border-bottom: 1px solid var(--line); }
     .hero-grid > * { min-width: 0; }
     .hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 56px; align-items: center; }
@@ -362,6 +388,16 @@
         <div><span class="ico" aria-hidden="true">&#128197;</span><h3>More bookings</h3><p>Visitors can request a booking or quote right in the chat, and it lands in your inbox.</p></div>
         <div><span class="ico" aria-hidden="true">&#129309;</span><h3>No lost leads</h3><p>When it cannot answer, it takes the visitor's email so you can follow up. Nobody slips away.</p></div>
       </div>
+      <div class="expect" id="expect" role="region" aria-label="What Bubble5 is built to do">
+        <div class="expect-label">What it is built to do &middot; example scenarios, not customer reviews</div>
+        <div class="expect-slides" aria-live="off">
+          <div class="expect-slide on"><h3>11:42 pm, a visitor asks if you take walk-ins on Sunday</h3><p>Bubble5 answers from your own opening hours in seconds. You find out in the morning, not at midnight.</p></div>
+          <div class="expect-slide"><h3>A customer asks how much a service costs</h3><p>It quotes the price from your own price list and offers a booking request. You wake up to a message that is ready to confirm.</p></div>
+          <div class="expect-slide"><h3>A question your documents do not cover</h3><p>It says so instead of guessing, takes the visitor's email and flags it in your Inbox. You add the answer once and it knows it from then on.</p></div>
+          <div class="expect-slide"><h3>Someone writes in Thai, Spanish or French</h3><p>It replies in the language they used, so you do not need to hire for it or translate anything.</p></div>
+        </div>
+        <div class="expect-dots" id="expectDots"></div>
+      </div>
       <div class="cta-band">
         <p>Free to start. Plans from $29 a month.</p>
         <a href="app.html#/signup" class="btn btn-primary">Start free</a>
@@ -399,6 +435,22 @@
       </div>
       <div class="uses" aria-label="Works for">
         <span>Cafes and restaurants</span><span>Salons and spas</span><span>Clinics and dentists</span><span>Hotels and tours</span><span>Online shops</span><span>Gyms and studios</span><span>Trades and services</span><span>Schools and classes</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="love" class="section alt" hidden>
+    <div class="wrap">
+      <div class="section-head" style="text-align:center;margin-left:auto;margin-right:auto">
+        <h2>What owners say</h2>
+      </div>
+      <div class="love" role="region" aria-roledescription="carousel" aria-label="Customer feedback">
+        <figure class="love-card" id="loveCard" style="margin:0">
+          <div class="love-stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <blockquote class="love-quote" id="loveQuote"></blockquote>
+          <figcaption class="love-who" id="loveWho"></figcaption>
+        </figure>
+        <div class="love-dots" id="loveDots"></div>
       </div>
     </div>
   </section>
@@ -453,8 +505,8 @@
           <ul class="pricing-features">
             <li>Unlimited chatbot agents</li>
             <li>Unlimited chats</li>
-            <li>Dedicated AI backend</li>
-            <li>24/7 account manager</li>
+            <li>Priority setup and support</li>
+            <li>Direct line to the founder</li>
           </ul>
           <a href="#contact" class="btn btn-outline">Contact sales</a>
         </article>
@@ -742,6 +794,53 @@
       }, "Thanks! Your message is on its way. We'll reply by email.");
     }
   </script>
-<script src="assets/live.js" data-api="https://bubble5.mlgcostello.workers.dev" defer></script>
+<script src="assets/live.js" data-api="https://bubble5.mlgcostello.workers.dev" defer>
+  /* Customer feedback: add ONLY real quotes (with permission). The section stays hidden while this list is empty.
+     Each entry: { quote, name, business, url (link to the original post, optional), source ("Facebook"), } */
+  (function () {
+    var FEEDBACK = [];
+    var sec = document.getElementById("love");
+    if (!sec || !FEEDBACK.length) return;
+    if (/[?&]previewfeedback=1/.test(location.search)) FEEDBACK = [
+      { quote: "Sample text only.", name: "Sample name", business: "Sample business", sample: true },
+      { quote: "Second sample quote, shown for layout preview.", name: "Sample name", business: "Sample business", sample: true }
+    ];
+    sec.hidden = false;
+    var card = document.getElementById("loveCard"), q = document.getElementById("loveQuote"), who = document.getElementById("loveWho"), dots = document.getElementById("loveDots");
+    var i = 0, timer = null, paused = false, reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function show(n) {
+      i = (n + FEEDBACK.length) % FEEDBACK.length; var f = FEEDBACK[i];
+      q.textContent = "\u201c" + f.quote + "\u201d";
+      who.textContent = f.name + (f.business ? ", " + f.business : "");
+      if (f.source) { who.appendChild(document.createTextNode(" \u00b7 ")); if (f.url) { var a = document.createElement("a"); a.href = f.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = "on " + f.source; who.appendChild(a); } else who.appendChild(document.createTextNode("on " + f.source)); }
+      if (f.sample) { var t = document.createElement("span"); t.className = "love-tag"; t.textContent = "Sample, not a real customer"; who.appendChild(t); }
+      card.classList.remove("swap"); void card.offsetWidth; card.classList.add("swap");
+      [].forEach.call(dots.children, function (b, k) { b.setAttribute("aria-current", k === i ? "true" : "false"); });
+    }
+    FEEDBACK.forEach(function (_, k) { var b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-label", "Show feedback " + (k + 1)); b.onclick = function () { show(k); }; dots.appendChild(b); });
+    if (FEEDBACK.length < 2) dots.hidden = true;
+    function start() { if (reduce || FEEDBACK.length < 2) return; clearInterval(timer); timer = setInterval(function () { if (!paused) show(i + 1); }, 7000); }
+    sec.addEventListener("mouseenter", function () { paused = true; }); sec.addEventListener("mouseleave", function () { paused = false; });
+    sec.addEventListener("focusin", function () { paused = true; }); sec.addEventListener("focusout", function () { paused = false; });
+    show(0); start();
+  })();
+</script>
+<script>
+(function () {
+  var box = document.getElementById("expect"); if (!box) return;
+  var slides = box.querySelectorAll(".expect-slide"), dots = document.getElementById("expectDots"), i = 0, timer = null, paused = false;
+  function show(n) {
+    i = n; slides.forEach(function (s, k) { s.classList.toggle("on", k === n); });
+    dots.querySelectorAll("button").forEach(function (d, k) { d.setAttribute("aria-current", k === n ? "true" : "false"); });
+  }
+  slides.forEach(function (_, k) { var b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-label", "Scenario " + (k + 1)); b.onclick = function () { show(k); }; dots.appendChild(b); });
+  show(0);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  function tick() { if (!paused) show((i + 1) % slides.length); }
+  timer = setInterval(tick, 6500);
+  ["mouseenter", "focusin"].forEach(function (e) { box.addEventListener(e, function () { paused = true; }); });
+  ["mouseleave", "focusout"].forEach(function (e) { box.addEventListener(e, function () { paused = false; }); });
+})();
+</script>
 </body>
 </html>

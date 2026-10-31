@@ -31,7 +31,9 @@ To demo a prospect's own business, edit the documents in `worker/src/kb.js` (and
 1. In Stripe, copy your secret key and add it to the Worker as the secret `STRIPE_SECRET_KEY`.
 2. Sign in to the portal as the admin (the `NOTIFY_EMAIL` account), open Billing and press **Set up Stripe billing**. It creates the three plans (monthly and annual), the payment webhook and the customer billing portal, and saves the IDs in the database. Safe to press again.
 
-Stripe Tax is optional. Turn it on in the Stripe dashboard (Tax, set your origin address and registrations), then add the Worker variable `STRIPE_TAX` = `on` **before** pressing the setup button, so prices are created tax-exclusive. Checkout then collects the billing address and an optional tax ID and adds tax automatically.
+Use a **restricted API key** (`rk_...`) instead of a full secret key. Give it write access to Products, Prices, Webhook endpoints, Checkout Sessions, Customers, Customer portal and Subscriptions, and read access to Invoices. If the setup button reports a permission error, add what it names. Use a Stripe sandbox for testing.
+
+Stripe Tax is optional. It collects **no tax until you have an active registration** in the customer's jurisdiction (Stripe dashboard, Tax, Locations), a head office address in Tax settings, and a product tax code. Pick the tax code with your tax advisor from Stripe's list, then set it as the Worker variable `STRIPE_TAX_CODE` (a `txcd_` value) before pressing the setup button, or set a preset tax code in Tax settings. Turn it on in the Stripe dashboard (Tax, set your origin address and registrations), then add the Worker variable `STRIPE_TAX` = `on` **before** pressing the setup button, so prices are created tax-exclusive. Checkout then collects the billing address and an optional tax ID and adds tax automatically.
 
 ### Switching on online billing (Stripe), by hand
 1. In Stripe, create products Starter, Pro (and Enterprise if you want) with a monthly and an annual recurring price.

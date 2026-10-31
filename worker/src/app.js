@@ -3,7 +3,7 @@
 
 import { PLANS } from "./plans.js";
 import { botGet, botUpdate, botConversations, botLeads, botDeleteData } from "./bot.js";
-import { sendEmail } from "./mail.js";
+import { sendEmail, escapeHtml } from "./mail.js";
 import { isAdmin, adminList, adminThread, adminReply, adminClose } from "./live.js";
 
 const enc = new TextEncoder();
@@ -425,8 +425,8 @@ async function billingCheckout(request, env, user, cors) {
   if (env.STRIPE_TAX === "on") {
     params["automatic_tax[enabled]"] = "true";
     params["tax_id_collection[enabled]"] = "true";
-    params.billing_address_collection = "required";
-    if (user.stripe_customer_id) { params["customer_update[address]"] = "auto"; params["customer_update[name]"] = "auto"; }
+    // New customers: Checkout collects the address it needs. Returning customers: re-collect so tax uses the address entered now.
+    if (user.stripe_customer_id) { params.billing_address_collection = "required"; params["customer_update[address]"] = "auto"; params["customer_update[name]"] = "auto"; }
   }
   try {
     const session = await stripeCall(env, "POST", "/checkout/sessions", params);
@@ -516,9 +516,11 @@ async function stripeWebhook(request, env) {
   const obj = event.data && event.data.object;
   if (!obj) return new Response("ok", { status: 200 });
 
-  if (event.type === "checkout.session.completed" && obj.mode === "subscription") {
+  if ((event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") && obj.mode === "subscription") {
     const userId = Number(obj.client_reference_id);
-    if (userId) {
+    // Delayed payment methods report "unpaid" at completion; activate only once paid.
+    const paid = obj.payment_status === "paid" || obj.payment_status === "no_payment_required";
+    if (userId && paid) {
       const interval = obj.metadata && obj.metadata.interval ? obj.metadata.interval : null;
       const plan = obj.metadata && obj.metadata.plan ? obj.metadata.plan : null;
       await env.DB.prepare(
@@ -538,6 +540,12 @@ async function stripeWebhook(request, env) {
     }
   } else if (event.type === "invoice.payment_failed") {
     await env.DB.prepare("UPDATE users SET sub_status = 'past_due' WHERE stripe_customer_id = ?").bind(obj.customer).run();
+  } else if (event.type === "invoice.paid") {
+    await env.DB.prepare("UPDATE users SET sub_status = 'active' WHERE stripe_customer_id = ? AND sub_status = 'past_due'").bind(obj.customer).run();
+  } else if (["charge.dispute.created", "charge.refunded", "radar.early_fraud_warning.created"].includes(event.type)) {
+    // Money is at risk or has moved: tell the owner so it is looked at the same day.
+    const label = { "charge.dispute.created": "A customer opened a dispute", "charge.refunded": "A charge was refunded", "radar.early_fraud_warning.created": "Stripe raised an early fraud warning" }[event.type];
+    await sendEmail(env, { to: env.NOTIFY_EMAIL, subject: `Stripe: ${label}`, html: `<p>${label} on your Bubble5 account.</p><p>Event: ${escapeHtml(event.type)}<br>Charge/object: ${escapeHtml(obj.id || "")}<br>Customer: ${escapeHtml(obj.customer || "")}</p><p>Open it in the Stripe dashboard to respond.</p>` });
   }
   return new Response("ok", { status: 200 });
 }
@@ -598,7 +606,11 @@ async function billingSetup(env, user, cors) {
         };
         if (env.STRIPE_TAX === "on") params.tax_behavior = "exclusive";
         if (products[p.plan]) params.product = products[p.plan];
-        else params["product_data[name]"] = p.name;
+        else {
+          params["product_data[name]"] = p.name;
+          // Set STRIPE_TAX_CODE to a txcd_ code you have confirmed from Stripe's tax code list; otherwise the account's preset tax code applies.
+          if (env.STRIPE_TAX_CODE) params["product_data[tax_code]"] = env.STRIPE_TAX_CODE;
+        }
         price = await stripeCall(env, "POST", "/prices", params);
         log.push("created " + lookup);
       }
@@ -616,6 +628,11 @@ async function billingSetup(env, user, cors) {
       "enabled_events[1]": "customer.subscription.updated",
       "enabled_events[2]": "customer.subscription.deleted",
       "enabled_events[3]": "invoice.payment_failed",
+      "enabled_events[4]": "checkout.session.async_payment_succeeded",
+      "enabled_events[5]": "invoice.paid",
+      "enabled_events[6]": "charge.dispute.created",
+      "enabled_events[7]": "charge.refunded",
+      "enabled_events[8]": "radar.early_fraud_warning.created",
       description: "Bubble5 billing",
     });
     await putSetting(env, "stripe_webhook_secret", hook.secret);

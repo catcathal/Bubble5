@@ -31,6 +31,8 @@ To demo a prospect's own business, edit the documents in `worker/src/kb.js` (and
 1. In Stripe, copy your secret key and add it to the Worker as the secret `STRIPE_SECRET_KEY`.
 2. Sign in to the portal as the admin (the `NOTIFY_EMAIL` account), open Billing and press **Set up Stripe billing**. It creates the three plans (monthly and annual), the payment webhook and the customer billing portal, and saves the IDs in the database. Safe to press again.
 
+Stripe Tax is optional. Turn it on in the Stripe dashboard (Tax, set your origin address and registrations), then add the Worker variable `STRIPE_TAX` = `on` **before** pressing the setup button, so prices are created tax-exclusive. Checkout then collects the billing address and an optional tax ID and adds tax automatically.
+
 ### Switching on online billing (Stripe), by hand
 1. In Stripe, create products Starter, Pro (and Enterprise if you want) with a monthly and an annual recurring price.
 2. Put the price IDs into `STRIPE_PRICES` in `worker/wrangler.toml` (see the comment there).

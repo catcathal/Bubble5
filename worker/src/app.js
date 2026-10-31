@@ -421,6 +421,13 @@ async function billingCheckout(request, env, user, cors) {
   };
   if (user.stripe_customer_id) params.customer = user.stripe_customer_id;
   else params.customer_email = user.email;
+  // Stripe Tax: switch on with the Worker variable STRIPE_TAX = "on" once Stripe Tax is set up in the dashboard.
+  if (env.STRIPE_TAX === "on") {
+    params["automatic_tax[enabled]"] = "true";
+    params["tax_id_collection[enabled]"] = "true";
+    params.billing_address_collection = "required";
+    if (user.stripe_customer_id) { params["customer_update[address]"] = "auto"; params["customer_update[name]"] = "auto"; }
+  }
   try {
     const session = await stripeCall(env, "POST", "/checkout/sessions", params);
     return reply({ url: session.url }, 200, cors);
@@ -589,6 +596,7 @@ async function billingSetup(env, user, cors) {
           lookup_key: lookup,
           "metadata[plan]": p.plan,
         };
+        if (env.STRIPE_TAX === "on") params.tax_behavior = "exclusive";
         if (products[p.plan]) params.product = products[p.plan];
         else params["product_data[name]"] = p.name;
         price = await stripeCall(env, "POST", "/prices", params);

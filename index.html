@@ -11,7 +11,7 @@
   <meta property="og:title" content="Bubble5 | AI chatbots that answer from your own business info">
   <meta property="og:description" content="A website chatbot for small businesses. It only answers from what you tell it, captures leads, and hands over to you when it is unsure.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="https://bubble5.online/assets/brand/cover.png">
+  <meta property="og:image" content="https://bubble5.online/assets/brand/header.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -128,6 +128,12 @@
     .expect-dots button { width: 14px; height: 14px; padding: 0; border-radius: 50%; border: 2px solid var(--ink); background: #fff; cursor: pointer; }
     .expect-dots button[aria-current="true"] { background: var(--sun); }
     @media (prefers-reduced-motion: reduce) { .expect-slide.on { animation: none; } }
+    .reviews-wrap { text-align: center; }
+    .review { display: none; max-width: 40rem; margin: 0 auto; }
+    .review.on { display: block; animation: ex-in .35s ease-out; }
+    .review blockquote { margin: 0; font: 700 clamp(1.25rem, 3vw, 1.7rem)/1.35 var(--display); letter-spacing: -0.01em; }
+    .review figcaption { margin-top: 14px; color: var(--ink-soft); font-size: .95rem; }
+    .review figcaption b { color: var(--ink); }
     .cta-band { margin-top: 34px; background: var(--mist); border: 2px solid var(--ink); border-radius: 18px; padding: 24px; display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; justify-content: space-between; }
     .cta-band p { font: 700 1.25rem/1.3 var(--display); max-width: 30ch; }
     @media (max-width: 900px) { .gain { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -431,6 +437,7 @@
         <div class="feat"><h3>Hands over to you</h3><p>When it is unsure, it offers to take the visitor's email and forwards the question to you. Every one is saved as a lead.</p></div>
         <div class="feat"><h3>Shows you what customers want</h3><p>See every question, what it could not answer, and add the missing answer in one click.</p></div>
         <div class="feat"><h3>Speaks your customers' language</h3><p>It replies in the language the visitor writes in, in English, Spanish, French, Thai and many more.</p></div>
+        <div class="feat"><h3>A chat link, no website needed</h3><p>Get a page of your own for your chatbot. Share it on Facebook, WhatsApp, Instagram or a QR code.</p></div>
         <div class="feat"><h3>Locked to your website</h3><p>Limit it to your own domains so nobody else can use your chats.</p></div>
         <div class="feat"><h3>Private by design</h3><p>Your documents are only used to answer your own customers. Delete your data any time.</p></div>
       </div>
@@ -453,6 +460,14 @@
         </figure>
         <div class="love-dots" id="loveDots"></div>
       </div>
+    </div>
+  </section>
+
+  <section id="reviews" class="section" hidden aria-label="What customers say">
+    <div class="wrap reviews-wrap">
+      <div class="section-head" style="margin-left:auto;margin-right:auto"><h2>What business owners say</h2></div>
+      <div id="reviewList"></div>
+      <div class="expect-dots" id="reviewDots" style="justify-content:center"></div>
     </div>
   </section>
 
@@ -841,6 +856,33 @@
   timer = setInterval(tick, 6500);
   ["mouseenter", "focusin"].forEach(function (e) { box.addEventListener(e, function () { paused = true; }); });
   ["mouseleave", "focusout"].forEach(function (e) { box.addEventListener(e, function () { paused = false; }); });
+})();
+</script>
+<script>
+/* Real customer reviews only. Add entries to assets/reviews.json as {"quote":"","name":"","business":""} with the customer's permission. The section stays hidden while the file is empty. */
+(function () {
+  var sec = document.getElementById("reviews"); if (!sec) return;
+  fetch("assets/reviews.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : []; }).then(function (list) {
+    list = (Array.isArray(list) ? list : []).filter(function (x) { return x && x.quote && x.name; }).slice(0, 8);
+    if (!list.length) return;
+    var box = document.getElementById("reviewList"), dots = document.getElementById("reviewDots"), items = [], i = 0, paused = false;
+    list.forEach(function (x, k) {
+      var f = document.createElement("figure"); f.className = "review" + (k ? "" : " on"); f.style.margin = "0 auto";
+      var q = document.createElement("blockquote"); q.textContent = "\u201c" + x.quote + "\u201d";
+      var c = document.createElement("figcaption"), b = document.createElement("b"); b.textContent = x.name; c.appendChild(b);
+      if (x.business) c.appendChild(document.createTextNode(", " + x.business));
+      f.appendChild(q); f.appendChild(c); box.appendChild(f); items.push(f);
+      var d = document.createElement("button"); d.type = "button"; d.setAttribute("aria-label", "Review " + (k + 1)); d.setAttribute("aria-current", k ? "false" : "true");
+      d.onclick = function () { show(k); }; dots.appendChild(d);
+    });
+    function show(n) { i = n; items.forEach(function (f, k) { f.classList.toggle("on", k === n); }); dots.querySelectorAll("button").forEach(function (d, k) { d.setAttribute("aria-current", k === n ? "true" : "false"); }); }
+    if (items.length < 2) dots.hidden = true;
+    sec.hidden = false;
+    if (items.length > 1 && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      sec.addEventListener("mouseenter", function () { paused = true; }); sec.addEventListener("mouseleave", function () { paused = false; });
+      setInterval(function () { if (!paused) show((i + 1) % items.length); }, 7000);
+    }
+  }).catch(function () {});
 })();
 </script>
 </body>

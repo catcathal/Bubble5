@@ -134,6 +134,22 @@
     .review blockquote { margin: 0; font: 700 clamp(1.25rem, 3vw, 1.7rem)/1.35 var(--display); letter-spacing: -0.01em; }
     .review figcaption { margin-top: 14px; color: var(--ink-soft); font-size: .95rem; }
     .review figcaption b { color: var(--ink); }
+    .eyebrow { display: inline-block; margin-bottom: 10px; padding: 4px 12px; border-radius: 999px; background: var(--sun); color: var(--ink); font: 700 .78rem/1.2 var(--body); letter-spacing: .07em; text-transform: uppercase; }
+    .trial-note { margin-top: 22px !important; }
+    .faq summary { list-style: none; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::after { content: "+"; flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--mist); color: var(--ink); display: grid; place-items: center; font-weight: 700; font-size: 1.2rem; transition: transform .2s, background .2s; }
+    .faq details[open] summary::after { content: "\2212"; background: var(--sun); }
+    .faq details { transition: background .2s; }
+    .contact-points { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 10px; }
+    .contact-points li { position: relative; padding-left: 30px; color: var(--ink); font-weight: 500; }
+    .contact-points li::before { content: "\2713"; position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--lagoon); color: #fff; display: grid; place-items: center; font-size: .8rem; font-weight: 700; }
+    .footer-links { display: flex; gap: 18px; flex-wrap: wrap; }
+    .footer-links a { color: var(--ink-soft); }
+    .feat { transition: transform .15s, box-shadow .15s; }
+    .feat:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(15,42,46,.1); }
+    .expect-slides { min-height: 96px; }
+    @media (prefers-reduced-motion: reduce) { .feat { transition: none; } .feat:hover { transform: none; } }
     .cta-band { margin-top: 34px; background: var(--mist); border: 2px solid var(--ink); border-radius: 18px; padding: 24px; display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; justify-content: space-between; }
     .cta-band p { font: 700 1.25rem/1.3 var(--display); max-width: 30ch; }
     @media (max-width: 900px) { .gain { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -386,7 +402,7 @@
   <section id="gain" class="section">
     <div class="wrap">
       <div class="section-head">
-        <h2>What you get back</h2>
+        <span class="eyebrow">Why Bubble5</span><h2>What you get back</h2>
         <p>Bubble5 handles the repeat questions, so your time goes to the work only you can do.</p>
       </div>
       <div class="gain">
@@ -415,7 +431,7 @@
   <section id="how" class="section alt">
     <div class="wrap">
       <div class="section-head">
-        <h2>Leave the work to us</h2>
+        <span class="eyebrow">How it works</span><h2>Leave the work to us</h2>
         <p>We host and run the whole chatbot on our backend. You add one snippet to your site and you are up in about 2 minutes. No developers needed.</p>
       </div>
       <ol class="steps3">
@@ -429,7 +445,7 @@
   <section id="why" class="section alt">
     <div class="wrap">
       <div class="section-head">
-        <h2>Built so you can trust it</h2>
+        <span class="eyebrow">Honest by design</span><h2>Built so you can trust it</h2>
         <p>A chatbot that makes things up is worse than no chatbot. Bubble5 is built to stay honest.</p>
       </div>
       <div class="feats">
@@ -438,6 +454,8 @@
         <div class="feat"><h3>Shows you what customers want</h3><p>See every question, what it could not answer, and add the missing answer in one click.</p></div>
         <div class="feat"><h3>Speaks your customers' language</h3><p>It replies in the language the visitor writes in, in English, Spanish, French, Thai and many more.</p></div>
         <div class="feat"><h3>A chat link, no website needed</h3><p>Get a page of your own for your chatbot. Share it on Facebook, WhatsApp, Instagram or a QR code.</p></div>
+        <div class="feat"><h3>Takes bookings and quotes</h3><p>Visitors can request a booking or quote in the chat. It lands in your inbox, ready to confirm.</p></div>
+        <div class="feat"><h3>Always on, always quick</h3><p>Answers in seconds, at night, on weekends and on holidays, so you do not have to be there.</p></div>
         <div class="feat"><h3>Locked to your website</h3><p>Limit it to your own domains so nobody else can use your chats.</p></div>
         <div class="feat"><h3>Private by design</h3><p>Your documents are only used to answer your own customers. Delete your data any time.</p></div>
       </div>
@@ -474,7 +492,7 @@
   <section id="pricing" class="section">
     <div class="wrap">
       <div class="section-head">
-        <h2>Simple, transparent pricing</h2>
+        <span class="eyebrow">Pricing</span><h2>Simple, transparent pricing</h2>
         <p>Pick the plan that fits your business. Change or cancel any time.</p>
       </div>
 
@@ -491,9 +509,10 @@
           <div class="price" data-monthly="29" data-annual="23">$29<span>/mo</span></div>
           <div class="billed-note"></div>
           <ul class="pricing-features">
-            <li>1 chatbot agent</li>
+            <li>Your own chatbot and shareable chat link</li>
             <li>Up to 1,000 chats a month</li>
-            <li>Basic AI training</li>
+            <li>Up to 10 documents or price lists</li>
+            <li>Booking requests and lead capture</li>
             <li>Email support</li>
           </ul>
           <a href="app.html#/signup" class="btn btn-outline">Start with Starter</a>
@@ -505,9 +524,10 @@
           <div class="price" data-monthly="79" data-annual="63">$79<span>/mo</span></div>
           <div class="billed-note"></div>
           <ul class="pricing-features">
-            <li>3 chatbot agents</li>
+            <li>Your own chatbot and shareable chat link</li>
             <li>Up to 10,000 chats a month</li>
-            <li>Custom knowledge base integration</li>
+            <li>Up to 50 documents or price lists</li>
+            <li>Booking requests and lead capture</li>
             <li>Priority support</li>
           </ul>
           <a href="app.html#/signup" class="btn btn-primary">Start with Pro</a>
@@ -519,8 +539,9 @@
           <div class="price" data-monthly="199" data-annual="159">$199<span>/mo</span></div>
           <div class="billed-note"></div>
           <ul class="pricing-features">
-            <li>Unlimited chatbot agents</li>
             <li>Unlimited chats</li>
+            <li>Up to 200 documents or price lists</li>
+            <li>Booking requests and lead capture</li>
             <li>Priority setup and support</li>
             <li>Direct line to the founder</li>
           </ul>
@@ -533,7 +554,7 @@
 
   <section id="faq" class="section alt">
     <div class="wrap">
-      <div class="section-head"><h2>Questions</h2></div>
+      <div class="section-head"><span class="eyebrow">FAQ</span><h2>Questions</h2></div>
       <div class="faq">
         <details><summary>Do I need to be technical?</summary><p>No. You type your information into a form and paste one line of code on your website. If you would rather not, ask us and we will do it for you.</p></details>
         <details><summary>What if the chatbot does not know the answer?</summary><p>It says so honestly, offers to take the visitor's email, and sends you the question. It will not invent an answer.</p></details>
@@ -548,8 +569,13 @@
   <section class="section contact-section" id="contact">
     <div class="wrap contact-wrap">
       <div class="contact-intro">
-        <h2>Contact us</h2>
+        <span class="eyebrow">Get in touch</span><h2>Contact us</h2>
         <p>Want a chatbot for your business, or have a question about pricing? Send us a message and we'll reply by email.</p>
+        <ul class="contact-points">
+          <li>Free trial, no card needed</li>
+          <li>We can set it up for you</li>
+          <li>Replies by email</li>
+        </ul>
       </div>
       <div class="form-card">
         <form onsubmit="handleContact(event)">
@@ -580,7 +606,8 @@
 
   <footer>
     <div class="wrap footer-row">
-      <span>&copy; 2026 Bubble5. All rights reserved. <a href="help.html">Help</a></span>
+      <span>&copy; 2026 Bubble5. All rights reserved.</span>
+      <nav class="footer-links" aria-label="Footer"><a href="try.html">Try it free</a><a href="#pricing">Pricing</a><a href="help.html">Help</a><a href="#contact">Contact</a></nav>
       <span>Demo mode: the bakery in the chat is fictional.</span>
     </div>
   </footer>

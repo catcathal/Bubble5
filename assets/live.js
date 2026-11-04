@@ -29,6 +29,7 @@
   st.textContent =
     "*{box-sizing:border-box}.fab,.panel,input,textarea,button{font-family:'Figtree',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}" +
     ".fab{position:fixed;right:18px;bottom:18px;border:0;border-radius:999px;background:#0E7C7B;color:#fff;cursor:pointer;box-shadow:0 8px 24px rgba(15,42,46,.3);display:flex;align-items:center;gap:10px;padding:0 20px 0 16px;height:56px;font-weight:700;font-size:15px}" +
+    ".fab{transition:transform .2s ease,opacity .2s ease}.fab.away{transform:translateX(calc(100% - 8px));opacity:.85;pointer-events:none}" +
     ".fab:hover{background:#0A5F5E}.fab:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #FFC53D;outline-offset:2px}" +
     ".fab svg{width:24px;height:24px}.dot{width:10px;height:10px;border-radius:50%;background:#9aa;display:inline-block}.dot.on{background:#3ddc84;box-shadow:0 0 0 3px rgba(61,220,132,.3)}" +
     ".badge{background:#FFC53D;color:#0F2A2E;border-radius:999px;font-size:12px;min-width:20px;height:20px;display:none;align-items:center;justify-content:center;padding:0 6px}.badge.show{display:inline-flex}" +
@@ -186,6 +187,30 @@
     schedule();
   }
   function shut() { openState = false; panel.classList.remove("open"); fab.style.display = ""; fab.focus(); if (chat) { lastId = lastId; } schedule(); }
+
+  /* Keep the chat bubble from sitting on top of buttons, links and form fields: when it would overlap one, it tucks to the edge until the user scrolls on. */
+  var dodgeQueued = false;
+  function dodge() {
+    dodgeQueued = false;
+    if (openState || fab.style.display === "none") return;
+    /* Use the bubble's resting position (not its animated one) so it cannot flip back and forth. */
+    var cs0 = getComputedStyle(fab), rr = parseFloat(cs0.right) || 18, bb = parseFloat(cs0.bottom) || 18;
+    var fw = fab.offsetWidth, fh = fab.offsetHeight, vw = document.documentElement.clientWidth, vh = innerHeight;
+    var r = { left: vw - rr - fw, right: vw - rr, top: vh - bb - fh, bottom: vh - bb }, m = 6, hit = false;
+    var els = document.querySelectorAll("a.btn, button, input, textarea, select, summary, [role=button]");
+    for (var i = 0; i < els.length && !hit; i++) {
+      var e = els[i]; if (host.contains(e)) continue;
+      var b = e.getBoundingClientRect();
+      if (b.width < 2 || b.height < 2) continue;
+      if (b.right < r.left - m || b.left > r.right + m || b.bottom < r.top - m || b.top > r.bottom + m) continue;
+      var cs = getComputedStyle(e); if (cs.visibility === "hidden" || cs.display === "none") continue;
+      hit = true;
+    }
+    fab.classList.toggle("away", hit);
+  }
+  function queueDodge() { if (!dodgeQueued) { dodgeQueued = true; requestAnimationFrame(dodge); } }
+  addEventListener("scroll", queueDodge, { passive: true }); addEventListener("resize", queueDodge);
+  setInterval(queueDodge, 700); queueDodge();
   fab.onclick = open; close.onclick = shut;
   root.addEventListener("keydown", function (e) { if (e.key === "Escape") shut(); });
   document.addEventListener("visibilitychange", schedule);

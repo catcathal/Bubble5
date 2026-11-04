@@ -121,6 +121,30 @@
       .row-2 { grid-template-columns: 1fr; }
       .topbar-links .hide-sm { display: none; }
     }
+    .lm-back { position: fixed; inset: 0; z-index: 200; display: flex; align-items: flex-start; justify-content: center; padding: 20px 14px; overflow-y: auto; background: rgba(15,42,46,.6); }
+    .lm { position: relative; width: 100%; max-width: 480px; margin: auto; background: #fff; border-radius: 22px; padding: 26px 20px 22px; box-shadow: 0 20px 60px rgba(15,42,46,.35); }
+    .lm h2 { font: 800 1.45rem/1.2 var(--display); letter-spacing: -.02em; margin: 0 28px 6px 0; }
+    .lm .lm-sub { color: var(--ink-soft); margin-bottom: 16px; }
+    .lm-x { position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--mist); color: var(--ink); font-size: 1.3rem; cursor: pointer; }
+    .lm-int { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 0 14px; font-weight: 600; color: var(--ink-soft); }
+    .lm-int .on { color: var(--ink); }
+    .lm-plan { position: relative; border: 1.5px solid var(--line); border-radius: 18px; padding: 16px 16px 14px; margin-bottom: 12px; background: #fff; }
+    .lm-plan.hot { border: 2.5px solid var(--lagoon); background: #F2FAF8; box-shadow: 0 6px 20px rgba(14,124,123,.18); padding-top: 22px; }
+    .lm-badge { position: absolute; top: -13px; left: 14px; background: var(--sun); color: var(--ink); font: 800 .78rem var(--body); padding: 5px 12px; border-radius: 999px; }
+    .lm-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+    .lm-head h3 { font: 800 1.2rem var(--display); margin: 0; }
+    .lm-price { font: 800 1.5rem var(--display); }
+    .lm-price small { font: 500 .9rem var(--body); color: var(--ink-soft); }
+    .lm-for { color: var(--ink-soft); font-size: .92rem; margin: 2px 0 8px; }
+    .lm-rows { list-style: none; margin: 0 0 12px; padding: 0; }
+    .lm-rows li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px solid var(--line); font-size: .95rem; }
+    .lm-rows li span:first-child { color: var(--ink-soft); }
+    .lm-rows li b.up { color: var(--lagoon-dark); }
+    .lm-rows li b.up::before { content: "\2191 "; }
+    .lm-rows li.now b { color: var(--ink-soft); font-weight: 600; }
+    .lm-note { text-align: center; font-size: .85rem; color: var(--ink-soft); margin: 4px 0 8px; }
+    .lm-later { display: block; margin: 0 auto; background: none; border: 0; color: var(--ink-soft); text-decoration: underline; font: inherit; cursor: pointer; padding: 8px; }
+    .lm-err { color: var(--danger); font-size: .9rem; text-align: center; margin: 6px 0; }
   </style>
 </head>
 <body>
@@ -227,6 +251,64 @@
     return { name: name || "", params: new URLSearchParams(query || "") };
   }
 
+  /* ---------- out-of-chats popup ---------- */
+  const LIMIT_ROWS = [
+    ["Chats a month", { none: 50, starter: 1000, pro: 10000, enterprise: "Unlimited" }],
+    ["Knowledge documents", { none: 5, starter: 10, pro: 50, enterprise: 200 }],
+    ["Chatbot agents", { none: 1, starter: 1, pro: 3, enterprise: "Unlimited" }],
+    ["Support", { none: "Email", starter: "Email", pro: "Priority", enterprise: "24/7 manager" }]
+  ];
+  const LIMIT_TAGS = { starter: "Great for solo businesses", pro: "For growing teams with more customers", enterprise: "For larger businesses" };
+  function fmtVal(v) { return typeof v === "number" ? v.toLocaleString() : v; }
+  function maybeShowLimitModal() {
+    const me = state.me; if (!me || !me.usage || me.usage.limit === null) return;
+    const hasPlan = ["active", "trialing", "past_due"].includes(me.user.status) && me.user.plan !== "none";
+    if (hasPlan || me.usage.chats < me.usage.limit) return;
+    try { if (sessionStorage.getItem("limitModalSeen") === "1") return; } catch (e) { /* ignore */ }
+    if (document.getElementById("limitModal")) return;
+    const opener = document.activeElement;
+    const back = document.createElement("div"); back.className = "lm-back"; back.id = "limitModal";
+    function draw() {
+      const annual = state.billingInterval === "annual";
+      back.innerHTML = `<div class="lm" role="dialog" aria-modal="true" aria-labelledby="lmT">
+        <button type="button" class="lm-x" id="lmX" aria-label="Close">&times;</button>
+        <h2 id="lmT">You've used your ${me.usage.limit.toLocaleString()} free chats</h2>
+        <p class="lm-sub">Your chatbot can't answer new customer questions until you choose a plan. Pick one to switch it back on.</p>
+        <div class="lm-int"><span class="${annual ? "" : "on"}">Monthly</span><button type="button" class="switch" id="lmSw" role="switch" aria-checked="${annual}" aria-label="Bill annually"></button><span class="${annual ? "on" : ""}">Annual <span class="status-pill ok">Save 20%</span></span></div>
+        ${Object.entries(PLAN_INFO).map(([id, p]) => `<div class="lm-plan ${id === "starter" ? "hot" : ""}">
+          ${id === "starter" ? '<span class="lm-badge">&#9733; Most popular for solo businesses</span>' : ""}
+          <div class="lm-head"><h3>${p.name}</h3><div class="lm-price">$${annual ? p.annual : p.monthly}<small>/mo</small></div></div>
+          <p class="lm-for">${LIMIT_TAGS[id]}</p>
+          <ul class="lm-rows">${LIMIT_ROWS.map(([label, vals]) => {
+            const better = JSON.stringify(vals[id]) !== JSON.stringify(vals.none);
+            return `<li><span>${label}</span><b class="${better ? "up" : ""}">${fmtVal(vals[id])}</b></li>`;
+          }).join("")}</ul>
+          ${id === "enterprise" ? `<a class="btn btn-outline btn-block" href="${supportLink("I'm interested in the Enterprise plan for " + (me.user.company || "my company") + ".")}">Contact sales</a>`
+            : `<button type="button" class="btn ${id === "starter" ? "btn-primary" : "btn-outline"} btn-block" data-lm-plan="${id}">Choose ${p.name}</button>`}</div>`).join("")}
+        <p class="lm-note">Your free trial: 50 chats, 5 documents, 1 agent. Arrows mark what you gain. Cancel any time.</p>
+        <div class="lm-err" id="lmErr" role="alert"></div>
+        <button type="button" class="lm-later" id="lmLater">Not now</button></div>`;
+      back.querySelector("#lmSw").onclick = () => { state.billingInterval = annual ? "monthly" : "annual"; draw(); };
+      back.querySelectorAll("[data-lm-plan]").forEach((b) => b.onclick = async () => {
+        b.disabled = true; const old = b.textContent; b.textContent = "Opening checkout";
+        try { const out = await api("POST", "/billing/checkout", { plan: b.dataset.lmPlan, interval: state.billingInterval, return_url: location.origin + location.pathname }); location.href = out.url; }
+        catch (e) { b.disabled = false; b.textContent = old; if (e.code === "billing_not_ready") { close(); location.hash = "#/billing"; } else back.querySelector("#lmErr").textContent = e.message; }
+      });
+      back.querySelector("#lmX").onclick = close; back.querySelector("#lmLater").onclick = close;
+      const f = back.querySelector("[data-lm-plan=starter]"); if (f) f.focus({ preventScroll: true });
+    }
+    function close() { try { sessionStorage.setItem("limitModalSeen", "1"); } catch (e) { /* ignore */ } document.removeEventListener("keydown", onKey); back.remove(); document.body.style.overflow = ""; if (opener && opener.focus) opener.focus(); }
+    function onKey(e) {
+      if (e.key === "Escape") return close();
+      if (e.key === "Tab") { const els = back.querySelectorAll("button:not([disabled]), a[href]"); if (!els.length) return; const first = els[0], last = els[els.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); } }
+    }
+    back.addEventListener("click", (e) => { if (e.target === back) close(); });
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    document.body.appendChild(back); draw();
+  }
+
   async function route() {
     clearInterval(liveTimer);
     const { name, params } = parseRoute();
@@ -255,6 +337,7 @@
     catch (e) { if (e.status !== 401) main.innerHTML = notice("err", esc(e.message)); }
     main.focus({ preventScroll: true });
     window.scrollTo(0, 0);
+    if (name !== "billing") maybeShowLimitModal();
   }
 
   function renderLoading() { root.innerHTML = '<div class="wrap"><div class="loading"><span class="spinner"></span> Loading your account</div></div>'; }

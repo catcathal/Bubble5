@@ -2,7 +2,7 @@
 // Everything here is stored in the D1 database bound as env.DB (see schema.sql).
 
 import { PLANS } from "./plans.js";
-import { botGet, botUpdate, botConversations, botLeads, botDeleteData } from "./bot.js";
+import { botGet, botUpdate, botConversations, botSetStatus, botLeads, botDeleteData } from "./bot.js";
 import { sendEmail, escapeHtml } from "./mail.js";
 import { isAdmin, adminList, adminThread, adminReply, adminClose } from "./live.js";
 
@@ -806,6 +806,7 @@ export async function handleApp(request, env, url, cors, ctx) {
     if (path === "/bot" && method === "GET") return await botGet(env, user, cors);
     if (path === "/bot" && method === "PATCH") return await botUpdate(request, env, user, cors);
     if (path === "/bot/conversations" && method === "GET") return await botConversations(env, user, cors);
+    if (path === "/bot/conversations/status" && method === "PATCH") return await botSetStatus(request, env, user, cors);
     if (path === "/bot/leads" && method === "GET") return await botLeads(env, user, cors);
 
     if (path === "/billing" && method === "GET") return await billingInfo(env, user, cors);

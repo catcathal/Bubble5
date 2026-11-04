@@ -28,11 +28,11 @@
   var st = document.createElement("style");
   st.textContent =
     "*{box-sizing:border-box}.fab,.panel,input,textarea,button{font-family:'Figtree',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}" +
-    ".fab{position:fixed;right:18px;bottom:18px;border:0;border-radius:999px;background:#0E7C7B;color:#fff;cursor:pointer;box-shadow:0 8px 24px rgba(15,42,46,.3);display:flex;align-items:center;gap:10px;padding:0 20px 0 16px;height:56px;font-weight:700;font-size:15px}" +
+    ".fab{position:fixed;right:18px;bottom:18px;border:0;border-radius:50%;width:60px;height:60px;padding:0;background:#0E7C7B;background:radial-gradient(circle at 32% 26%,#3FB5AE,#0E7C7B 55%,#0A5F5E);color:#fff;cursor:pointer;box-shadow:0 8px 24px rgba(15,42,46,.3),inset 0 -3px 6px rgba(0,0,0,.15),inset 0 3px 6px rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center}" +
     ".fab{transition:transform .2s ease,opacity .2s ease}.fab.away{transform:translateX(calc(100% - 8px));opacity:.85;pointer-events:none}" +
-    ".fab:hover{background:#0A5F5E}.fab:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #FFC53D;outline-offset:2px}" +
-    ".fab svg{width:24px;height:24px}.dot{width:10px;height:10px;border-radius:50%;background:#9aa;display:inline-block}.dot.on{background:#3ddc84;box-shadow:0 0 0 3px rgba(61,220,132,.3)}" +
-    ".badge{background:#FFC53D;color:#0F2A2E;border-radius:999px;font-size:12px;min-width:20px;height:20px;display:none;align-items:center;justify-content:center;padding:0 6px}.badge.show{display:inline-flex}" +
+    ".fab:hover{filter:brightness(1.08);transform:scale(1.05)}.fab:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #FFC53D;outline-offset:2px}" +
+    ".fab svg{width:30px;height:30px}.dot{width:10px;height:10px;border-radius:50%;background:#9aa;display:inline-block}.dot.on{background:#3ddc84;box-shadow:0 0 0 3px rgba(61,220,132,.3)}" +
+    ".fab{position:fixed}.badge{position:absolute;top:-4px;right:-4px;background:#FFC53D;color:#0F2A2E;border-radius:999px;font-size:12px;min-width:20px;height:20px;display:none;align-items:center;justify-content:center;padding:0 6px}.badge.show{display:inline-flex}" +
     ".panel{position:fixed;right:18px;bottom:86px;width:360px;max-width:calc(100vw - 24px);height:520px;max-height:calc(100vh - 110px);background:#fff;color:#0F2A2E;border-radius:18px;box-shadow:0 18px 60px rgba(15,42,46,.35);display:none;flex-direction:column;overflow:hidden}" +
     ".panel.open{display:flex}" +
     "header{background:#0E7C7B;color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px}header b{font-size:16px;display:block}header small{font-size:12.5px;opacity:.92;display:flex;align-items:center;gap:6px}header .x{margin-left:auto;background:transparent;border:0;color:#fff;font-size:28px;line-height:1;cursor:pointer;padding:4px 8px}" +
@@ -52,8 +52,7 @@
   root.appendChild(st);
 
   var fab = el("button", "fab"); fab.setAttribute("aria-label", "Chat with us");
-  fab.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>';
-  fab.appendChild(el("span", null, "Chat with us"));
+  fab.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-4.2 3.6a.5.5 0 0 1-.8-.4V16h-.5A2.5 2.5 0 0 1 4 13.5z"/><path d="M8.5 8.5h7M8.5 11.5h4.5"/></svg>';
   var badge = el("span", "badge"); fab.appendChild(badge);
   var panel = el("div", "panel"); panel.setAttribute("role", "dialog"); panel.setAttribute("aria-label", "Chat with the Bubble5 team");
   var head = el("header"); var ht = el("div"); ht.appendChild(el("b", null, "Ask Bubble5"));

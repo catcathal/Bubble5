@@ -110,6 +110,32 @@ export async function botUpdate(request, env, user, cors) {
   return json({ bot: publicBot(fresh) }, 200, cors);
 }
 
+/* Conversation workflow status (open, on hold, resolved). The table is created on first use so no manual migration is needed. */
+let statusTableReady = false;
+async function ensureStatusTable(env) {
+  if (statusTableReady) return;
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS conversation_status (bot_id INTEGER NOT NULL, visitor TEXT NOT NULL, status TEXT NOT NULL, updated_at TEXT NOT NULL DEFAULT (datetime('now')), PRIMARY KEY (bot_id, visitor))"
+  ).run();
+  statusTableReady = true;
+}
+
+export async function botSetStatus(request, env, user, cors) {
+  let b;
+  try { b = await request.json(); } catch { return json({ error: "Invalid request." }, 400, cors); }
+  const visitor = String((b && b.visitor) || "").slice(0, 80);
+  const status = String((b && b.status) || "");
+  if (!visitor || !["open", "on_hold", "resolved"].includes(status)) return json({ error: "Invalid request." }, 400, cors);
+  const bot = await getOrCreateBot(env, user);
+  const exists = await env.DB.prepare("SELECT 1 AS ok FROM bot_messages WHERE bot_id = ? AND visitor = ? LIMIT 1").bind(bot.id, visitor).first();
+  if (!exists) return json({ error: "Conversation not found." }, 404, cors);
+  await ensureStatusTable(env);
+  await env.DB.prepare(
+    "INSERT INTO conversation_status (bot_id, visitor, status, updated_at) VALUES (?, ?, ?, datetime('now')) ON CONFLICT(bot_id, visitor) DO UPDATE SET status = excluded.status, updated_at = excluded.updated_at"
+  ).bind(bot.id, visitor, status).run();
+  return json({ ok: true, status }, 200, cors);
+}
+
 export async function botConversations(env, user, cors) {
   const bot = await getOrCreateBot(env, user);
   const rows = await env.DB.prepare(
@@ -124,6 +150,14 @@ export async function botConversations(env, user, cors) {
     g.last = m.created_at;
   }
   const conversations = [...groups.values()].sort((a, b) => (a.last < b.last ? 1 : -1)).slice(0, 50);
+  try {
+    await ensureStatusTable(env);
+    const st = await env.DB.prepare("SELECT visitor, status FROM conversation_status WHERE bot_id = ?").bind(bot.id).all();
+    const map = new Map((st.results || []).map((r) => [r.visitor, r.status]));
+    for (const c of conversations) c.status = map.get(c.visitor) || "open";
+  } catch (e) {
+    for (const c of conversations) c.status = "open";
+  }
   const stats = await env.DB.prepare(
     `SELECT SUM(role='user') AS questions, SUM(unanswered) AS unanswered, COUNT(DISTINCT visitor) AS visitors
      FROM bot_messages WHERE bot_id = ? AND visitor NOT LIKE 'test-%' AND created_at > datetime('now','-30 days')`

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bubble5 | AI Chatbots for Modern Businesses</title>
   <link rel="canonical" href="https://bubble5.online/">
-  <meta name="description" content="Bubble5 builds AI chatbots that answer customer questions from your own business information. Try the live demo.">
+  <meta name="description" content="Bubble5 builds AI chatbots that answer customer questions from your own business information. Try it for free.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 170 170'%3E%3Cg fill='%230E7C7B'%3E%3Ccircle cx='85' cy='80' r='76'/%3E%3Cpath d='M36 124L14 164l54-14z'/%3E%3C/g%3E%3Ctext x='85' y='112' font-size='92' font-weight='800' text-anchor='middle' fill='%23FFC53D' font-family='Arial,sans-serif'%3E5%3C/text%3E%3C/svg%3E">
   <meta name="theme-color" content="#0E7C7B">
   <meta property="og:title" content="Bubble5 | AI chatbots that answer from your own business info">
@@ -84,9 +84,7 @@
     }
     .nav-bar { display: flex; align-items: center; justify-content: space-between; min-height: 64px; gap: 12px; }
     .logo { font: 800 1.35rem/1 var(--display); letter-spacing: -0.03em; color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
-    .logo-mark { position: relative; isolation: isolate; width: 38px; height: 38px; flex: none; display: inline-flex; align-items: center; justify-content: center; background: none; color: var(--sun); font: 800 1.15rem/1 var(--display); letter-spacing: 0; padding-bottom: 3px; }
-    .logo-mark::before { content: ""; position: absolute; z-index: -1; left: 3%; top: 2%; width: 89%; height: 89%; border-radius: 50%; background: var(--lagoon); }
-    .logo-mark::after { content: ""; position: absolute; z-index: -1; inset: 0; background: var(--lagoon); clip-path: polygon(21% 73%, 8% 96%, 40% 88%); }
+    .logo-mark { width: 42px; height: 42px; flex: none; display: block; overflow: visible; filter: drop-shadow(0 3px 4px rgba(6,63,62,.28)); }
     .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
     .nav-links a:not(.btn) { color: var(--ink); text-decoration: none; font-weight: 500; }
     .nav-links a:not(.btn):hover { text-decoration: underline; text-underline-offset: 4px; }
@@ -333,11 +331,10 @@
 <body>
   <nav class="nav" aria-label="Main">
     <div class="wrap nav-bar">
-      <a href="#top" class="logo" aria-label="Bubble5 home"><span class="logo-mark" aria-hidden="true">5</span>Bubble5</a>
+      <a href="#top" class="logo" aria-label="Bubble5 home"><svg class="logo-mark" viewBox="0 0 200 200" aria-hidden="true" focusable="false"><defs><radialGradient id="lgB" cx="36%" cy="28%" r="82%"><stop offset="0" stop-color="#5FD0C9"/><stop offset=".45" stop-color="#0E7C7B"/><stop offset="1" stop-color="#063F3E"/></radialGradient><radialGradient id="lgR" cx="50%" cy="50%" r="50%"><stop offset=".8" stop-color="#9FEDE6" stop-opacity="0"/><stop offset="1" stop-color="#9FEDE6" stop-opacity=".5"/></radialGradient><radialGradient id="lgU" cx="62%" cy="94%" r="45%"><stop offset="0" stop-color="#8FF0E6" stop-opacity=".7"/><stop offset="1" stop-color="#8FF0E6" stop-opacity="0"/></radialGradient><linearGradient id="lgH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#fff" stop-opacity=".05"/></linearGradient><linearGradient id="lgF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE69A"/><stop offset="1" stop-color="#FFC53D"/></linearGradient></defs><circle cx="100" cy="98" r="90" fill="url(#lgB)"/><circle cx="100" cy="98" r="90" fill="url(#lgR)"/><circle cx="100" cy="98" r="90" fill="url(#lgU)"/><ellipse cx="68" cy="48" rx="38" ry="22" transform="rotate(-30 68 48)" fill="url(#lgH)"/><circle cx="153" cy="64" r="5.5" fill="#fff" opacity=".8"/><circle cx="162" cy="81" r="2.6" fill="#fff" opacity=".6"/><text x="100" y="140" text-anchor="middle" font-size="128" font-weight="800" fill="#063F3E" opacity=".35" style="font-family:var(--display)" transform="translate(0 3)">5</text><text x="100" y="140" text-anchor="middle" font-size="128" font-weight="800" fill="url(#lgF)" style="font-family:var(--display)">5</text></svg>Bubble5</a>
       <div class="nav-actions">
         <ul class="nav-links" id="navLinks">
-          <li><a href="#demo">Demo</a></li>
-          <li><a href="try.html">Try it free</a></li>
+          <li><a href="#top">Try for free</a></li>
           <li><a href="#how">How it works</a></li>
           <li><a href="#pricing">Pricing</a></li>
           <li><a href="#faq">FAQ</a></li>
@@ -359,7 +356,7 @@
           <a href="app.html#/signup" class="btn btn-primary">Start free</a>
           <a href="#contact" class="btn btn-outline">Talk to us</a>
         </div>
-        <p class="demo-note">Try the live demo: it answers as a made-up bakery, using only the information we gave it. Want to see it with your own business? <a href="try.html"><strong>Try it with your own info</strong></a>.</p>
+        <p class="demo-note">Try it for free: the assistant answers as a made-up bakery, using only the information we gave it. Want to see it with your own business? <a href="try.html"><strong>Try it with your own info</strong></a>.</p>
       </div>
 
       <section id="demo" aria-label="Live demo chatbot">
@@ -369,7 +366,7 @@
               <div class="chat-title">Maple &amp; Co. Bakery assistant</div>
               <div class="chat-sub">Powered by Bubble5</div>
             </div>
-            <span class="demo-badge"><span class="live-dot" aria-hidden="true"></span>Live demo</span>
+            <span class="demo-badge"><span class="live-dot" aria-hidden="true"></span>Try for free</span>
           </div>
           <div class="chat-messages" id="chatMessages" aria-live="polite">
             <div class="message bot">Hi! I'm a demo assistant for Maple &amp; Co. Bakery, a made-up business. Ask me about hours, the menu, allergies or custom cakes.</div>
@@ -396,6 +393,15 @@
         <div class="stat"><b>40%</b><span>of after-hours enquiries have already messaged a competitor by the next morning</span></div>
       </div>
       <p class="stats-src">Source: <a href="https://chatmaxima.com/blog/when-do-customers-actually-message-we-analysed-100000-conversations-to-find-out/" target="_blank" rel="noopener">ChatMaxima analysis of 100,000+ conversations</a>. Figures vary by business.</p>
+    </div>
+  </section>
+
+  <section id="story" class="section" aria-labelledby="storyH">
+    <div class="wrap" style="max-width:820px">
+      <div class="section-head" style="margin-left:auto;margin-right:auto"><h2 id="storyH">Jane, real estate agent in Spain</h2></div>
+      <p style="margin:0 0 14px">Jane runs a busy real estate business in Spain and now brings AI into her working day. She uploads her own listings to Bubble5, and when customers have questions about a property they get a quick, real-time answer.</p>
+      <p style="margin:0 0 14px">It is faster than the list-and-filter search she used before: visitors just ask, and the answer comes straight from her own listings.</p>
+      <p class="stats-src" style="text-align:left">A real Bubble5 customer, shared with her permission.</p>
     </div>
   </section>
 
@@ -607,7 +613,7 @@
   <footer>
     <div class="wrap footer-row">
       <span>&copy; 2026 Bubble5. All rights reserved.</span>
-      <nav class="footer-links" aria-label="Footer"><a href="try.html">Try it free</a><a href="#pricing">Pricing</a><a href="help.html">Help</a><a href="#contact">Contact</a></nav>
+      <nav class="footer-links" aria-label="Footer"><a href="try.html">Try for free</a><a href="#pricing">Pricing</a><a href="help.html">Help</a><a href="#contact">Contact</a></nav>
       <span>Demo mode: the bakery in the chat is fictional.</span>
     </div>
   </footer>

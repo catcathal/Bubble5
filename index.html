@@ -333,7 +333,8 @@
     .cta-strip p { margin-top: 10px; font-size: .9rem; color: var(--ink-soft); }
     .sticky-cta { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: none; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(251,253,252,.96); backdrop-filter: blur(8px); border-top: 1px solid var(--line); transform: translateY(110%); transition: transform .25s ease; }
     .sticky-cta.show { transform: none; }
-    .sticky-cta .btn { width: 100%; min-height: 50px; }
+    .sticky-cta { padding-right: 190px; }
+    .sticky-cta .btn { width: 100%; min-height: 50px; padding: 0 12px; }
     @media (max-width: 759px) { .sticky-cta { display: block; } body { padding-bottom: 72px; } }
     @media (prefers-reduced-motion: reduce) { .sticky-cta { transition: none; } }
     .demo-photo { display: block; width: 100%; height: auto; margin-top: 18px; border-radius: 20px; box-shadow: 0 10px 30px rgba(15,42,46,.14); }
@@ -647,7 +648,7 @@
     </div>
   </section>
 
-  <div class="sticky-cta" id="stickyCta" aria-hidden="true"><a href="app.html#/signup" class="btn btn-primary" tabindex="-1">Try it free: no card needed</a></div>
+  <div class="sticky-cta" id="stickyCta" aria-hidden="true"><a href="app.html#/signup" class="btn btn-primary" tabindex="-1">Try it free</a></div>
   <script>
   (function(){var b=document.getElementById("stickyCta");if(!b)return;var h=document.querySelector(".hero-actions"),p=document.getElementById("pricing");
   function u(){var past=h&&h.getBoundingClientRect().bottom<0,atP=p&&p.getBoundingClientRect().top<innerHeight&&p.getBoundingClientRect().bottom>120;var on=past&&!atP;b.classList.toggle("show",on);b.setAttribute("aria-hidden",on?"false":"true");b.querySelector("a").tabIndex=on?0:-1;}

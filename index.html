@@ -294,6 +294,8 @@
       .nav-links.open { display: flex; }
       .nav-links a:not(.btn) { display: block; padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 1.05rem; }
       .nav-links li:last-child a { border-bottom: none; }
+      .nav-links li:last-child { display: flex; justify-content: center; padding-top: 14px; }
+      .nav-links li:last-child .btn { min-width: 200px; }
       .nav-bar { position: relative; }
       .hero { padding: 36px 0 52px; }
       .hero-actions .btn { flex: 1 1 100%; }
@@ -356,7 +358,7 @@
           <li><a href="#faq">FAQ</a></li>
           <li><a href="#contact">Contact</a></li>
           <li><a href="help.html">Help</a></li>
-          <li><a class="btn btn-outline" id="loginBtn" href="app.html#/login">Business login</a></li>
+          <li><a class="btn btn-outline" id="loginBtn" href="app.html#/login">Login</a></li>
         </ul>
         <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="navLinks">Menu</button>
       </div>

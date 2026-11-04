@@ -335,6 +335,13 @@
     @media (max-width: 759px) { .sticky-cta { display: block; } body { padding-bottom: 72px; } }
     @media (prefers-reduced-motion: reduce) { .sticky-cta { transition: none; } }
     .demo-photo { display: block; width: 100%; height: auto; margin-top: 18px; border-radius: 20px; box-shadow: 0 10px 30px rgba(15,42,46,.14); }
+    .time-stat { margin-top: 18px; padding: 18px 20px; border-radius: 20px; background: #fff; border: 1.5px solid var(--line); }
+    .time-stat .big { font: 800 2.3rem/1.05 var(--display); letter-spacing: -0.03em; color: var(--lagoon); }
+    .time-stat .big small { font: 600 1rem var(--body); letter-spacing: 0; color: var(--ink); }
+    .time-stat p { margin-top: 6px; font-size: .98rem; line-height: 1.45; }
+    .time-stat .alt { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: .92rem; color: var(--ink-soft); }
+    .time-stat .src { margin-top: 10px; font-size: .78rem; color: var(--ink-soft); }
+    .time-stat .src a { color: inherit; }
   </style>
 </head>
 <body>
@@ -389,6 +396,12 @@
             <input type="text" id="chatInput" maxlength="500" placeholder="Ask us a question" aria-label="Your message" onkeypress="handleKeyPress(event)">
             <button id="sendBtn" type="button" onclick="sendMessage()">Send</button>
           </div>
+        </div>
+        <div class="time-stat">
+          <div class="big">6 to 10 hours <small>a week</small></div>
+          <p>That is how much time 22% of small-business leaders say AI saves them, compared with doing everything by hand.</p>
+          <p class="alt">On chat specifically, AI chatbots fully resolve 44.8% of conversations with no human involved.</p>
+          <p class="src">Sources: <a href="https://itbrief.news/story/ai-saves-small-business-leaders-6-to-10-hours-a-week" target="_blank" rel="noopener">Tech.co survey of 300 US business leaders, 2026</a> (AI in general); <a href="https://www.comm100.com/blog/what-percentage-of-chats-can-ai-chatbots-resolve" target="_blank" rel="noopener">Comm100 live chat benchmark, 2025 data</a>. Results vary by business.</p>
         </div>
         <img class="demo-photo" src="assets/relaxed-owner.jpg" width="1000" height="800" loading="lazy" decoding="async" alt="A relaxed business owner enjoying a hot drink at her desk while her website answers customer questions">
       </section>

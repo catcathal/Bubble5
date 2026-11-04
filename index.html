@@ -294,8 +294,9 @@
       .nav-links.open { display: flex; }
       .nav-links a:not(.btn) { display: block; padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 1.05rem; }
       .nav-links li:last-child a { border-bottom: none; }
-      .nav-links li:last-child { display: flex; justify-content: center; padding-top: 14px; }
-      .nav-links li:last-child .btn { min-width: 200px; }
+      .nav-links li.nav-btn { display: flex; justify-content: center; padding-top: 12px; }
+      .nav-links li.nav-btn .btn { min-width: 200px; }
+      .nav-links li:last-child { padding-bottom: 4px; }
       .nav-bar { position: relative; }
       .hero { padding: 36px 0 52px; }
       .hero-actions .btn { flex: 1 1 100%; }
@@ -355,13 +356,13 @@
       <a href="#top" class="logo" aria-label="Bubble5 home"><svg class="logo-mark" viewBox="0 0 200 200" aria-hidden="true" focusable="false"><defs><radialGradient id="lgB" cx="36%" cy="28%" r="82%"><stop offset="0" stop-color="#5FD0C9"/><stop offset=".45" stop-color="#0E7C7B"/><stop offset="1" stop-color="#063F3E"/></radialGradient><radialGradient id="lgR" cx="50%" cy="50%" r="50%"><stop offset=".8" stop-color="#9FEDE6" stop-opacity="0"/><stop offset="1" stop-color="#9FEDE6" stop-opacity=".5"/></radialGradient><radialGradient id="lgU" cx="62%" cy="94%" r="45%"><stop offset="0" stop-color="#8FF0E6" stop-opacity=".7"/><stop offset="1" stop-color="#8FF0E6" stop-opacity="0"/></radialGradient><linearGradient id="lgH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#fff" stop-opacity=".05"/></linearGradient><linearGradient id="lgF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE69A"/><stop offset="1" stop-color="#FFC53D"/></linearGradient></defs><circle cx="100" cy="98" r="90" fill="url(#lgB)"/><circle cx="100" cy="98" r="90" fill="url(#lgR)"/><circle cx="100" cy="98" r="90" fill="url(#lgU)"/><ellipse cx="68" cy="48" rx="38" ry="22" transform="rotate(-30 68 48)" fill="url(#lgH)"/><circle cx="153" cy="64" r="5.5" fill="#fff" opacity=".8"/><circle cx="162" cy="81" r="2.6" fill="#fff" opacity=".6"/><text x="100" y="140" text-anchor="middle" font-size="128" font-weight="800" fill="#063F3E" opacity=".35" style="font-family:var(--display)" transform="translate(0 3)">5</text><text x="100" y="140" text-anchor="middle" font-size="128" font-weight="800" fill="url(#lgF)" style="font-family:var(--display)">5</text></svg>Bubble5</a>
       <div class="nav-actions">
         <ul class="nav-links" id="navLinks">
-          <li><a href="#top">Try for free</a></li>
           <li><a href="#how">How it works</a></li>
           <li><a href="#pricing">Pricing</a></li>
           <li><a href="#faq">FAQ</a></li>
           <li><a href="#contact">Contact</a></li>
           <li><a href="help.html">Help</a></li>
-          <li><a class="btn btn-outline" id="loginBtn" href="app.html#/login">Login</a></li>
+          <li class="nav-btn"><a class="btn btn-outline" id="loginBtn" href="app.html#/login">Login</a></li>
+          <li class="nav-btn"><a class="btn btn-primary" id="startBtn" href="app.html#/signup">Start free</a></li>
         </ul>
         <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="navLinks">Menu</button>
       </div>

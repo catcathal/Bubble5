@@ -145,6 +145,28 @@
     .lm-note { text-align: center; font-size: .85rem; color: var(--ink-soft); margin: 4px 0 8px; }
     .lm-later { display: block; margin: 0 auto; background: none; border: 0; color: var(--ink-soft); text-decoration: underline; font: inherit; cursor: pointer; padding: 8px; }
     .lm-err { color: var(--danger); font-size: .9rem; text-align: center; margin: 6px 0; }
+    .hd-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .hd-filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 14px; }
+    .hd-chip { border: 1.5px solid var(--line); background: #fff; border-radius: 999px; min-height: 40px; padding: 0 14px; font: 600 .92rem var(--body); color: var(--ink); cursor: pointer; }
+    .hd-chip b { margin-left: 4px; color: var(--ink-soft); }
+    .hd-chip[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); } .hd-chip[aria-pressed="true"] b { color: #CFE0DC; }
+    .hd-table { border-top: 1px solid var(--line); }
+    .hd-row { border-bottom: 1px solid var(--line); }
+    .hd-main { display: grid; grid-template-columns: 120px 110px minmax(0,1fr) 84px; gap: 12px; align-items: center; width: 100%; text-align: left; background: none; border: 0; padding: 14px 4px; cursor: pointer; font: inherit; color: inherit; }
+    .hd-main:hover { background: var(--mist); } .hd-main:focus-visible { outline: 3px solid var(--sun); outline-offset: -3px; }
+    .hd-what b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hd-what small { display: block; color: var(--ink-soft); font-size: .86rem; } .hd-what small.hd-problem { color: var(--danger); font-weight: 600; }
+    .hd-who { font-weight: 600; } .hd-when { text-align: right; }
+    .hd-thread { padding: 4px 4px 16px; display: flex; flex-direction: column; gap: 8px; }
+    .hd-pulse { display: inline-block; width: 9px; height: 9px; margin-right: 6px; border-radius: 50%; background: #1fb866; box-shadow: 0 0 0 0 rgba(31,184,102,.6); animation: hdPulse 1.6s infinite; vertical-align: middle; }
+    @keyframes hdPulse { 70% { box-shadow: 0 0 0 9px rgba(31,184,102,0); } 100% { box-shadow: 0 0 0 0 rgba(31,184,102,0); } }
+    .hd-topics { list-style: none; display: grid; gap: 8px; margin-top: 12px; }
+    .hd-topics li { position: relative; display: flex; justify-content: space-between; gap: 12px; padding: 9px 12px; border-radius: 10px; background: #fff; border: 1px solid var(--line); overflow: hidden; }
+    .hd-bar { position: absolute; left: 0; top: 0; bottom: 0; background: #DCEEEA; z-index: 0; }
+    .hd-tn, .hd-tc { position: relative; z-index: 1; } .hd-tc { font-weight: 700; }
+    @media (max-width: 700px) { .hd-main { grid-template-columns: minmax(0,1fr) auto; grid-template-areas: "s w" "t t"; row-gap: 6px; } .hd-main .status-pill { grid-area: s; justify-self: start; } .hd-when { grid-area: w; } .hd-who { display: none; } .hd-what { grid-area: t; } }
+    @media (prefers-reduced-motion: reduce) { .hd-pulse { animation: none; } }
+    .hd-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
   </style>
 </head>
 <body>
@@ -166,7 +188,7 @@
     <a href="#/dashboard" data-route="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Home</a>
     <a href="#/knowledge" data-route="knowledge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/><path d="M9 8h6"/></svg>Knowledge</a>
     <a href="#/chatbot" data-route="chatbot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>Chatbot</a>
-    <a href="#/inbox" data-route="inbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 3h6l1-3h5"/></svg>Inbox</a>
+    <a href="#/inbox" data-route="inbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 3h6l1-3h5"/></svg>Helpdesk</a>
     <a href="#/billing" data-route="billing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/></svg>Billing</a>
     <a href="#/settings" data-route="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account</a>
   </nav>
@@ -344,7 +366,7 @@
   function renderError(msg) { root.innerHTML = '<div class="wrap" style="padding-top:28px">' + notice("err", esc(msg)) + '<button class="btn btn-primary" id="retry">Try again</button></div>'; document.getElementById("retry").onclick = route; }
 
   function renderShell(active) {
-    const links = [["dashboard", "Dashboard"], ["knowledge", "Knowledge base"], ["chatbot", "Your chatbot"], ["inbox", "Inbox"], ...(state.me && state.me.admin ? [["live", "Live chat"]] : []), ["billing", "Billing"], ["settings", "Account settings"]];
+    const links = [["dashboard", "Dashboard"], ["knowledge", "Knowledge base"], ["chatbot", "Your chatbot"], ["inbox", "Helpdesk"], ...(state.me && state.me.admin ? [["live", "Live chat"]] : []), ["billing", "Billing"], ["settings", "Account settings"]];
     root.innerHTML = `<div class="wrap shell">
       <aside class="side" aria-label="Portal">${links.map(([r, t]) => `<a href="#/${r}" ${r === active ? 'aria-current="page"' : ""}>${t}</a>`).join("")}
         <a href="help.html">Help and diagnostics</a></aside>
@@ -676,22 +698,92 @@
   }
 
   /* ---------- inbox: conversations, unanswered questions, leads ---------- */
+  /* ---------- helpdesk: problems and who is chatting right now ---------- */
+  const TOPICS = [
+    ["Pricing and payments", /\b(price|prices|pricing|cost|how much|fee|fees|pay|payment|paid|refund|invoice|charge|charged|discount|deposit|\$|€|£)\b/i],
+    ["Opening hours and location", /\b(open|opening|close|closing|hours|address|where|location|directions|parking|find you|today|tomorrow|weekend|sunday|saturday)\b/i],
+    ["Bookings and availability", /\b(book|booking|reserve|reservation|appointment|schedule|available|availability|quote|slot|table for)\b/i],
+    ["Products and services", /\b(menu|product|products|service|services|size|sizes|stock|ingredient|ingredients|vegan|gluten|allerg\w*|have you got|do you (have|sell|offer))\b/i],
+    ["Delivery and orders", /\b(deliver|delivery|shipping|ship|order|orders|track|tracking|pickup|collect)\b/i],
+    ["Problems and complaints", /\b(problem|issue|broken|not working|doesn'?t work|error|wrong|late|cancel|cancelled|complain|disappointed|damaged|missing)\b/i]
+  ];
+  function topicOf(text) { for (const [name, re] of TOPICS) if (re.test(text)) return name; return "Other questions"; }
+  function utcMs(iso) { return iso ? new Date(String(iso).replace(" ", "T") + "Z").getTime() : 0; }
+
   async function renderInbox(el) {
-    const [conv, leads] = await Promise.all([api("GET", "/bot/conversations"), api("GET", "/bot/leads")]);
-    const st = conv.stats;
-    const answeredPct = st.questions ? Math.round(((st.questions - st.unanswered) / st.questions) * 100) : null;
-    el.innerHTML = `<h1>Inbox</h1><p class="lead">What your customers are asking, in the last 30 days.</p>
-      <div class="stats">
-        <div class="stat"><div class="label">Questions</div><div class="value">${st.questions}</div><div class="sub">from ${st.visitors} visitor${st.visitors === 1 ? "" : "s"}</div></div>
-        <div class="stat"><div class="label">Answered</div><div class="value">${answeredPct === null ? "-" : answeredPct + "%"}</div><div class="sub">${st.unanswered} could not be answered</div></div>
-        <div class="stat"><div class="label">Leads captured</div><div class="value">${leads.leads.length}</div><div class="sub">visitors who left their email</div></div>
-      </div>
-      <div class="card"><h2>Leads</h2>${leads.leads.length ? `<ul class="doc-list">${leads.leads.map((l) => `<li class="doc"><div class="doc-main"><div class="doc-title">${esc(l.name || "Visitor")} &middot; <a href="mailto:${esc(l.email)}">${esc(l.email)}</a></div>
-        <div class="doc-snippet">${esc(l.message || "")}</div><div class="muted small">${esc(fmtDate(l.created_at))}</div></div></li>`).join("")}</ul>` : '<div class="empty"><p>No leads yet. When your chatbot cannot answer, it asks the visitor for their email and it shows up here.</p></div>'}</div>
-      <div class="card"><h2>Questions it could not answer</h2><p class="muted">Add these answers to your knowledge base and your chatbot gets better.</p>
-        ${conv.unanswered.length ? `<ul class="doc-list">${conv.unanswered.map((u) => `<li class="doc"><div class="doc-main"><div class="doc-title">${esc(u.question)}</div><div class="muted small">asked ${u.n} time${u.n === 1 ? "" : "s"}</div></div><div class="doc-actions"><a class="btn btn-outline btn-small" href="#/knowledge">Add answer</a></div></li>`).join("")}</ul>` : '<div class="empty"><p>Nothing unanswered. Nice.</p></div>'}</div>
-      <div class="card"><h2>Recent conversations</h2>${conv.conversations.length ? conv.conversations.map((c) => `<details class="conv"><summary>${esc(c.messages[0].content.slice(0, 70))} <span class="muted small">&middot; ${esc(fmtDate(c.last))}${c.unanswered ? " &middot; needs attention" : ""}</span></summary>
-        ${c.messages.map((m) => `<div class="tm ${m.role === "user" ? "u" : "a"}${m.unanswered ? " flag" : ""}">${esc(m.content)}</div>`).join("")}</details>`).join("") : '<div class="empty"><p>No conversations yet. Try the chatbot, or add it to your website.</p></div>'}</div>`;
+    const hd = { filter: "all", open: new Set(), conv: null, leads: null };
+    el.innerHTML = `<h1>Helpdesk</h1><p class="lead">Every visitor conversation, who needs you, and who is chatting right now.</p><div id="hdBody"><div class="loading"><span class="spinner"></span> Loading</div></div>`;
+    const body = document.getElementById("hdBody");
+
+    function ticketOf(c) {
+      const first = (c.messages.find((m) => m.role === "user") || c.messages[0] || { content: "" }).content;
+      const prob = c.messages.find((m) => m.unanswered);
+      let probQ = "";
+      if (prob) { const i = c.messages.indexOf(prob); for (let k = i - 1; k >= 0; k--) if (c.messages[k].role === "user") { probQ = c.messages[k].content; break; } }
+      const lastMs = utcMs(c.last), live = Date.now() - lastMs < 3 * 60 * 1000;
+      const resolved = c.status === "resolved", hold = c.status === "on_hold";
+      const attention = c.unanswered > 0 && !resolved;
+      const status = resolved ? "resolved" : hold ? "hold" : live ? "live" : attention ? "attention" : "answered";
+      return { c, first, probQ, lastMs, live, status, attention, resolved, hold };
+    }
+    function draw() {
+      const { conv, leads } = hd; if (!conv) return;
+      const tickets = conv.conversations.map(ticketOf).sort((a, b) => (b.live - a.live) || (b.attention - a.attention) || (b.lastMs - a.lastMs));
+      const liveN = tickets.filter((t) => t.live).length, attN = tickets.filter((t) => t.attention).length;
+      const st = conv.stats, answeredPct = st.questions ? Math.round(((st.questions - st.unanswered) / st.questions) * 100) : null;
+      const shown = tickets.filter((t) => hd.filter === "all" || (hd.filter === "live" && t.live) || (hd.filter === "attention" && t.attention) || (hd.filter === "hold" && t.hold) || (hd.filter === "resolved" && t.resolved));
+      const counts = {}; let totalQ = 0;
+      conv.conversations.forEach((c) => c.messages.forEach((m) => { if (m.role === "user" && m.content && m.content !== "(shared an email address)") { const t = topicOf(m.content); counts[t] = (counts[t] || 0) + 1; totalQ++; } }));
+      const topics = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      const pill = { live: ["ok", "Live now"], attention: ["err", "Needs you"], hold: ["warn", "On hold"], resolved: ["", "Resolved"], answered: ["", "Answered"] };
+      body.innerHTML = `
+        <div class="stats">
+          <div class="stat"><div class="label">Chatting now</div><div class="value">${liveN ? '<span class="hd-pulse" aria-hidden="true"></span>' : ""}${liveN}</div><div class="sub">active in the last 3 minutes</div></div>
+          <div class="stat"><div class="label">Need you</div><div class="value">${attN}</div><div class="sub">visitors it could not fully help</div></div>
+          <div class="stat"><div class="label">Answered</div><div class="value">${answeredPct === null ? "-" : answeredPct + "%"}</div><div class="sub">${st.questions} question${st.questions === 1 ? "" : "s"} from ${st.visitors} visitor${st.visitors === 1 ? "" : "s"}, 30 days</div></div>
+          <div class="stat"><div class="label">Leads captured</div><div class="value">${leads.leads.length}</div><div class="sub">visitors who left their email</div></div>
+        </div>
+        <div class="card"><div class="hd-head"><h2>Conversations</h2><span class="muted small" aria-live="polite">Updates every 5 seconds</span></div>
+          <div class="hd-filters" role="group" aria-label="Filter conversations">
+            ${[["all", "All", tickets.length], ["live", "Live now", liveN], ["attention", "Needs you", attN], ["hold", "On hold", tickets.filter((t) => t.hold).length], ["resolved", "Resolved", tickets.filter((t) => t.resolved).length]].map(([k, l, n]) => `<button type="button" class="hd-chip" data-f="${k}" aria-pressed="${hd.filter === k}">${l} <b>${n}</b></button>`).join("")}
+          </div>
+          ${shown.length ? `<div class="hd-table" role="list">${shown.map((t) => {
+            const id = t.c.visitor, open = hd.open.has(id), p = pill[t.status];
+            return `<div class="hd-row ${open ? "open" : ""}" role="listitem">
+              <button type="button" class="hd-main" data-v="${esc(id)}" aria-expanded="${open}">
+                <span class="status-pill ${p[0]}">${t.live ? '<span class="hd-pulse" aria-hidden="true"></span>' : ""}${p[1]}</span>
+                <span class="hd-who">Visitor ${esc(id.slice(-4).toUpperCase())}</span>
+                <span class="hd-what"><b>${esc((t.attention && t.probQ ? t.probQ : t.first).slice(0, 90))}</b>${t.attention ? `<small class="hd-problem">Could not answer${t.c.unanswered > 1 ? " (" + t.c.unanswered + " questions)" : ""}</small>` : `<small>${t.c.messages.filter((m) => m.role === "user").length} message${t.c.messages.filter((m) => m.role === "user").length === 1 ? "" : "s"}</small>`}</span>
+                <span class="hd-when muted small">${esc(ago(t.c.last))}</span>
+              </button>
+              ${open ? `<div class="hd-thread">${t.c.messages.map((m) => `<div class="tm ${m.role === "user" ? "u" : "a"}${m.unanswered ? " flag" : ""}">${esc(m.content)}</div>`).join("")}${t.attention ? `<p class="muted small">Add the missing answer in <a href="#/knowledge">your knowledge base</a> so it can answer next time.</p>` : ""}<div class="hd-actions">${t.resolved ? `<button type="button" class="btn btn-outline btn-small" data-st="open" data-v="${esc(id)}">Reopen</button>` : `<button type="button" class="btn btn-primary btn-small" data-st="resolved" data-v="${esc(id)}">Mark resolved</button>${t.hold ? `<button type="button" class="btn btn-outline btn-small" data-st="open" data-v="${esc(id)}">Take off hold</button>` : `<button type="button" class="btn btn-outline btn-small" data-st="on_hold" data-v="${esc(id)}">Put on hold</button>`}`}</div></div>` : ""}
+            </div>`; }).join("")}</div>`
+            : `<div class="empty"><p>${hd.filter === "all" ? "No conversations yet. Try the chatbot, or add it to your website, and visitors will show up here." : "Nothing here right now."}</p></div>`}
+        </div>
+        <div class="card"><h2>What customers ask about</h2><p class="muted">Grouped automatically by keywords, from the latest conversations.</p>
+          ${topics.length ? `<ul class="hd-topics">${topics.map(([n, c]) => `<li><span class="hd-bar" style="width:${Math.max(6, Math.round((c / topics[0][1]) * 100))}%"></span><span class="hd-tn">${esc(n)}</span><span class="hd-tc">${c}</span></li>`).join("")}</ul>` : '<div class="empty"><p>Topics appear after your first conversations.</p></div>'}
+        </div>
+        <div class="card"><h2>Questions it could not answer</h2><p class="muted">Add these answers to your knowledge base and your chatbot gets better.</p>
+          ${conv.unanswered.length ? `<ul class="doc-list">${conv.unanswered.map((u) => `<li class="doc"><div class="doc-main"><div class="doc-title">${esc(u.question)}</div><div class="muted small">asked ${u.n} time${u.n === 1 ? "" : "s"}</div></div></li>`).join("")}</ul><p style="margin-top:14px"><a class="btn btn-outline" href="#/knowledge">Add answers</a></p>` : '<div class="empty"><p>Nothing unanswered. Your chatbot has coped with every question so far.</p></div>'}
+        </div>
+        <div class="card"><h2>Leads</h2>${leads.leads.length ? `<ul class="doc-list">${leads.leads.map((l) => `<li class="doc"><div class="doc-main"><div class="doc-title">${esc(l.name || "Visitor")} &middot; <a href="mailto:${esc(l.email)}">${esc(l.email)}</a></div><div class="doc-snippet">${esc(l.message || "")}</div><div class="muted small">${esc(fmtDate(l.created_at))}</div></div></li>`).join("")}</ul>` : '<div class="empty"><p>No leads yet. When your chatbot cannot answer, it asks the visitor for their email and it appears here.</p></div>'}</div>`;
+      body.querySelectorAll(".hd-chip").forEach((b) => b.onclick = () => { hd.filter = b.dataset.f; draw(); });
+      body.querySelectorAll("[data-st]").forEach((b) => b.onclick = async () => {
+        b.disabled = true;
+        try { await api("PATCH", "/bot/conversations/status", { visitor: b.dataset.v, status: b.dataset.st }); await load(); }
+        catch (e) { b.disabled = false; b.textContent = "Could not save, try again"; }
+      });
+      body.querySelectorAll(".hd-main").forEach((b) => b.onclick = () => { const v = b.dataset.v; hd.open.has(v) ? hd.open.delete(v) : hd.open.add(v); draw(); const nb = body.querySelector('.hd-main[data-v="' + (window.CSS && CSS.escape ? CSS.escape(v) : v) + '"]'); if (nb) nb.focus({ preventScroll: true }); });
+    }
+    async function load() {
+      const [conv, leads] = await Promise.all([api("GET", "/bot/conversations"), hd.leads ? Promise.resolve(hd.leads) : api("GET", "/bot/leads")]);
+      const first = !hd.conv; hd.conv = conv; hd.leads = leads;
+      if (first && conv.conversations.some((c) => c.unanswered > 0 && c.status !== "resolved")) hd.filter = "attention"; /* open straight onto the visitors who need you */
+      draw();
+    }
+    await load();
+    clearInterval(liveTimer);
+    liveTimer = setInterval(() => { if (parseRoute().name !== "inbox" || document.hidden) return; load().catch(() => {}); }, 5000);
   }
 
 

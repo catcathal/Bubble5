@@ -159,3 +159,11 @@ CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS conversation_status (
+  bot_id INTEGER NOT NULL,
+  visitor TEXT NOT NULL,
+  status TEXT NOT NULL,                       -- open | on_hold | resolved
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (bot_id, visitor)
+);

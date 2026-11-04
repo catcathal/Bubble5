@@ -329,9 +329,10 @@
     .faq details p { margin-top: 10px; color: var(--ink-soft); }
     .trial-note { text-align: center; margin-top: 8px; color: var(--ink-soft); }
     @media (min-width: 760px) { .steps3 { grid-template-columns: repeat(3, minmax(0,1fr)); } .feats { grid-template-columns: repeat(3, minmax(0,1fr)); } }
-    .cta-strip { text-align: center; padding: 8px 20px 44px; }
+    .cta-strip { position: relative; z-index: 1; text-align: center; padding: 0 20px; margin: -44px 0; }
     .cta-strip .btn { min-height: 52px; padding: 0 30px; font-size: 1.05rem; }
     .cta-strip p { margin-top: 10px; font-size: .9rem; color: var(--ink-soft); }
+    @media (max-width: 759px) { .cta-strip { margin: -28px 0; } }
     .sticky-cta { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: none; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(251,253,252,.96); backdrop-filter: blur(8px); border-top: 1px solid var(--line); transform: translateY(110%); transition: transform .25s ease; }
     .sticky-cta.show { transform: none; }
     .sticky-cta { padding-right: 190px; }
@@ -348,6 +349,37 @@
     .time-stat .src a { color: inherit; }
     .seo-h2 { margin-top: 14px; font: 600 1.12rem/1.45 var(--body); color: var(--ink-soft); max-width: 36em; }
     .slogan { margin-top: 12px; font: 800 1.35rem/1.25 var(--display); letter-spacing: -0.02em; color: var(--lagoon-dark); }
+    .trust { display: grid; grid-template-columns: minmax(0,1fr); gap: 18px; margin-top: 32px; }
+    .trust-tabs { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: thin; }
+    .trust-tabs button { flex: 0 0 auto; text-align: left; border: 1.5px solid var(--line); background: #fff; border-radius: 16px; padding: 12px 16px; min-width: 190px; cursor: pointer; font: inherit; color: var(--ink); }
+    .trust-tabs button b { display: block; font: 700 1rem/1.25 var(--display); }
+    .trust-tabs button span { display: block; margin-top: 3px; font-size: .86rem; color: var(--ink-soft); }
+    .trust-tabs button:hover { border-color: var(--lagoon); }
+    .trust-tabs button[aria-selected="true"] { border-color: var(--lagoon); background: var(--lagoon); color: #fff; box-shadow: 0 6px 18px rgba(14,124,123,.25); }
+    .trust-tabs button[aria-selected="true"] span { color: #D7F1EE; }
+    .trust-tabs button:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+    .trust-stage { background: #fff; border: 1.5px solid var(--line); border-radius: 22px; padding: 22px; min-height: 340px; }
+    .trust-why { font-size: 1.05rem; color: var(--ink); max-width: 36em; margin-bottom: 16px; }
+    .mock { max-width: 460px; background: var(--paper); border: 1.5px solid var(--line); border-radius: 18px; padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 9px; }
+    .mock-bar { font: 700 .72rem/1 var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+    .bub { max-width: 86%; padding: 10px 14px; border-radius: 16px; font-size: .96rem; line-height: 1.4; animation: bubIn .35s ease both; }
+    .bub.u { align-self: flex-end; background: var(--lagoon); color: #fff; border-bottom-right-radius: 4px; }
+    .bub.a { align-self: flex-start; background: #fff; border: 1.5px solid var(--line); border-bottom-left-radius: 4px; }
+    .mock .bub:nth-of-type(2) { animation-delay: .25s; } .mock .bub:nth-of-type(3) { animation-delay: .5s; } .mock .bub:nth-of-type(4) { animation-delay: .75s; }
+    .mock-tag { align-self: flex-start; margin-top: 2px; background: #FFF3CF; border: 1.5px solid var(--sun); color: var(--ink); border-radius: 999px; padding: 6px 12px; font-weight: 700; font-size: .86rem; animation: bubIn .35s ease 1s both; }
+    @keyframes bubIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .locks { list-style: none; display: grid; gap: 12px; max-width: 520px; }
+    .locks li { padding: 14px 16px 14px 48px; border-radius: 14px; background: var(--mist); position: relative; }
+    .locks li::before { content: "\1F512"; position: absolute; left: 16px; top: 14px; }
+    .locks b { display: block; } .locks span { color: var(--ink-soft); font-size: .95rem; }
+    .trust-also { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .trust-also span { background: var(--mist); border-radius: 999px; padding: 9px 16px; font-weight: 600; font-size: .92rem; }
+    @media (min-width: 900px) {
+      .trust { grid-template-columns: 300px minmax(0,1fr); gap: 24px; align-items: start; }
+      .trust-tabs { flex-direction: column; overflow: visible; padding: 0; }
+      .trust-tabs button { min-width: 0; width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) { .bub, .mock-tag { animation: none; } }
   </style>
 </head>
 <body>
@@ -491,17 +523,58 @@
         <span class="eyebrow">Honest by design</span><h2>Built so you can trust it</h2>
         <p>A chatbot that makes things up is worse than no chatbot. Bubble5 is built to stay honest.</p>
       </div>
-      <div class="feats">
-        <div class="feat"><h3>Answers only from your info</h3><p>It does not guess prices, hours or policies. If your documents do not say it, it does not say it.</p></div>
-        <div class="feat"><h3>Hands over to you</h3><p>When it is unsure, it offers to take the visitor's email and forwards the question to you. Every one is saved as a lead.</p></div>
-        <div class="feat"><h3>Shows you what customers want</h3><p>See every question, what it could not answer, and add the missing answer in one click.</p></div>
-        <div class="feat"><h3>Speaks your customers' language</h3><p>It replies in the language the visitor writes in, in English, Spanish, French, Thai and many more.</p></div>
-        <div class="feat"><h3>A chat link, no website needed</h3><p>Get a page of your own for your chatbot. Share it on Facebook, WhatsApp, Instagram or a QR code.</p></div>
-        <div class="feat"><h3>Takes bookings and quotes</h3><p>Visitors can request a booking or quote in the chat. It lands in your inbox, ready to confirm.</p></div>
-        <div class="feat"><h3>Always on, always quick</h3><p>Answers in seconds, at night, on weekends and on holidays, so you do not have to be there.</p></div>
-        <div class="feat"><h3>Locked to your website</h3><p>Limit it to your own domains so nobody else can use your chats.</p></div>
-        <div class="feat"><h3>Private by design</h3><p>Your documents are only used to answer your own customers. Delete your data any time.</p></div>
+      <div class="trust" id="trust">
+        <div class="trust-tabs" role="tablist" aria-label="Ways Bubble5 stays honest">
+          <button type="button" role="tab" id="tt1" aria-controls="tp1" aria-selected="true"><b>Never makes things up</b><span>Answers only from your info</span></button>
+          <button type="button" role="tab" id="tt2" aria-controls="tp2" aria-selected="false" tabindex="-1"><b>Hands over to you</b><span>Saves every unsure question as a lead</span></button>
+          <button type="button" role="tab" id="tt3" aria-controls="tp3" aria-selected="false" tabindex="-1"><b>Speaks their language</b><span>Replies in the visitor's own language</span></button>
+          <button type="button" role="tab" id="tt4" aria-controls="tp4" aria-selected="false" tabindex="-1"><b>Takes bookings and quotes</b><span>Lands in your inbox, ready to confirm</span></button>
+          <button type="button" role="tab" id="tt5" aria-controls="tp5" aria-selected="false" tabindex="-1"><b>Private and locked down</b><span>Your data stays yours</span></button>
+        </div>
+        <div class="trust-stage">
+          <div class="trust-panel" role="tabpanel" id="tp1" aria-labelledby="tt1">
+            <p class="trust-why">If your documents do not say it, it does not say it. No guessed prices, hours or policies.</p>
+            <div class="mock"><div class="mock-bar">Example conversation</div>
+              <div class="bub u">Do you offer gluten-free wedding cakes?</div>
+              <div class="bub a">I don't have that information, and I won't guess. Want me to pass your question to the team? Leave your email and they'll reply.</div>
+              <div class="mock-tag">Not in your documents, so it hands over</div></div>
+          </div>
+          <div class="trust-panel" role="tabpanel" id="tp2" aria-labelledby="tt2" hidden>
+            <p class="trust-why">When it is unsure, it takes the visitor's email and forwards the question to you. You see everything it could not answer and add the answer in one click.</p>
+            <div class="mock"><div class="mock-bar">Example conversation</div>
+              <div class="bub u">Can I bring my own cake?</div>
+              <div class="bub a">Good question, I'll ask the team. What's your email?</div>
+              <div class="bub u">sam@example.com</div>
+              <div class="bub a">Thanks! They'll reply by email.</div>
+              <div class="mock-tag">&#10003; Saved to your Inbox as a lead</div></div>
+          </div>
+          <div class="trust-panel" role="tabpanel" id="tp3" aria-labelledby="tt3" hidden>
+            <p class="trust-why">It replies in the language the visitor writes in: English, Spanish, French, Thai and many more. Nothing to translate or hire for.</p>
+            <div class="mock"><div class="mock-bar">Example conversation</div>
+              <div class="bub u" lang="es">&iquest;Tienen mesa para cuatro esta noche?</div>
+              <div class="bub a" lang="es">&iexcl;S&iacute;! Tenemos una a las 19:30. &iquest;Quiere que se la reserve?</div>
+              <div class="mock-tag">Reply in the visitor's language, automatically</div></div>
+          </div>
+          <div class="trust-panel" role="tabpanel" id="tp4" aria-labelledby="tt4" hidden>
+            <p class="trust-why">Visitors can ask for a booking or a quote right in the chat. It arrives in your inbox, ready to confirm.</p>
+            <div class="mock"><div class="mock-bar">Example conversation</div>
+              <div class="bub u">Can I book a table for 4 on Friday at 7?</div>
+              <div class="bub a">I can send a booking request to the team for Friday 7:00 pm, 4 people. Shall I?</div>
+              <div class="bub u">Yes please</div>
+              <div class="bub a">Done! The team will confirm by email.</div>
+              <div class="mock-tag">&#128236; Booking request in your inbox</div></div>
+          </div>
+          <div class="trust-panel" role="tabpanel" id="tp5" aria-labelledby="tt5" hidden>
+            <p class="trust-why">Built so only you and your customers ever touch your information.</p>
+            <ul class="locks">
+              <li><b>Locked to your website</b><span>Limit it to your own domains so nobody else can use your chats.</span></li>
+              <li><b>Your documents stay yours</b><span>They are only used to answer your own customers.</span></li>
+              <li><b>Delete any time</b><span>Remove your data whenever you like.</span></li>
+            </ul>
+          </div>
+        </div>
       </div>
+      <p class="trust-also"><span>Always on, day and night</span><span>Share a chat link on Facebook, WhatsApp or a QR code</span><span>See every question your customers ask</span></p>
       <div class="uses" aria-label="Works for">
         <span>Cafes and restaurants</span><span>Salons and spas</span><span>Clinics and dentists</span><span>Hotels and tours</span><span>Online shops</span><span>Gyms and studios</span><span>Trades and services</span><span>Schools and classes</span>
       </div>
@@ -962,6 +1035,26 @@
       setInterval(function () { if (!paused) show((i + 1) % items.length); }, 7000);
     }
   }).catch(function () {});
+})();
+</script>
+<script>
+(function () {
+  var tabs = Array.prototype.slice.call(document.querySelectorAll("#trust [role=tab]")), panels = Array.prototype.slice.call(document.querySelectorAll("#trust [role=tabpanel]"));
+  if (!tabs.length) return;
+  function pick(i, focus) {
+    tabs.forEach(function (t, k) { var on = k === i; t.setAttribute("aria-selected", on ? "true" : "false"); t.tabIndex = on ? 0 : -1; panels[k].hidden = !on; });
+    if (focus) tabs[i].focus();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener("click", function () { pick(i, false); });
+    t.addEventListener("keydown", function (e) {
+      var n = tabs.length, k = e.key;
+      if (k === "ArrowDown" || k === "ArrowRight") { e.preventDefault(); pick((i + 1) % n, true); }
+      else if (k === "ArrowUp" || k === "ArrowLeft") { e.preventDefault(); pick((i - 1 + n) % n, true); }
+      else if (k === "Home") { e.preventDefault(); pick(0, true); }
+      else if (k === "End") { e.preventDefault(); pick(n - 1, true); }
+    });
+  });
 })();
 </script>
 <script src="assets/lang.js" defer></script>

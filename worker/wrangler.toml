@@ -39,7 +39,7 @@ AI_SEARCH_INSTANCE = "bubble5-demo"
 ALLOWED_ORIGINS = "https://catcathal.github.io,https://bubble5.mlgcostello.workers.dev,https://bubble5.online,https://www.bubble5.online,http://localhost:8080,http://127.0.0.1:8080"
 
 # Google sign-in: paste your OAuth Web client ID (public, not a secret) to switch the Continue with Google button on.
-# GOOGLE_CLIENT_ID = "1234567890-abc.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = "382879827562-t6obukc8oai8u9nqalhqpsh20d0b9m7d.apps.googleusercontent.com"
 
 # Billing (Stripe). Put your Stripe Price IDs here as JSON once you have created them, e.g.
 # STRIPE_PRICES = '{"starter":{"monthly":"price_...","annual":"price_..."},"pro":{"monthly":"price_...","annual":"price_..."}}'

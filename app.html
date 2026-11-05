@@ -167,6 +167,9 @@
     @media (max-width: 700px) { .hd-main { grid-template-columns: minmax(0,1fr) auto; grid-template-areas: "s w" "t t"; row-gap: 6px; } .hd-main .status-pill { grid-area: s; justify-self: start; } .hd-when { grid-area: w; } .hd-who { display: none; } .hd-what { grid-area: t; } }
     @media (prefers-reduced-motion: reduce) { .hd-pulse { animation: none; } }
     .hd-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .g-box { margin: 4px 0 6px; } #gBtn { display: flex; justify-content: center; min-height: 44px; }
+    .or-line { display: flex; align-items: center; gap: 12px; margin: 16px 0 4px; color: var(--ink-soft); font-size: .9rem; }
+    .or-line::before, .or-line::after { content: ""; flex: 1; height: 1px; background: var(--line); }
   </style>
 </head>
 <body>
@@ -200,6 +203,7 @@
   /* ---------- configuration ---------- */
   const API = "https://bubble5.mlgcostello.workers.dev";
   const TURNSTILE_SITE_KEY = "0x4AAAAAAFpSUJeJCnZzIYfw"; // paste your Cloudflare Turnstile site key to switch the captcha on
+  const STRIPE_PORTAL_LOGIN = "https://billing.stripe.com/p/login/cNi3cu2YkdAs0aR8uv3cc00";
   const PLAN_INFO = {
     starter: { name: "Starter", monthly: 29, annual: 23, features: ["1 chatbot agent", "Up to 1,000 chats a month", "Basic AI training", "Email support"] },
     pro: { name: "Pro", monthly: 79, annual: 63, features: ["3 chatbot agents", "Up to 10,000 chats a month", "Custom knowledge base integration", "Priority support"] },
@@ -376,6 +380,35 @@
     document.title = "Bubble5 | " + (links.find((l) => l[0] === active) || ["", "Portal"])[1];
   }
 
+  /* ---------- Continue with Google (only appears once the Worker has a GOOGLE_CLIENT_ID) ---------- */
+  let gClientId = null;
+  async function googleClientId() {
+    if (gClientId !== null) return gClientId;
+    try { gClientId = (await api("GET", "/auth/config")).google_client_id || ""; } catch (e) { gClientId = ""; }
+    return gClientId;
+  }
+  function loadGsi(done) {
+    if (window.google && google.accounts && google.accounts.id) return done();
+    const s = document.createElement("script"); s.src = "https://accounts.google.com/gsi/client"; s.async = true; s.defer = true; s.onload = done; document.head.appendChild(s);
+  }
+  async function mountGoogle(signup) {
+    const id = await googleClientId(), box = document.getElementById("gBox");
+    if (!id || !box) return;
+    loadGsi(() => {
+      const btn = document.getElementById("gBtn"); if (!btn || !window.google) return;
+      google.accounts.id.initialize({
+        client_id: id, ux_mode: "popup",
+        callback: async (resp) => {
+          const msg = document.getElementById("authMsg"); if (msg) msg.innerHTML = "";
+          try { const out = await api("POST", "/auth/google", { credential: resp.credential }); setToken(out.token); state.me = null; location.hash = "#/dashboard"; }
+          catch (err) { if (msg) msg.innerHTML = notice("err", esc(err.message)); }
+        }
+      });
+      google.accounts.id.renderButton(btn, { theme: "outline", size: "large", shape: "pill", text: signup ? "signup_with" : "signin_with", logo_alignment: "left", width: 340 });
+      box.hidden = false;
+    });
+  }
+
   /* ---------- sign in / sign up ---------- */
   function renderAuth(mode, params) {
     const signup = mode === "signup";
@@ -388,6 +421,7 @@
         <button type="button" role="tab" aria-selected="${signup}" data-mode="signup">Create account</button>
       </div>
       <div id="authMsg">${params.get("expired") ? notice("info", "Your session ended. Please log in again.") : params.get("reset") ? notice("ok", "Password changed. Log in with your new password.") : ""}</div>
+      <div class="g-box" id="gBox" hidden><div id="gBtn"></div><div class="or-line"><span>or</span></div></div>
       <form id="authForm" novalidate>
         ${signup ? `<div class="form-group"><label for="aName">Your name</label><input id="aName" autocomplete="name" required></div>` : ""}
         <div class="form-group"><label for="aEmail">Email</label><input id="aEmail" type="email" autocomplete="email" inputmode="email" required></div>
@@ -401,6 +435,7 @@
     </div></div>`;
     root.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => { location.hash = "#/" + b.dataset.mode; }));
     if (signup) mountTurnstile();
+    mountGoogle(signup);
     const form = document.getElementById("authForm");
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -942,13 +977,14 @@
         <div class="form-group"><label for="sCompany">Company name</label><input id="sCompany" value="${esc(u.company)}" autocomplete="organization"></div></div>
         <div class="form-group"><label for="sEmail">Email</label><input id="sEmail" value="${esc(u.email)}" disabled><p class="hint">To change your email, <a href="${supportLink("Please change the email on my Bubble5 account from " + u.email + " to: ")}">contact us</a>.</p></div>
         <button class="btn btn-primary" type="submit">Save changes</button></form>
-      <form class="card" id="pwForm"><h2>Password</h2><p class="muted">Changing it signs you out on your other devices.</p><div id="wMsg"></div>
+      ${u.password_set === false ? `<div class="card"><h2>Password</h2><p class="muted">You signed in with Google, so there is no password to manage. If you would like one as well, use <a href="#/forgot">Forgot password</a>.</p></div>` : `<form class="card" id="pwForm"><h2>Password</h2><p class="muted">Changing it signs you out on your other devices.</p><div id="wMsg"></div>
         <div class="form-group"><label for="curPw">Current password</label><input id="curPw" type="password" autocomplete="current-password" required></div>
         <div class="form-group"><label for="newPw">New password</label><input id="newPw" type="password" autocomplete="new-password" required><p class="hint">At least 8 characters.</p></div>
-        <button class="btn btn-outline" type="submit">Change password</button></form>
+        <button class="btn btn-outline" type="submit">Change password</button></form>`}
+      <div class="card"><h2>Billing and invoices</h2><p class="muted">Update your card, download invoices or cancel your subscription in Stripe's secure customer portal.</p><a class="btn btn-primary" href="${STRIPE_PORTAL_LOGIN}?prefilled_email=${encodeURIComponent(u.email)}" target="_blank" rel="noopener noreferrer">Manage billing in Stripe</a><p class="hint">Stripe emails a one-time sign-in link to ${esc(u.email)}. It opens in a new tab.</p></div>
       <div class="card"><h2>Session</h2><p class="muted">Log out of Bubble5 on this device.</p><button class="btn btn-outline" id="logoutBtn2">Log out</button></div>
       <form class="card danger-zone" id="delForm"><h2>Delete account</h2><p class="muted">Permanently removes your account and knowledge base. This can't be undone. Cancel any subscription first.</p><div id="dMsg"></div>
-        <div class="form-group"><label for="delPw">Enter your password to confirm</label><input id="delPw" type="password" autocomplete="current-password" required></div>
+        ${u.password_set === false ? `<div class="form-group"><label for="delPw">Type DELETE to confirm</label><input id="delPw" autocomplete="off" required></div>` : `<div class="form-group"><label for="delPw">Enter your password to confirm</label><input id="delPw" type="password" autocomplete="current-password" required></div>`}
         <button class="btn btn-danger" type="submit">Delete my account</button></form>`;
     function wire(id, msgId, fn, okText) {
       document.getElementById(id).addEventListener("submit", async (e) => {
@@ -960,10 +996,10 @@
       });
     }
     wire("profileForm", "pMsg", async () => { const out = await api("PATCH", "/me", { name: document.getElementById("sName").value, company: document.getElementById("sCompany").value }); state.me.user = out.user; }, "Saved.");
-    wire("pwForm", "wMsg", async () => { await api("POST", "/me/password", { current_password: document.getElementById("curPw").value, new_password: document.getElementById("newPw").value }); document.getElementById("pwForm").reset(); }, "Password changed. Other devices have been signed out.");
+    if (document.getElementById("pwForm")) wire("pwForm", "wMsg", async () => { await api("POST", "/me/password", { current_password: document.getElementById("curPw").value, new_password: document.getElementById("newPw").value }); document.getElementById("pwForm").reset(); }, "Password changed. Other devices have been signed out.");
     wire("delForm", "dMsg", async () => {
       if (!confirm("Delete your account and everything in it? This can't be undone.")) return;
-      await api("DELETE", "/me", { password: document.getElementById("delPw").value });
+      await api("DELETE", "/me", u.password_set === false ? { confirm: document.getElementById("delPw").value } : { password: document.getElementById("delPw").value });
       setToken(""); state.me = null; location.hash = "#/signup";
     });
     document.getElementById("logoutBtn2").onclick = () => logoutBtn.click();

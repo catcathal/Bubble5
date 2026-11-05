@@ -27,6 +27,12 @@ To demo a prospect's own business, edit the documents in `worker/src/kb.js` (and
 - `help.html` is a public troubleshooting page with a guided diagnosis and live system check (`GET /health` on the Worker).
 - Passwords are hashed with PBKDF2 and never stored in clear text. Login is rate limited.
 
+### Continue with Google (sign up and log in)
+1. In Google Cloud Console, go to APIs and Services, then Credentials, then Create credentials, OAuth client ID, type **Web application**.
+2. Under Authorised JavaScript origins add `https://bubble5.online` (and `https://www.bubble5.online` if you use it).
+3. Copy the **Client ID** (it looks like `1234-abc.apps.googleusercontent.com`; it is public, not a secret) into `worker/wrangler.toml` as `GOOGLE_CLIENT_ID` and push. The **Continue with Google** button then appears on the log in and sign up pages by itself.
+Accounts created with Google have no password. They can add one with Forgot password, and delete the account by typing DELETE. An existing account with the same verified email is signed in as itself.
+
 ### Switching on online billing (Stripe), the quick way
 1. In Stripe, copy your secret key and add it to the Worker as the secret `STRIPE_SECRET_KEY`.
 2. Sign in to the portal as the admin (the `NOTIFY_EMAIL` account), open Billing and press **Set up Stripe billing**. It creates the three plans (monthly and annual), the payment webhook and the customer billing portal, and saves the IDs in the database. Safe to press again.

@@ -110,6 +110,7 @@ function publicUser(u) {
     status: u.sub_status,
     period_end: u.current_period_end || null,
     has_billing: !!u.stripe_customer_id,
+    password_set: u.pw_salt !== "google",
     created_at: u.created_at,
   };
 }
@@ -210,6 +211,49 @@ async function login(request, env, cors) {
   return reply({ token, user: publicUser(user) }, 200, cors);
 }
 
+/* Sign in or sign up with Google. The browser sends the ID token Google issued; we verify it with Google and
+   check it was issued for our client ID and the email is verified. Accounts created this way have no password. */
+async function googleSignIn(request, env, cors) {
+  if (!env.GOOGLE_CLIENT_ID) return fail("Google sign-in is not switched on yet.", 501, cors, { code: "google_not_ready" });
+  const b = await readJson(request);
+  const credential = String((b && b.credential) || "");
+  if (!credential || credential.length > 6000) return fail("Invalid request.", 400, cors);
+
+  const ip = await ipKey(request);
+  const recent = await env.DB.prepare(
+    "SELECT COUNT(*) AS n FROM login_attempts WHERE key = ? AND kind = 'google' AND created_at > datetime('now','-15 minutes')"
+  ).bind(ip).first();
+  if (recent && recent.n >= 20) return fail("Too many attempts. Please wait a few minutes and try again.", 429, cors);
+  await env.DB.prepare("INSERT INTO login_attempts (key, kind) VALUES (?, 'google')").bind(ip).run();
+
+  let info;
+  try {
+    const r = await fetch("https://oauth2.googleapis.com/tokeninfo?id_token=" + encodeURIComponent(credential));
+    if (!r.ok) throw new Error("tokeninfo " + r.status);
+    info = await r.json();
+  } catch (e) {
+    return fail("We couldn't verify your Google sign-in. Please try again.", 401, cors);
+  }
+  const issOk = info.iss === "accounts.google.com" || info.iss === "https://accounts.google.com";
+  const email = String(info.email || "").trim().toLowerCase();
+  if (info.aud !== env.GOOGLE_CLIENT_ID || !issOk || String(info.email_verified) !== "true" || !EMAIL_RE.test(email) || Number(info.exp) * 1000 < Date.now()) {
+    return fail("We couldn't verify your Google sign-in. Please try again.", 401, cors);
+  }
+
+  let user = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(email).first();
+  let created = false;
+  if (!user) {
+    const name = clean(info.name || email.split("@")[0], 100) || "Friend";
+    const hash = await derivePassword(randomToken(32), crypto.getRandomValues(new Uint8Array(16)));
+    const res = await env.DB.prepare("INSERT INTO users (email, name, company, pw_hash, pw_salt) VALUES (?, ?, ?, ?, 'google')")
+      .bind(email, name, null, hash).run();
+    user = await env.DB.prepare("SELECT * FROM users WHERE id = ?").bind(res.meta.last_row_id).first();
+    created = true;
+  }
+  const token = await createSession(env, user.id);
+  return reply({ token, user: publicUser(user), created }, created ? 201 : 200, cors);
+}
+
 async function logout(request, env, cors) {
   const token = bearer(request);
   if (token) await env.DB.prepare("DELETE FROM sessions WHERE token_hash = ?").bind(await sha256Hex(token)).run();
@@ -253,6 +297,7 @@ async function changePassword(request, env, user, cors) {
   if (!b) return fail("Invalid request.", 400, cors);
   const current = String(b.current_password || "");
   const next = String(b.new_password || "");
+  if (user.pw_salt === "google") return fail("You signed in with Google, so there is no password to change. Use Forgot password on the log in page if you want to create one.", 400, cors);
   if (next.length < 8) return fail("Use a new password with at least 8 characters.", 400, cors);
   if (next.length > 200) return fail("That password is too long.", 400, cors);
   const hash = await derivePassword(current, fromB64Url(user.pw_salt));
@@ -269,8 +314,12 @@ async function changePassword(request, env, user, cors) {
 async function deleteAccount(request, env, user, cors) {
   const b = await readJson(request);
   if (!b) return fail("Invalid request.", 400, cors);
-  const hash = await derivePassword(String(b.password || ""), fromB64Url(user.pw_salt));
-  if (!safeEqual(hash, user.pw_hash)) return fail("Your password is not correct.", 403, cors);
+  if (user.pw_salt === "google") {
+    if (String(b.confirm || "") !== "DELETE") return fail("Type DELETE to confirm.", 403, cors);
+  } else {
+    const hash = await derivePassword(String(b.password || ""), fromB64Url(user.pw_salt));
+    if (!safeEqual(hash, user.pw_hash)) return fail("Your password is not correct.", 403, cors);
+  }
   if (ACTIVE_STATUSES.includes(user.sub_status)) {
     return fail("Cancel your subscription in Billing before deleting your account.", 409, cors);
   }
@@ -774,6 +823,8 @@ export async function handleApp(request, env, url, cors, ctx) {
   try {
     if (path === "/auth/signup" && method === "POST") return await signup(request, env, cors);
     if (path === "/auth/login" && method === "POST") return await login(request, env, cors);
+    if (path === "/auth/google" && method === "POST") return await googleSignIn(request, env, cors);
+    if (path === "/auth/config" && method === "GET") return reply({ google_client_id: env.GOOGLE_CLIENT_ID || "" }, 200, cors);
     if (path === "/auth/logout" && method === "POST") return await logout(request, env, cors);
     if (path === "/auth/forgot" && method === "POST") return await forgotPassword(request, env, cors, ctx);
     if (path === "/auth/reset" && method === "POST") return await resetPassword(request, env, cors);

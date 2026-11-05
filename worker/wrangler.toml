@@ -38,6 +38,9 @@ AI_SEARCH_INSTANCE = "bubble5-demo"
 # Add your GitHub Pages / custom domain here.
 ALLOWED_ORIGINS = "https://catcathal.github.io,https://bubble5.mlgcostello.workers.dev,https://bubble5.online,https://www.bubble5.online,http://localhost:8080,http://127.0.0.1:8080"
 
+# Google sign-in: paste your OAuth Web client ID (public, not a secret) to switch the Continue with Google button on.
+# GOOGLE_CLIENT_ID = "1234567890-abc.apps.googleusercontent.com"
+
 # Billing (Stripe). Put your Stripe Price IDs here as JSON once you have created them, e.g.
 # STRIPE_PRICES = '{"starter":{"monthly":"price_...","annual":"price_..."},"pro":{"monthly":"price_...","annual":"price_..."}}'
 # Secrets for billing: STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET (webhook URL: <worker-url>/stripe-webhook)

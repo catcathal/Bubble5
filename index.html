@@ -169,7 +169,7 @@
     @media (prefers-reduced-motion: reduce) { .love-card.swap { animation: none; } }
     .hero { background: var(--mist); padding: 56px 0 72px; border-bottom: 1px solid var(--line); }
     .hero-grid > * { min-width: 0; }
-    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 56px; align-items: center; }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 56px; align-items: start; }
     .hero h1 { font-size: clamp(2.3rem, 5.2vw, 3.9rem); font-weight: 800; max-width: 16ch; }
     .hero-lead { margin-top: 20px; font-size: 1.15rem; color: var(--ink-soft); max-width: 46ch; }
     .hero-actions { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 12px; }
@@ -272,7 +272,12 @@
 
     /* ---------- Tablet and phone ---------- */
     @media (max-width: 920px) {
-      .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+      .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
+      /* Phones: show the live demo right under the headline, before the buttons */
+      .hero-grid > div:first-child { display: contents; }
+      #demo { order: 1; margin-top: 24px; }
+      .hero-actions, .demo-note { order: 2; }
+      .demo-note { margin-bottom: 8px; }
       .hero h1 { max-width: 16ch; }
       .pricing-grid { grid-template-columns: minmax(0, 1fr); max-width: 520px; }
       .contact-wrap { grid-template-columns: minmax(0, 1fr); gap: 28px; }
@@ -408,7 +413,6 @@
         <h1>Answer customers at 2am. Get your evenings back.</h1>
         <h2 class="seo-h2">Bubble5 is an AI-powered customer support backend on Cloudflare, with a free trial and affordable packages for small and growing businesses, built on modern AI models.</h2>
         <p class="slogan">Leave customer support to powerful new AI models.</p>
-        <p class="hero-lead">Leave the work to us. We run everything on our backend and give you one snippet to add, so you are up in about 2 minutes. Customers get accurate answers any hour of the day, and you stop answering the same questions twice.</p>
         <div class="hero-actions">
           <a href="app.html#/signup" class="btn btn-primary">Start free</a>
           <a href="#contact" class="btn btn-outline">Talk to us</a>

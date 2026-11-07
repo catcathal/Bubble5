@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS bots (
   allowed_domains TEXT NOT NULL DEFAULT '',   -- comma separated hostnames; empty = any site
   handoff_email TEXT,
   enabled INTEGER NOT NULL DEFAULT 1,
+  settings TEXT,                              -- JSON: instructions, style, starters, FAQs, widget look (see botsettings.js). Added automatically to older databases.
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

@@ -1,7 +1,8 @@
 // Business accounts: sign up / log in, knowledge base, billing (Stripe-ready) and health checks.
 // Everything here is stored in the D1 database bound as env.DB (see schema.sql).
 
-import { PLANS } from "./plans.js";
+import { PLANS, planOf, limitsOf } from "./plans.js";
+import { fetchPage } from "./webimport.js";
 import { botGet, botUpdate, botConversations, botSetStatus, botLeads, botDeleteData } from "./bot.js";
 import { sendEmail, escapeHtml } from "./mail.js";
 import { isAdmin, adminList, adminThread, adminReply, adminClose } from "./live.js";
@@ -11,7 +12,6 @@ export { PLANS };
 
 const SESSION_DAYS = 30;
 const PBKDF2_ITERATIONS = 100000; // the maximum Cloudflare Workers allows
-const MAX_DOC_CHARS = 20000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ACTIVE_STATUSES = ["active", "trialing", "past_due"];
 
@@ -265,12 +265,12 @@ async function overview(env, user, cors) {
   const usage = await env.DB.prepare(
     "SELECT chats FROM usage WHERE user_id = ? AND month = strftime('%Y-%m','now')"
   ).bind(user.id).first();
-  const docs = await env.DB.prepare("SELECT COUNT(*) AS n FROM kb_docs WHERE user_id = ?").bind(user.id).first();
+  const docs = await env.DB.prepare("SELECT COUNT(*) AS n, COALESCE(SUM(LENGTH(content)), 0) AS chars FROM kb_docs WHERE user_id = ?").bind(user.id).first();
   return reply(
     {
       user: publicUser(user),
       usage: { chats: usage ? usage.chats : 0, limit: plan.chats },
-      kb: { count: docs ? docs.n : 0, limit: plan.docs, max_chars: MAX_DOC_CHARS },
+      kb: { count: docs ? docs.n : 0, used_chars: docs ? docs.chars : 0, limit: plan.docs, max_chars: plan.docChars, ...limitsOf(user) },
       billing_ready: !!env.STRIPE_SECRET_KEY && !!env.STRIPE_PRICES,
       setup_needed: !!env.STRIPE_SECRET_KEY && !env.STRIPE_PRICES && isAdmin(env, user),
       email_ready: !!env.RESEND_API_KEY,
@@ -336,11 +336,48 @@ async function deleteAccount(request, env, user, cors) {
 
 /* ---------- knowledge base ---------- */
 
+const SNIPPET_CHARS = 260;
+
+async function kbTotals(env, user, exceptId) {
+  const row = exceptId
+    ? await env.DB.prepare("SELECT COUNT(*) AS n, COALESCE(SUM(LENGTH(content)), 0) AS chars FROM kb_docs WHERE user_id = ? AND id != ?").bind(user.id, exceptId).first()
+    : await env.DB.prepare("SELECT COUNT(*) AS n, COALESCE(SUM(LENGTH(content)), 0) AS chars FROM kb_docs WHERE user_id = ?").bind(user.id).first();
+  return { count: row ? row.n : 0, chars: row ? row.chars : 0 };
+}
+
+function kbLimitsPayload(user, totals) {
+  return { limit: planOf(user).docs, max_chars: planOf(user).docChars, used_chars: totals.chars, ...limitsOf(user) };
+}
+
+// The list only carries a short preview and the size of each document, so a large knowledge base stays quick to open.
 async function kbList(env, user, cors) {
   const rows = await env.DB.prepare(
-    "SELECT id, title, content, updated_at FROM kb_docs WHERE user_id = ? ORDER BY updated_at DESC, id DESC"
-  ).bind(user.id).all();
-  return reply({ docs: rows.results || [], limit: (PLANS[user.plan] || PLANS.none).docs, max_chars: MAX_DOC_CHARS }, 200, cors);
+    "SELECT id, title, SUBSTR(content, 1, ?) AS snippet, LENGTH(content) AS chars, updated_at FROM kb_docs WHERE user_id = ? ORDER BY updated_at DESC, id DESC LIMIT 2000"
+  ).bind(SNIPPET_CHARS, user.id).all();
+  const totals = await kbTotals(env, user);
+  return reply({ docs: rows.results || [], ...kbLimitsPayload(user, totals) }, 200, cors);
+}
+
+async function kbGet(env, user, cors, id) {
+  const doc = await env.DB.prepare("SELECT id, title, content, updated_at FROM kb_docs WHERE id = ? AND user_id = ?").bind(id, user.id).first();
+  if (!doc) return fail("Document not found.", 404, cors);
+  return reply({ doc }, 200, cors);
+}
+
+// Checks one document against the plan. Returns an error string or "".
+export function kbCheck(user, totals, content, isEdit) {
+  const plan = planOf(user);
+  if (content.length > plan.docChars) {
+    return `Keep each document under ${plan.docChars.toLocaleString("en-US")} characters${user.plan === "enterprise" ? "" : " or upgrade in Billing for a higher limit"}. Split it into parts.`;
+  }
+  if (!isEdit && totals.count >= plan.docs) {
+    return `Your plan allows ${plan.docs.toLocaleString("en-US")} documents. Delete one or upgrade in Billing.`;
+  }
+  if (totals.chars + content.length > plan.totalChars) {
+    const room = Math.max(0, plan.totalChars - totals.chars);
+    return `That would take your knowledge base over your plan's ${plan.totalChars.toLocaleString("en-US")} characters (you have room for ${room.toLocaleString("en-US")} more). Shorten the text, delete something, or upgrade in Billing.`;
+  }
+  return "";
 }
 
 async function kbSave(request, env, user, cors, id) {
@@ -350,20 +387,17 @@ async function kbSave(request, env, user, cors, id) {
   const content = String(b.content == null ? "" : b.content).trim();
   if (!title) return fail("Give the document a title.", 400, cors);
   if (!content) return fail("Add some text for your chatbot to learn from.", 400, cors);
-  if (content.length > MAX_DOC_CHARS) {
-    return fail(`Keep each document under ${MAX_DOC_CHARS.toLocaleString("en-US")} characters. Split it into two.`, 400, cors);
-  }
   if (id) {
     const own = await env.DB.prepare("SELECT id FROM kb_docs WHERE id = ? AND user_id = ?").bind(id, user.id).first();
     if (!own) return fail("Document not found.", 404, cors);
+  }
+  const totals = await kbTotals(env, user, id || 0);
+  const problem = kbCheck(user, totals, content, !!id);
+  if (problem) return fail(problem, id ? 400 : 403, cors, { code: "kb_limit" });
+  if (id) {
     await env.DB.prepare("UPDATE kb_docs SET title = ?, content = ?, updated_at = datetime('now') WHERE id = ?")
       .bind(title, content, id).run();
     return reply({ ok: true, id }, 200, cors);
-  }
-  const limit = (PLANS[user.plan] || PLANS.none).docs;
-  const count = await env.DB.prepare("SELECT COUNT(*) AS n FROM kb_docs WHERE user_id = ?").bind(user.id).first();
-  if (count && count.n >= limit) {
-    return fail(`Your plan allows ${limit} documents. Delete one or upgrade in Billing.`, 403, cors);
   }
   const res = await env.DB.prepare("INSERT INTO kb_docs (user_id, title, content) VALUES (?, ?, ?)")
     .bind(user.id, title, content).run();
@@ -374,6 +408,26 @@ async function kbDelete(env, user, cors, id) {
   const res = await env.DB.prepare("DELETE FROM kb_docs WHERE id = ? AND user_id = ?").bind(id, user.id).run();
   if (!res.meta.changes) return fail("Document not found.", 404, cors);
   return reply({ ok: true }, 200, cors);
+}
+
+// Reads a public web page and returns its text for the owner to review. Nothing is saved until they press Save.
+async function kbImportUrl(request, env, user, cors) {
+  const b = await readJson(request);
+  if (!b || !b.url) return fail("Paste the address of the page to import.", 400, cors);
+  const plan = planOf(user);
+  const key = "import:" + user.id;
+  const used = await env.DB.prepare("SELECT COUNT(*) AS n FROM rate_hits WHERE key = ? AND created_at >= date('now','start of month')").bind(key).first();
+  if (used && used.n >= plan.urlImports) {
+    return fail(`You have used your ${plan.urlImports.toLocaleString("en-US")} page imports for this month.${user.plan === "enterprise" ? "" : " Upgrade in Billing for more, or paste the text instead."}`, 403, cors, { code: "import_limit" });
+  }
+  try {
+    const page = await fetchPage(String(b.url));
+    await env.DB.prepare("INSERT INTO rate_hits (key) VALUES (?)").bind(key).run();
+    const truncated = page.text.length > plan.docChars;
+    return reply({ url: page.url, title: page.title.slice(0, 120), text: page.text, truncated, imports_left: Math.max(0, plan.urlImports - (used ? used.n : 0) - 1) }, 200, cors);
+  } catch (e) {
+    return fail(e.message || "We could not import that page.", 422, cors);
+  }
 }
 
 /* ---------- billing (Stripe) ---------- */
@@ -841,7 +895,9 @@ export async function handleApp(request, env, url, cors, ctx) {
 
     if (path === "/kb" && method === "GET") return await kbList(env, user, cors);
     if (path === "/kb" && method === "POST") return await kbSave(request, env, user, cors, null);
+    if (path === "/kb/import-url" && method === "POST") return await kbImportUrl(request, env, user, cors);
     const m = path.match(/^\/kb\/(\d+)$/);
+    if (m && method === "GET") return await kbGet(env, user, cors, Number(m[1]));
     if (m && method === "PUT") return await kbSave(request, env, user, cors, Number(m[1]));
     if (m && method === "DELETE") return await kbDelete(env, user, cors, Number(m[1]));
 

@@ -49,6 +49,85 @@
     .tm.note { background: #fff7e0; border: 1px dashed #d9a400; max-width: 100%; align-self: stretch; font-size: .88rem; color: var(--ink-soft); }
     .testform { display: flex; gap: 8px; }
     .testform input { flex: 1; min-width: 0; min-height: 42px; padding: 8px 12px; border: 1.5px solid var(--line); border-radius: 999px; font: inherit; }
+
+    /* chatbot customisation */
+    .cz-grid { display: grid; grid-template-columns: minmax(0,1fr); gap: 16px; align-items: start; }
+    @media (min-width: 1000px) { .cz-grid { grid-template-columns: minmax(0,1.15fr) minmax(340px,.85fr); } .cz-side .pv-card { position: sticky; top: 78px; z-index: 1; } }
+    .cz-grid > * { min-width: 0; }
+    .cz-side .card + .card { margin-top: 16px; }
+    .cz-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1.5px solid var(--line); }
+    .cz-tabs button { min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; color: var(--ink); font: 600 .95rem var(--body); cursor: pointer; }
+    .cz-tabs button[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+    .cz-pane[hidden] { display: none; }
+    .choices { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .choice { position: relative; display: block; cursor: pointer; }
+    .choice input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+    .choice > span { display: block; padding: 11px 13px; border: 1.5px solid var(--line); border-radius: 14px; background: #fff; }
+    .choice b { display: block; font-size: .98rem; }
+    .choice small { display: block; margin-top: 2px; color: var(--ink-soft); font-size: .82rem; line-height: 1.3; }
+    .choice input:checked + span { border-color: var(--lagoon); box-shadow: 0 0 0 3px rgba(14,124,123,.18); background: var(--mist); }
+    .choice input:focus-visible + span { outline: 3px solid var(--sun); outline-offset: 2px; }
+    .seg { display: inline-flex; flex-wrap: wrap; border: 1.5px solid var(--line); border-radius: 999px; overflow: hidden; background: #fff; }
+    .seg .choice > span { border: 0; border-radius: 0; padding: 9px 18px; background: transparent; }
+    .seg .choice input:checked + span { background: var(--ink); color: #fff; box-shadow: none; }
+    .seg .choice input:checked + span b { color: #fff; }
+    .seg .choice b { font-weight: 600; }
+    .check { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; font-weight: 600; }
+    .check input { width: 20px; height: 20px; flex: none; }
+    .check.locked { color: var(--ink-soft); }
+    .lock-pill { display: inline-block; padding: 1px 9px; border-radius: 999px; background: var(--sun); color: var(--ink); font-size: .75rem; font-weight: 800; text-decoration: none; }
+    .swatches { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .sw-btn { min-width: 40px; height: 40px; padding: 0 8px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; font-size: 1.25rem; cursor: pointer; }
+    .sw-btn.txt { font: 600 .85rem var(--body); }
+    .sw-btn.dot { width: 34px; min-width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1.5px var(--line); }
+    .color-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .color-row input[type=color] { width: 64px; min-width: 64px; min-height: 48px; padding: 4px; }
+    .color-row .swatches { margin-top: 0; }
+    .ideas { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .idea { padding: 6px 12px; border: 1.5px dashed var(--line); border-radius: 999px; background: #fff; color: var(--ink-soft); font: 500 .85rem var(--body); cursor: pointer; text-align: left; }
+    .idea:hover { border-color: var(--lagoon); color: var(--ink); }
+    .row-edit { display: flex; gap: 8px; margin-bottom: 8px; }
+    .row-edit input { flex: 1; min-width: 0; min-height: 44px; padding: 8px 12px; border: 1.5px solid var(--line); border-radius: 12px; font: inherit; background: var(--paper); }
+    .faq-edit { display: grid; gap: 8px; padding: 12px; margin-bottom: 10px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--paper); }
+    .faq-edit input, .faq-edit textarea { width: 100%; min-height: 44px; padding: 8px 12px; border: 1.5px solid var(--line); border-radius: 12px; font: inherit; background: #fff; resize: vertical; }
+    .faq-edit button { justify-self: end; }
+    .row-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .save-bar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; position: sticky; bottom: 0; margin: 20px -24px -24px; padding: 14px 24px; background: rgba(255,255,255,.96); border-top: 1.5px solid var(--line); border-radius: 0 0 18px 18px; }
+    /* live preview */
+    .pv { --bg: #fff; --fg: #1b1b24; --log: #f6f6fa; --bub: #fff; --line2: #e6e6ee; --mu: #8a8a9a; position: relative; padding: 4px 0 0; }
+    .pv.pv-dark { --bg: #1c1c26; --fg: #f1f1f6; --log: #13131a; --bub: #272733; --line2: #34344a; --mu: #a2a2b6; }
+    .pv-panel { background: var(--bg); color: var(--fg); border-radius: 18px; overflow: hidden; box-shadow: 0 10px 34px rgba(15,42,46,.22); font: 14px/1.45 system-ui, sans-serif; }
+    .pv-head { background: var(--c); color: var(--on); padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+    .pv-head b { display: block; font-size: 15px; } .pv-head small { display: block; opacity: .85; font-size: 12px; }
+    .pv-av { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.22); display: grid; place-items: center; font-weight: 700; flex: none; }
+    .pv-on { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #4ade80; margin-right: 5px; }
+    .pv-log { background: var(--log); padding: 12px; display: flex; flex-direction: column; gap: 8px; min-height: 230px; }
+    .pv-m { max-width: 86%; padding: 8px 12px; border-radius: 15px; overflow-wrap: anywhere; }
+    .pv-m.a { background: var(--bub); border: 1px solid var(--line2); border-bottom-left-radius: 5px; align-self: flex-start; }
+    .pv-m.u { background: var(--c); color: var(--on); border-bottom-right-radius: 5px; align-self: flex-end; }
+    .pv-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pv-chips span { border: 1.5px solid var(--c); color: var(--c); background: var(--bg); border-radius: 999px; padding: 4px 11px; font-size: 13px; font-weight: 600; }
+    .pv-dark .pv-chips span { color: var(--fg); }
+    .pv-form { display: flex; gap: 8px; align-items: center; padding: 10px; background: var(--bg); border-top: 1px solid var(--line2); }
+    .pv-form span { flex: 1; min-width: 0; padding: 8px 12px; border: 1px solid var(--line2); border-radius: 12px; color: var(--mu); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pv-form b { background: var(--c); color: var(--on); border-radius: 12px; padding: 8px 14px; font-size: 14px; }
+    .pv-pw { text-align: center; font-size: 11px; padding: 5px; color: var(--mu); background: var(--bg); }
+    .pv-dock { display: flex; align-items: flex-end; gap: 10px; margin-top: 12px; }
+    .pv-dock.r { justify-content: flex-end; } .pv-dock.l { justify-content: flex-start; flex-direction: row-reverse; }
+    .pv-teaser { max-width: 220px; background: var(--bg); color: var(--fg); border-radius: 16px 16px 4px 16px; padding: 9px 13px; font: 13px/1.4 system-ui, sans-serif; box-shadow: 0 6px 20px rgba(15,42,46,.2); }
+    .pv-dock.l .pv-teaser { border-radius: 16px 16px 16px 4px; }
+    .pv-fab { display: inline-flex; align-items: center; justify-content: center; gap: 9px; height: 54px; min-width: 54px; border-radius: 999px; background: var(--c); color: var(--on); box-shadow: 0 8px 22px rgba(0,0,0,.25); font: 700 14.5px system-ui, sans-serif; }
+    .pv-fab.wide { padding: 0 20px 0 16px; }
+    .kb-meter { margin-top: 12px; }
+    .kb-meter .bar { margin-top: 6px; }
+    .kb-meters { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px 24px; margin-bottom: 4px; }
+    .kb-meter .row { display: flex; justify-content: space-between; gap: 8px; font-size: .92rem; font-weight: 600; }
+    .kb-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+    .kb-tools input[type=search] { flex: 1; min-width: 180px; min-height: 44px; padding: 8px 14px; border: 1.5px solid var(--line); border-radius: 999px; font: inherit; background: #fff; }
+    .doc-meta { display: flex; gap: 12px; flex-wrap: wrap; font-size: .85rem; color: var(--ink-soft); }
+    .url-row { display: flex; gap: 8px; }
+    .url-row input { flex: 1; min-width: 0; }
+    @media (max-width: 560px) { .save-bar { margin: 20px -16px -16px; padding: 12px 16px; } .row-edit { flex-wrap: wrap; } }
     .conv { border-top: 1px solid var(--line); padding: 10px 0; }
     .conv summary { cursor: pointer; font-weight: 600; }
     .conv .tm { margin-top: 8px; }
@@ -205,8 +284,8 @@
   const TURNSTILE_SITE_KEY = "0x4AAAAAAFpSUJeJCnZzIYfw"; // paste your Cloudflare Turnstile site key to switch the captcha on
   const STRIPE_PORTAL_LOGIN = "https://billing.stripe.com/p/login/cNi3cu2YkdAs0aR8uv3cc00";
   const PLAN_INFO = {
-    starter: { name: "Starter", monthly: 29, annual: 23, features: ["1 chatbot agent", "Up to 1,000 chats a month", "Basic AI training", "Email support"] },
-    pro: { name: "Pro", monthly: 79, annual: 63, features: ["3 chatbot agents", "Up to 10,000 chats a month", "Custom knowledge base integration", "Priority support"] },
+    starter: { name: "Starter", monthly: 29, annual: 23, features: ["1 chatbot agent", "Up to 1,000 chats a month", "50 documents, 1 million characters", "Email support"] },
+    pro: { name: "Pro", monthly: 79, annual: 63, features: ["3 chatbot agents", "Up to 10,000 chats a month", "250 documents, 3 million characters", "Remove the Bubble5 badge", "Priority support"] },
     enterprise: { name: "Enterprise", monthly: 199, annual: 159, features: ["Unlimited chatbot agents", "Unlimited chats", "Dedicated AI backend", "24/7 account manager"] }
   };
 
@@ -280,7 +359,11 @@
   /* ---------- out-of-chats popup ---------- */
   const LIMIT_ROWS = [
     ["Chats a month", { none: 50, starter: 1000, pro: 10000, enterprise: "Unlimited" }],
-    ["Knowledge documents", { none: 5, starter: 10, pro: 50, enterprise: 200 }],
+    ["Knowledge documents", { none: 10, starter: 50, pro: 250, enterprise: 1000 }],
+    ["Knowledge size (characters)", { none: 150000, starter: 1000000, pro: 3000000, enterprise: 5000000 }],
+    ["Web page imports a month", { none: 3, starter: 30, pro: 150, enterprise: 500 }],
+    ["Custom instructions (characters)", { none: 600, starter: 2000, pro: 4000, enterprise: 8000 }],
+    ["Remove Bubble5 badge", { none: "No", starter: "No", pro: "Yes", enterprise: "Yes" }],
     ["Chatbot agents", { none: 1, starter: 1, pro: 3, enterprise: "Unlimited" }],
     ["Support", { none: "Email", starter: "Email", pro: "Priority", enterprise: "24/7 manager" }]
   ];
@@ -311,7 +394,7 @@
           }).join("")}</ul>
           ${id === "enterprise" ? `<a class="btn btn-outline btn-block" href="${supportLink("I'm interested in the Enterprise plan for " + (me.user.company || "my company") + ".")}">Contact sales</a>`
             : `<button type="button" class="btn ${id === "starter" ? "btn-primary" : "btn-outline"} btn-block" data-lm-plan="${id}">Choose ${p.name}</button>`}</div>`).join("")}
-        <p class="lm-note">Your free trial: 50 chats, 5 documents, 1 agent. Arrows mark what you gain. Cancel any time.</p>
+        <p class="lm-note">Your free trial: 50 chats, 10 documents, 1 agent. Arrows mark what you gain. Cancel any time.</p>
         <div class="lm-err" id="lmErr" role="alert"></div>
         <button type="button" class="lm-later" id="lmLater">Not now</button></div>`;
       back.querySelector("#lmSw").onclick = () => { state.billingInterval = annual ? "monthly" : "annual"; draw(); };
@@ -538,7 +621,7 @@
         <div class="stat"><div class="label">Plan</div><div class="value">${esc(planName)}</div><div class="sub">${statusPill(user)}</div></div>
         <div class="stat"><div class="label">Chats this month</div><div class="value">${usage.chats.toLocaleString()}</div><div class="sub">${chatsSub}</div>
           ${usage.limit ? `<div class="bar ${barClass}" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Chat usage"><span style="width:${pct}%"></span></div>` : ""}</div>
-        <div class="stat"><div class="label">Knowledge documents</div><div class="value">${kb.count}</div><div class="sub">of ${kb.limit} allowed</div></div>
+        <div class="stat"><div class="label">Knowledge documents</div><div class="value">${kb.count}</div><div class="sub">of ${kb.limit.toLocaleString()} allowed, ${Number(kb.used_chars || 0).toLocaleString()} of ${Number(kb.total_chars || 0).toLocaleString()} characters</div></div>
       </div>
       <div class="card"><h2>Get your chatbot live</h2><p class="muted">Four steps from sign-up to answering customers.</p>
         <ul class="steps">${steps.map((s) => `<li class="${s.done ? "done" : ""}"><span class="tick" aria-hidden="true">${s.done ? "&#10003;" : ""}</span>
@@ -585,63 +668,111 @@
   }
 
   /* ---------- knowledge base ---------- */
+  const fmtNum = (n) => Number(n || 0).toLocaleString();
+  function meter(label, used, max, unitHint) {
+    const pct = max ? Math.min(100, Math.round((used / max) * 100)) : 0;
+    return `<div class="kb-meter"><div class="row"><span>${label}</span><span>${fmtNum(used)} of ${fmtNum(max)}</span></div><div class="bar ${pct >= 100 ? "full" : pct >= 85 ? "high" : ""}" role="img" aria-label="${pct}% used"><span style="width:${pct}%"></span></div>${unitHint ? `<div class="hint">${unitHint}</div>` : ""}</div>`;
+  }
   async function renderKnowledge(el) {
     const data = await api("GET", "/kb");
     state.docs = data.docs;
-    const full = data.docs.length >= data.limit;
+    const roomChars = Math.max(0, data.total_chars - data.used_chars);
+    const full = data.docs.length >= data.limit || roomChars <= 0;
+    let query = "";
     function list() {
-      if (!data.docs.length) return `<div class="empty"><p><strong>No documents yet.</strong></p><p>Add your opening hours, prices, delivery rules or FAQs. Plain text is fine.</p></div>`;
-      return `<ul class="doc-list">${data.docs.map((d) => `<li class="doc"><div class="doc-main"><div class="doc-title">${esc(d.title)}</div>
-        <div class="doc-snippet">${esc(d.content)}</div><div class="muted small">Updated ${esc(fmtDate(d.updated_at))}</div></div>
+      if (!data.docs.length) return `<div class="empty"><p><strong>No documents yet.</strong></p><p>Add your opening hours, prices, delivery rules or FAQs. Type or paste them, upload a file, or import a web page.</p></div>`;
+      const q = query.trim().toLowerCase();
+      const shown = q ? data.docs.filter((d) => (d.title + " " + d.snippet).toLowerCase().includes(q)) : data.docs;
+      if (!shown.length) return `<div class="empty"><p>No documents match "${esc(query)}".</p></div>`;
+      return `<ul class="doc-list">${shown.map((d) => `<li class="doc"><div class="doc-main"><div class="doc-title">${esc(d.title)}</div>
+        <div class="doc-snippet">${esc(d.snippet)}</div><div class="doc-meta"><span>${fmtNum(d.chars)} characters</span><span>Updated ${esc(fmtDate(d.updated_at))}</span></div></div>
         <div class="doc-actions"><button class="btn btn-outline btn-small" data-edit="${d.id}">Edit</button><button class="btn btn-danger btn-small" data-del="${d.id}" aria-label="Delete ${esc(d.title)}">Delete</button></div></li>`).join("")}</ul>`;
     }
+    const upgrade = state.me.user.plan === "enterprise" ? "" : ' <a href="#/billing">Change plan</a> for more room.';
     el.innerHTML = `<h1>Knowledge base</h1><p class="lead">What your chatbot knows about your business.</p>
       <div id="kbMsg"></div>
-      <div class="page-actions"><span class="muted">${data.docs.length} of ${data.limit} documents</span>
+      <div class="card"><div class="kb-meters">${meter("Documents", data.docs.length, data.limit)}${meter("Total size (characters)", data.used_chars, data.total_chars, `One document can hold up to ${fmtNum(data.max_chars)} characters. Longer text is split into parts for you.`)}</div></div>
+      ${full ? notice("warn", "You have reached your plan's limit." + upgrade) : ""}
+      <div class="page-actions" style="margin-top:16px"><span class="muted">${fmtNum(roomChars)} characters of room left</span>
         <button class="btn btn-primary" id="addDoc" ${full ? "disabled" : ""}>Add document</button></div>
-      ${full ? notice("warn", 'You\'ve reached your plan\'s document limit. Delete one or <a href="#/billing">change plan</a>.') : ""}
       <div id="editor"></div>
-      <div class="card" id="docs">${list()}</div>`;
+      <div class="card" id="docs">${data.docs.length > 6 ? '<div class="kb-tools"><input type="search" id="kbSearch" placeholder="Search your documents" aria-label="Search your documents"></div>' : ""}<div id="docList">${list()}</div></div>`;
     const msg = document.getElementById("kbMsg");
+    const search = document.getElementById("kbSearch");
+    function bindList() {
+      el.querySelectorAll("[data-edit]").forEach((b) => b.onclick = async () => {
+        b.disabled = true;
+        try { const out = await api("GET", "/kb/" + b.dataset.edit); openEditor(out.doc); } catch (err) { msg.innerHTML = notice("err", esc(err.message)); }
+        b.disabled = false;
+      });
+      el.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => {
+        const doc = data.docs.find((d) => String(d.id) === b.dataset.del);
+        if (!confirm(`Delete "${doc.title}"? Your chatbot will stop using it.`)) return;
+        b.disabled = true;
+        try { await api("DELETE", "/kb/" + doc.id); await route(); } catch (err) { msg.innerHTML = notice("err", esc(err.message)); b.disabled = false; }
+      });
+    }
+    if (search) search.addEventListener("input", () => { query = search.value; document.getElementById("docList").innerHTML = list(); bindList(); });
     function openEditor(doc) {
       const ed = document.getElementById("editor");
+      const editRoom = doc ? roomChars + (doc.content || "").length : roomChars;
       ed.innerHTML = `<form class="card" id="docForm"><h2>${doc ? "Edit document" : "New document"}</h2>
         <div class="form-group"><label for="dTitle">Title</label><input id="dTitle" maxlength="120" placeholder="Opening hours" value="${esc(doc ? doc.title : "")}" required></div>
-        ${doc ? "" : `<div class="form-group"><label for="dFile">Upload a PDF or text file <span class="muted">(optional)</span></label><input id="dFile" type="file" accept=".pdf,.txt,.md,.csv,application/pdf,text/plain" style="padding:10px"><p class="hint" id="fileNote">We read the text from the file in your browser. Nothing is sent until you press Save.</p></div>`}
-        <div class="form-group"><label for="dBody">What should the chatbot know?</label><textarea id="dBody" placeholder="Monday to Friday 9am to 6pm. Closed on public holidays." required>${esc(doc ? doc.content : "")}</textarea>
-          <p class="hint"><span id="count">0</span> / ${data.max_chars.toLocaleString()} characters <span id="splitNote"></span></p></div>
+        ${doc ? "" : `<div class="form-group"><label for="dUrl">Import a web page <span class="muted">(optional)</span></label>
+          <div class="url-row"><input id="dUrl" type="url" inputmode="url" placeholder="https://yourbusiness.com/prices" autocomplete="off"><button class="btn btn-outline btn-small" type="button" id="dUrlGo">Import</button></div>
+          <p class="hint" id="urlNote">We read the text on that one page so you can check it before saving. Only import pages you own or may use. ${fmtNum(data.url_imports)} imports a month on your plan.</p></div>
+        <div class="form-group"><label for="dFile">Upload a PDF or text file <span class="muted">(optional)</span></label><input id="dFile" type="file" accept=".pdf,.txt,.md,.csv,application/pdf,text/plain" style="padding:10px"><p class="hint" id="fileNote">We read the text from the file in your browser. Nothing is sent until you press Save.</p></div>`}
+        <div class="form-group"><label for="dBody">What should the chatbot know?</label><textarea id="dBody" style="min-height:220px" placeholder="Monday to Friday 9am to 6pm. Closed on public holidays." required>${esc(doc ? doc.content : "")}</textarea>
+          <p class="hint"><span id="count">0</span> / ${fmtNum(data.max_chars)} characters <span id="splitNote"></span></p></div>
         <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" type="submit">Save document</button><button class="btn btn-outline" type="button" id="cancelDoc">Cancel</button></div></form>`;
       const body = document.getElementById("dBody"), count = document.getElementById("count");
       const splitNote = document.getElementById("splitNote");
       const upd = () => {
-        count.textContent = body.value.length.toLocaleString();
+        count.textContent = fmtNum(body.value.length);
         const n = doc ? 1 : splitText(body.value, data.max_chars).length;
-        splitNote.textContent = n > 1 ? `. Too long for one document, so it will be saved as ${n} documents.` : "";
+        const notes = [];
+        if (n > 1) notes.push(`Too long for one document, so it will be saved as ${n} documents.`);
+        if (body.value.length > editRoom) notes.push(`That is ${fmtNum(body.value.length - editRoom)} characters more than you have room for.`);
+        splitNote.textContent = notes.length ? ". " + notes.join(" ") : "";
       }; upd(); body.addEventListener("input", upd);
+      const urlGo = document.getElementById("dUrlGo");
+      if (urlGo) urlGo.addEventListener("click", async () => {
+        const note = document.getElementById("urlNote"), u = document.getElementById("dUrl").value.trim();
+        if (!u) { note.textContent = "Paste the address of the page first."; return; }
+        urlGo.disabled = true; note.textContent = "Reading the page…";
+        try {
+          const out = await api("POST", "/kb/import-url", { url: u });
+          body.value = out.text; upd();
+          const t = document.getElementById("dTitle"); if (!t.value.trim()) t.value = out.title.slice(0, 120);
+          note.textContent = `Loaded ${fmtNum(out.text.length)} characters from ${new URL(out.url).hostname}. Check it looks right, then save.${out.truncated ? " It is longer than one document, so it will be split into parts." : ""} ${fmtNum(out.imports_left)} imports left this month.`;
+        } catch (err) { note.textContent = err.message; }
+        urlGo.disabled = false;
+      });
       const fileIn = document.getElementById("dFile");
       if (fileIn) fileIn.addEventListener("change", async () => {
         const f = fileIn.files[0]; const note = document.getElementById("fileNote"); if (!f) return;
-        if (f.size > 15 * 1024 * 1024) { note.textContent = "That file is over 15 MB. Try a smaller one."; return; }
-        note.textContent = "Reading " + f.name + "\u2026";
+        if (f.size > 25 * 1024 * 1024) { note.textContent = "That file is over 25 MB. Try a smaller one."; return; }
+        note.textContent = "Reading " + f.name + "…";
         try {
           const text = /\.pdf$/i.test(f.name) || f.type === "application/pdf" ? await pdfToText(f) : await f.text();
           if (!text.trim()) { note.textContent = "No text found. If this is a scanned PDF (a photo of pages), it needs to be converted to text first."; return; }
           body.value = text; upd();
           const t = document.getElementById("dTitle"); if (!t.value.trim()) t.value = f.name.replace(/\.[^.]+$/, "").slice(0, 120);
-          note.textContent = "Loaded " + text.length.toLocaleString() + " characters. Check it looks right, then save.";
+          note.textContent = "Loaded " + fmtNum(text.length) + " characters. Check it looks right, then save.";
         } catch (err) { note.textContent = "Could not read that file. Try another, or paste the text instead."; }
       });
       document.getElementById("dTitle").focus();
       document.getElementById("cancelDoc").onclick = () => { ed.innerHTML = ""; };
       document.getElementById("docForm").addEventListener("submit", async (e) => {
         e.preventDefault();
-        const btn = e.target.querySelector("button[type=submit]"); btn.disabled = true;
+        const btn = e.target.querySelector("button[type=submit]"); btn.disabled = true; msg.innerHTML = "";
         try {
           const title = document.getElementById("dTitle").value;
           if (doc) await api("PUT", "/kb/" + doc.id, { title, content: body.value });
           else {
             const parts = splitText(body.value, data.max_chars);
-            if (parts.length > 1 && data.docs.length + parts.length > data.limit) throw new Error(`This would make ${parts.length} documents, but your plan has room for ${Math.max(0, data.limit - data.docs.length)} more. Shorten the text or change plan.`);
+            if (data.docs.length + parts.length > data.limit) throw new Error(`This would make ${parts.length} documents, but your plan has room for ${Math.max(0, data.limit - data.docs.length)} more. Shorten the text or change plan.`);
+            if (body.value.trim().length > roomChars) throw new Error(`This is ${fmtNum(body.value.trim().length)} characters and you have room for ${fmtNum(roomChars)} more. Shorten it, delete something, or change plan.`);
             for (let i = 0; i < parts.length; i++) await api("POST", "/kb", { title: parts.length > 1 ? `${title} (${i + 1}/${parts.length})` : title, content: parts[i] });
           }
           await route();
@@ -650,80 +781,246 @@
       ed.scrollIntoView({ behavior: "smooth", block: "start" });
     }
     document.getElementById("addDoc").onclick = () => openEditor(null);
-    el.querySelectorAll("[data-edit]").forEach((b) => b.onclick = () => openEditor(data.docs.find((d) => String(d.id) === b.dataset.edit)));
-    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => {
-      const doc = data.docs.find((d) => String(d.id) === b.dataset.del);
-      if (!confirm(`Delete "${doc.title}"? Your chatbot will stop using it.`)) return;
-      b.disabled = true;
-      try { await api("DELETE", "/kb/" + doc.id); await route(); } catch (err) { msg.innerHTML = notice("err", esc(err.message)); b.disabled = false; }
-    });
+    bindList();
   }
 
 
   /* ---------- chatbot: settings, test, install ---------- */
+  // Readable text colour on top of the brand colour (dark on light colours, white on the rest).
+  function inkFor(hex) {
+    if (!/^#[0-9a-f]{6}$/i.test(hex || "")) return "#fff";
+    const l = [1, 3, 5].map((i) => { const c = parseInt(hex.substr(i, 2), 16) / 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); });
+    return 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2] > 0.4 ? "#14141c" : "#fff";
+  }
+  const TONE_HINTS = { friendly: "Warm and easy-going", professional: "Polite and precise", playful: "Upbeat, a little humour", concise: "Short and direct", empathetic: "Patient and reassuring", refined: "Polished, like a concierge", expert: "Confident and clear" };
+  const SWATCHES = ["#0E7C7B", "#2563EB", "#6D4AFF", "#DB2777", "#DC2626", "#EA580C", "#FFC53D", "#16A34A", "#111827"];
+  const AVATARS = ["😊", "🥐", "👋", "🌿", "☕", "🧑‍💻", "✨", "🏠"];
+  const INSTRUCTION_IDEAS = [
+    "Always mention free delivery on orders over $60.",
+    "Never discuss competitors or give legal or medical advice.",
+    "Ask which date or size they need before recommending anything.",
+    "Sign off with: Thanks for choosing us!"
+  ];
+  const DEFAULT_SAMPLE = { q: "Do you deliver?", a: "Yes! Delivery is free on orders over $60, and we deliver Tuesday to Saturday." };
+
   async function renderChatbot(el) {
-    const { bot } = await api("GET", "/bot");
-    const snippet = `<script src="${API}/assets/widget.js" data-key="${bot.public_key}" defer><\/script>`;
+    let { bot, settings: S, limits: L, options: O } = await api("GET", "/bot");
+    const snippet = () => `<script src="${API}/assets/widget.js" data-key="${bot.public_key}" defer><\/script>`;
     const kbCount = state.me.kb.count;
-    el.innerHTML = `<h1>Your chatbot</h1><p class="lead">Set how it looks, try it, then put it on your website.</p>
+    const radio = (name, items, current, cls) => `<div class="${cls || "choices"}" role="radiogroup">${items.map(([v, t, h]) => `<label class="choice"><input type="radio" name="${name}" value="${esc(v)}" ${String(current) === String(v) ? "checked" : ""}><span><b>${esc(t)}</b>${h ? `<small>${esc(h)}</small>` : ""}</span></label>`).join("")}</div>`;
+    const lock = (on, what) => on ? "" : ` <a class="lock-pill" href="#/billing" title="${esc(what)}">Pro</a>`;
+    el.innerHTML = `<h1>Your chatbot</h1><p class="lead">Make it sound, look and behave like your business, then put it on your website.</p>
       ${kbCount === 0 ? notice("warn", 'Your chatbot has nothing to answer from yet. <a href="#/knowledge">Add your business information</a> first.') : ""}
-      <div class="two-col">
-      <form class="card" id="botForm"><h2>Appearance and behaviour</h2><div id="botMsg" style="margin-top:12px"></div>
-        <div class="form-group"><label for="bName">Assistant name</label><input id="bName" maxlength="40" value="${esc(bot.name)}"></div>
-        <div class="form-group"><label for="bBiz">Business name</label><input id="bBiz" maxlength="100" value="${esc(bot.business)}"></div>
-        <div class="form-group"><label for="bGreet">Greeting</label><input id="bGreet" maxlength="300" value="${esc(bot.greeting)}"></div>
-        <div class="form-group"><label for="bTone">Tone of voice</label><select id="bTone">
-          ${[["friendly", "Friendly"], ["professional", "Professional"], ["playful", "Playful"]].map(([v, t]) => `<option value="${v}" ${bot.tone === v ? "selected" : ""}>${t}</option>`).join("")}</select></div>
-        <div class="form-group"><label for="bColor">Brand colour</label><input id="bColor" type="color" value="${esc(bot.color)}" style="min-height:48px;padding:4px"></div>
-        <div class="form-group"><label for="bMail">Send unanswered questions to</label><input id="bMail" type="email" value="${esc(bot.handoff_email)}" placeholder="you@yourbusiness.com">
-          <p class="hint">When the chatbot does not know, it asks the visitor for their email and forwards it here (also saved in your Inbox).</p></div>
-        <div class="form-group"><label for="bDom">Only allow on these websites <span class="muted">(optional)</span></label><input id="bDom" value="${esc(bot.allowed_domains.split(",").join(", "))}" placeholder="yourbusiness.com, shop.yourbusiness.com">
-          <p class="hint">Stops other sites from using your chatbot and your chat allowance. Leave empty to allow any site.</p></div>
-        <label style="display:flex;gap:10px;align-items:center;margin-bottom:16px"><input type="checkbox" id="bOn" ${bot.enabled ? "checked" : ""}> Chatbot is switched on</label>
-        <button class="btn btn-primary" type="submit">Save changes</button></form>
-      <div>
-        <div class="card"><h2>Try it</h2><p class="muted">This is exactly what your visitors will get.</p>
+      <div class="cz-grid">
+      <form class="card" id="botForm" novalidate>
+        <div class="cz-tabs" role="tablist" aria-label="Chatbot settings">
+          ${[["basics", "Basics"], ["voice", "Personality"], ["talk", "Conversation"], ["look", "Look and feel"], ["access", "Handoff and access"]].map(([id, t], i) => `<button type="button" role="tab" id="tab-${id}" aria-controls="pane-${id}" aria-selected="${i === 0}" data-tab="${id}">${t}</button>`).join("")}
+        </div>
+        <div id="botMsg"></div>
+
+        <section class="cz-pane" id="pane-basics" role="tabpanel" aria-labelledby="tab-basics">
+          <div class="form-group"><label for="bName">Assistant name</label><input id="bName" maxlength="40" value="${esc(bot.name)}"></div>
+          <div class="form-group"><label for="bBiz">Business name</label><input id="bBiz" maxlength="100" value="${esc(bot.business)}"></div>
+          <div class="form-group"><label for="bGreet">Opening message</label><textarea id="bGreet" maxlength="500" rows="3" style="min-height:84px">${esc(bot.greeting)}</textarea><p class="hint">The first thing visitors see when the chat opens.</p></div>
+          <div class="form-group"><label for="bAvatar">Avatar <span class="muted">(an emoji, or leave empty for the first letter of the name)</span></label>
+            <input id="bAvatar" maxlength="8" value="${esc(S.avatar)}" placeholder="e.g. 😊" style="max-width:140px">
+            <div class="swatches" aria-label="Avatar ideas">${AVATARS.map((a) => `<button type="button" class="sw-btn" data-avatar="${esc(a)}" aria-label="Use ${esc(a)}">${a}</button>`).join("")}<button type="button" class="sw-btn txt" data-avatar="">Letter</button></div></div>
+          <div class="form-group"><label for="bColor">Brand colour</label>
+            <div class="color-row"><input id="bColor" type="color" value="${esc(bot.color)}" aria-label="Brand colour"><div class="swatches">${SWATCHES.map((c) => `<button type="button" class="sw-btn dot" data-color="${c}" style="background:${c}" aria-label="Use colour ${c}"></button>`).join("")}</div></div>
+            <p class="hint">Text on the colour switches between white and dark automatically so it stays readable.</p></div>
+          <label class="check"><input type="checkbox" id="bOn" ${bot.enabled ? "checked" : ""}> Chatbot is switched on</label>
+        </section>
+
+        <section class="cz-pane" id="pane-voice" role="tabpanel" aria-labelledby="tab-voice" hidden>
+          <div class="form-group"><label>Tone of voice</label>${radio("tone", O.tones.map((t) => [t.id, t.label, TONE_HINTS[t.id]]), bot.tone)}</div>
+          <div class="form-group"><label>Answer length</label>${radio("length", O.lengths.map((t) => [t.id, t.label]), S.length, "seg")}</div>
+          <div class="form-group"><label>Emoji</label>${radio("emoji", [["none", "None"], ["some", "A little"], ["often", "Friendly"]], S.emoji, "seg")}</div>
+          <div class="form-group"><label for="bLang">Language</label><select id="bLang"><option value="auto" ${S.language === "auto" ? "selected" : ""}>Match the visitor (recommended)</option>${O.languages.map((l) => `<option ${S.language === l ? "selected" : ""}>${esc(l)}</option>`).join("")}</select><p class="hint">Or always answer in one language, whatever the visitor types.</p></div>
+          <div class="form-group"><label for="bInstr">Your own instructions</label>
+            <textarea id="bInstr" rows="6" maxlength="${L.instruction_chars}" placeholder="Anything you would tell a new team member: what to push, what to avoid, how to talk to customers.">${esc(S.instructions)}</textarea>
+            <p class="hint"><span id="instrCount">0</span> / ${L.instruction_chars.toLocaleString()} characters. Your chatbot still only answers from your knowledge base and never invents facts.${L.instruction_chars < 8000 ? ' <a href="#/billing">Longer instructions on bigger plans.</a>' : ""}</p>
+            <div class="ideas" aria-label="Instruction ideas">${INSTRUCTION_IDEAS.map((t) => `<button type="button" class="idea" data-idea="${esc(t)}">+ ${esc(t)}</button>`).join("")}</div></div>
+        </section>
+
+        <section class="cz-pane" id="pane-talk" role="tabpanel" aria-labelledby="tab-talk" hidden>
+          <div class="form-group"><label>Starter questions <span class="muted" id="stCount"></span></label>
+            <label class="check" style="margin-bottom:10px"><input type="checkbox" id="bShowStart" ${S.show_starters ? "checked" : ""}> Show tappable starter questions when the chat opens</label>
+            <div id="stList"></div>
+            <div class="row-actions"><button type="button" class="btn btn-outline btn-small" id="stAdd">Add a question</button><button type="button" class="btn btn-outline btn-small" id="stSuggest">Use suggestions</button></div>
+            <p class="hint" id="stHint"></p></div>
+          <div class="form-group"><label>Quick answers <span class="muted" id="faqCount"></span></label>
+            <p class="hint" style="margin:-2px 0 10px">Write the exact answer to a question you get a lot. These win over everything else, and they do not use up your documents.</p>
+            <div id="faqList"></div>
+            <div class="row-actions"><button type="button" class="btn btn-outline btn-small" id="faqAdd">Add a quick answer</button></div></div>
+          <div class="form-group"><label for="bFallback">When it does not know the answer</label>
+            <textarea id="bFallback" rows="3" maxlength="300" style="min-height:84px" placeholder="Leave empty to use our friendly default that offers to take the visitor's email.">${esc(S.fallback)}</textarea>
+            <p class="hint">Keep an offer to pass the question on, like "Leave your email and we'll reply today." That is what shows the contact form to the visitor.</p></div>
+        </section>
+
+        <section class="cz-pane" id="pane-look" role="tabpanel" aria-labelledby="tab-look" hidden>
+          <div class="form-group"><label>Side of the screen</label>${radio("position", [["right", "Bottom right"], ["left", "Bottom left"]], S.position, "seg")}</div>
+          <div class="form-group"><label>Theme</label>${radio("theme", [["light", "Light"], ["dark", "Dark"]], S.theme, "seg")}</div>
+          <div class="form-group"><label>Chat button</label>${radio("launcher", [["icon", "Round icon"], ["label", "Button with words"]], S.launcher, "seg")}
+            <input id="bLabel" maxlength="24" value="${esc(S.launcher_label)}" aria-label="Button text" style="margin-top:10px;max-width:260px"></div>
+          <div class="form-group"><label>Speech bubble that greets visitors</label>${radio("teaser", [["default", "Default"], ["custom", "My own words"], ["off", "Off"]], S.teaser, "seg")}
+            <input id="bTeaser" maxlength="90" value="${esc(S.teaser_text)}" placeholder="Hi! Need a hand?" aria-label="Greeting bubble text" style="margin-top:10px">
+            <p class="hint">Appears a few seconds after a visitor lands, once per visit.</p></div>
+          <div class="form-group"><label for="bPlace">Message box hint</label><input id="bPlace" maxlength="50" value="${esc(S.placeholder)}" placeholder="Type your question…"></div>
+          <div class="form-group"><label for="bSub">Line under the name</label><input id="bSub" maxlength="50" value="${esc(S.subtitle)}" placeholder="Online · replies instantly"></div>
+          <label class="check ${L.white_label ? "" : "locked"}"><input type="checkbox" id="bHide" ${S.hide_branding && L.white_label ? "checked" : ""} ${L.white_label ? "" : "disabled"}> Hide the "Powered by Bubble5" line${lock(L.white_label, "Included in Pro and Enterprise")}</label>
+        </section>
+
+        <section class="cz-pane" id="pane-access" role="tabpanel" aria-labelledby="tab-access" hidden>
+          <div class="form-group"><label for="bMail">Send unanswered questions to</label><input id="bMail" type="email" value="${esc(bot.handoff_email)}" placeholder="you@yourbusiness.com">
+            <p class="hint">When the chatbot does not know, it asks the visitor for their email and forwards it here (also saved in your Inbox).</p></div>
+          <div class="form-group"><label for="bDom">Only allow on these websites <span class="muted">(optional)</span></label><input id="bDom" value="${esc(bot.allowed_domains.split(",").join(", "))}" placeholder="yourbusiness.com, shop.yourbusiness.com">
+            <p class="hint">Stops other sites from using your chatbot and your chat allowance. Leave empty to allow any site.</p></div>
+        </section>
+
+        <div class="save-bar"><button class="btn btn-primary" type="submit" id="saveBot">Save changes</button><span class="muted small" id="dirty" aria-live="polite"></span></div>
+      </form>
+
+      <div class="cz-side">
+        <div class="card pv-card"><h2>Live preview</h2><p class="muted">Updates as you type. Press Save to put it on your website.</p><div id="pv"></div></div>
+        <div class="card"><h2>Try it</h2><p class="muted">Chat with your last saved version. These count as normal chats.</p>
           <div class="testlog" id="testLog" aria-live="polite"></div>
-          <form id="testForm" class="testform"><input id="testIn" placeholder="Ask a question\u2026" aria-label="Test question" maxlength="500" autocomplete="off"><button class="btn btn-primary btn-small" type="submit">Send</button></form></div>
+          <form id="testForm" class="testform"><input id="testIn" placeholder="Ask a question…" aria-label="Test question" maxlength="500" autocomplete="off"><button class="btn btn-primary btn-small" type="submit">Send</button></form></div>
         <div class="card"><h2>Share a chat link</h2><p class="muted">A page of its own for your chatbot. Send it to customers, put it in your Facebook or Instagram bio, WhatsApp, emails or a QR code. No website needed.</p>
           <input id="shareLink" readonly value="${esc("https://bubble5.online/chat.html?b=" + bot.public_key)}" style="width:100%;font:.9rem ui-monospace,Menlo,monospace;padding:12px;border:1.5px solid var(--line);border-radius:12px" aria-label="Chat link">
           <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-outline btn-small" id="copyLink" type="button">Copy link</button>
           <a class="btn btn-outline btn-small" href="${esc("https://bubble5.online/chat.html?b=" + bot.public_key)}" target="_blank" rel="noopener">Open it</a>
           <a class="btn btn-outline btn-small" href="https://wa.me/?text=${encodeURIComponent("Questions? Chat with us any time: " + "https://bubble5.online/chat.html?b=" + bot.public_key)}" target="_blank" rel="noopener">Share on WhatsApp</a></div></div>
         <div class="card"><h2>Add it to your website</h2><p class="muted">Paste this just before the closing &lt;/body&gt; tag of every page. Works on WordPress, Wix, Squarespace, Shopify and plain HTML.</p>
-          <textarea id="snip" readonly rows="4" style="width:100%;font:.85rem ui-monospace,Menlo,monospace;padding:12px;border:1.5px solid var(--line);border-radius:12px" aria-label="Install code">${esc(snippet)}</textarea>
+          <textarea id="snip" readonly rows="4" style="width:100%;font:.85rem ui-monospace,Menlo,monospace;padding:12px;border:1.5px solid var(--line);border-radius:12px" aria-label="Install code">${esc(snippet())}</textarea>
           <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-outline btn-small" id="copySnip" type="button">Copy code</button>
           <a class="btn btn-outline btn-small" href="${supportLink("Please help me add my Bubble5 chatbot to my website: ")}">Ask us to do it</a></div></div>
       </div></div>`;
-    const msg = document.getElementById("botMsg");
-    document.getElementById("botForm").addEventListener("submit", async (e) => {
+
+    const $ = (id) => document.getElementById(id);
+    const val = (id) => $(id).value;
+    const picked = (name) => { const r = el.querySelector(`input[name="${name}"]:checked`); return r ? r.value : ""; };
+    const msg = $("botMsg");
+    let starters = S.starters.slice();
+    let faqs = S.faqs.map((f) => ({ q: f.q, a: f.a }));
+    let dirty = false;
+    const markDirty = () => { if (!dirty) { dirty = true; $("dirty").textContent = "Unsaved changes"; } renderPreview(); };
+
+    /* tabs */
+    const tabs = [...el.querySelectorAll("[data-tab]")];
+    function showTab(id) { tabs.forEach((t) => { const on = t.dataset.tab === id; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; $("pane-" + t.dataset.tab).hidden = !on; }); }
+    tabs.forEach((t, i) => { t.onclick = () => showTab(t.dataset.tab); t.onkeydown = (e) => { const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0; if (!d) return; const n = tabs[(i + d + tabs.length) % tabs.length]; n.focus(); showTab(n.dataset.tab); }; });
+    showTab("basics");
+
+    /* starter questions and quick answers editors */
+    function drawStarters() {
+      $("stList").innerHTML = starters.map((s, i) => `<div class="row-edit"><input data-st="${i}" maxlength="60" value="${esc(s)}" aria-label="Starter question ${i + 1}" placeholder="What are your opening hours?"><button type="button" class="btn btn-danger btn-small" data-st-del="${i}" aria-label="Remove starter question ${i + 1}">Remove</button></div>`).join("");
+      $("stCount").textContent = `${starters.length} of ${L.starters}`;
+      $("stAdd").disabled = starters.length >= L.starters;
+      $("stHint").innerHTML = starters.length ? "" : `Empty means we show general ones (${O.default_starters.slice(0, 2).map(esc).join(", ")}…).`;
+      if (starters.length >= L.starters && L.starters < 8) $("stHint").innerHTML = 'You have used every starter question your plan allows. <a href="#/billing">Bigger plans allow more.</a>';
+      $("stList").querySelectorAll("[data-st]").forEach((i) => i.oninput = () => { starters[+i.dataset.st] = i.value; markDirty(); });
+      $("stList").querySelectorAll("[data-st-del]").forEach((b) => b.onclick = () => { starters.splice(+b.dataset.stDel, 1); drawStarters(); markDirty(); });
+    }
+    $("stAdd").onclick = () => { if (starters.length < L.starters) { starters.push(""); drawStarters(); markDirty(); const i = $("stList").querySelectorAll("input"); i[i.length - 1].focus(); } };
+    $("stSuggest").onclick = () => { starters = O.default_starters.slice(0, L.starters); drawStarters(); markDirty(); };
+    drawStarters();
+
+    function drawFaqs() {
+      $("faqList").innerHTML = faqs.map((f, i) => `<div class="faq-edit"><input data-fq="${i}" maxlength="200" value="${esc(f.q)}" aria-label="Question ${i + 1}" placeholder="Question, e.g. Do you offer gift cards?">
+        <textarea data-fa="${i}" maxlength="1200" rows="2" aria-label="Answer ${i + 1}" placeholder="The answer your chatbot should give">${esc(f.a)}</textarea>
+        <button type="button" class="btn btn-danger btn-small" data-fq-del="${i}" aria-label="Remove quick answer ${i + 1}">Remove</button></div>`).join("");
+      $("faqCount").textContent = `${faqs.length} of ${L.faqs}`;
+      $("faqAdd").disabled = faqs.length >= L.faqs;
+      $("faqList").querySelectorAll("[data-fq]").forEach((i) => i.oninput = () => { faqs[+i.dataset.fq].q = i.value; markDirty(); });
+      $("faqList").querySelectorAll("[data-fa]").forEach((i) => i.oninput = () => { faqs[+i.dataset.fa].a = i.value; markDirty(); });
+      $("faqList").querySelectorAll("[data-fq-del]").forEach((b) => b.onclick = () => { faqs.splice(+b.dataset.fqDel, 1); drawFaqs(); markDirty(); });
+    }
+    $("faqAdd").onclick = () => { if (faqs.length < L.faqs) { faqs.push({ q: "", a: "" }); drawFaqs(); markDirty(); const i = $("faqList").querySelectorAll("input"); i[i.length - 1].focus(); } };
+    drawFaqs();
+
+    /* instructions counter and ideas */
+    const instr = $("bInstr");
+    const countInstr = () => { $("instrCount").textContent = instr.value.length.toLocaleString(); };
+    instr.addEventListener("input", countInstr); countInstr();
+    el.querySelectorAll("[data-idea]").forEach((b) => b.onclick = () => {
+      const add = b.dataset.idea; if (instr.value.includes(add)) return;
+      const next = (instr.value.trim() ? instr.value.trim() + "\n" : "") + add;
+      if (next.length > L.instruction_chars) { msg.innerHTML = notice("warn", "That would go over the instruction length on your plan."); return; }
+      instr.value = next; countInstr(); markDirty();
+    });
+    el.querySelectorAll("[data-avatar]").forEach((b) => b.onclick = () => { $("bAvatar").value = b.dataset.avatar; markDirty(); });
+    el.querySelectorAll("[data-color]").forEach((b) => b.onclick = () => { $("bColor").value = b.dataset.color; markDirty(); });
+
+    /* live preview, drawn from the form so it matches what the widget will do */
+    function renderPreview() {
+      const color = val("bColor"), ink = inkFor(color), dark = picked("theme") === "dark", right = picked("position") !== "left";
+      const name = val("bName").trim() || "Assistant";
+      const avatar = Array.from(val("bAvatar").trim()).slice(0, 2).join("") || name.charAt(0).toUpperCase();
+      const sub = val("bSub").trim() || "Online · replies instantly";
+      const list = !$("bShowStart").checked ? [] : (starters.map((s) => s.trim()).filter(Boolean).length ? starters.map((s) => s.trim()).filter(Boolean) : O.default_starters).slice(0, L.starters);
+      const faq = faqs.find((f) => f.q.trim() && f.a.trim()) || DEFAULT_SAMPLE;
+      const label = picked("launcher") === "label" && val("bLabel").trim();
+      const teaserMode = picked("teaser");
+      const teaser = teaserMode === "off" ? "" : teaserMode === "custom" && val("bTeaser").trim() ? val("bTeaser").trim() : "👋 Got a question? Ask me, I reply instantly, any time.";
+      const hide = L.white_label && $("bHide").checked;
+      $("pv").innerHTML = `<div class="pv ${dark ? "pv-dark" : ""}" style="--c:${esc(color)};--on:${ink}">
+        <div class="pv-panel"><div class="pv-head"><span class="pv-av">${esc(avatar)}</span><span><b>${esc(name)}</b><small><i class="pv-on"></i>${esc(sub)}</small></span></div>
+          <div class="pv-log"><div class="pv-m a">${esc(val("bGreet").trim() || "Hi! How can I help you today?")}</div>
+            ${list.length ? `<div class="pv-chips">${list.map((s) => `<span>${esc(s)}</span>`).join("")}</div>` : ""}
+            <div class="pv-m u">${esc(faq.q)}</div><div class="pv-m a">${esc(faq.a)}</div></div>
+          <div class="pv-form"><span>${esc(val("bPlace").trim() || "Type your question…")}</span><b>Send</b></div>
+          ${hide ? "" : '<div class="pv-pw">Powered by Bubble5</div>'}</div>
+        <div class="pv-dock ${right ? "r" : "l"}">${teaser ? `<div class="pv-teaser">${esc(teaser)}</div>` : ""}
+          <span class="pv-fab ${label ? "wide" : ""}"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>${label ? `<span>${esc(val("bLabel").trim())}</span>` : ""}</span></div></div>`;
+    }
+    el.querySelector("#botForm").addEventListener("input", markDirty);
+    el.querySelector("#botForm").addEventListener("change", markDirty);
+    dirty = true; markDirty(); dirty = false; $("dirty").textContent = "";
+
+    /* save */
+    $("botForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const btn = e.target.querySelector("button[type=submit]"); btn.disabled = true; msg.innerHTML = "";
+      const btn = $("saveBot"); btn.disabled = true; msg.innerHTML = "";
+      const cleanStarters = starters.map((s) => s.trim()).filter(Boolean);
+      const cleanFaqs = faqs.map((f) => ({ q: f.q.trim(), a: f.a.trim() })).filter((f) => f.q && f.a);
+      if (faqs.some((f) => (f.q.trim() && !f.a.trim()) || (!f.q.trim() && f.a.trim()))) { msg.innerHTML = notice("warn", "Each quick answer needs both a question and an answer. Fill in or remove the unfinished ones."); showTab("talk"); btn.disabled = false; return; }
       try {
-        await api("PATCH", "/bot", { name: val("bName"), business: val("bBiz"), greeting: val("bGreet"), tone: val("bTone"), color: val("bColor"), handoff_email: val("bMail"), allowed_domains: val("bDom"), enabled: document.getElementById("bOn").checked });
-        msg.innerHTML = notice("ok", "Saved.");
+        const out = await api("PATCH", "/bot", {
+          name: val("bName"), business: val("bBiz"), greeting: val("bGreet"), tone: picked("tone"), color: val("bColor"),
+          handoff_email: val("bMail"), allowed_domains: val("bDom"), enabled: $("bOn").checked,
+          settings: {
+            instructions: val("bInstr"), length: picked("length"), emoji: picked("emoji"), language: val("bLang"), fallback: val("bFallback"),
+            show_starters: $("bShowStart").checked, starters: cleanStarters, faqs: cleanFaqs,
+            position: picked("position"), theme: picked("theme"), avatar: val("bAvatar"), launcher: picked("launcher"), launcher_label: val("bLabel"),
+            teaser: picked("teaser"), teaser_text: val("bTeaser"), placeholder: val("bPlace"), subtitle: val("bSub"), hide_branding: L.white_label && $("bHide").checked
+          }
+        });
+        bot = out.bot; S = out.settings; starters = S.starters.slice(); faqs = S.faqs.map((f) => ({ q: f.q, a: f.a }));
+        drawStarters(); drawFaqs(); dirty = false; $("dirty").textContent = "";
+        msg.innerHTML = notice("ok", "Saved. Your chatbot picks up the changes within a minute.");
+        window.scrollTo({ top: 0, behavior: "smooth" });
       } catch (err) { msg.innerHTML = notice("err", esc(err.message)); }
       btn.disabled = false;
     });
-    function val(id) { return document.getElementById(id).value; }
-    document.getElementById("copySnip").onclick = async (e) => {
-      const t = document.getElementById("snip"); t.select();
+
+    $("copySnip").onclick = async (e) => {
+      const t = $("snip"); t.select();
       try { await navigator.clipboard.writeText(t.value); e.target.textContent = "Copied"; } catch (x) { document.execCommand("copy"); e.target.textContent = "Copied"; }
       setTimeout(() => { e.target.textContent = "Copy code"; }, 2000);
     };
-    document.getElementById("copyLink").onclick = async (e) => {
-      const t = document.getElementById("shareLink"); t.select();
+    $("copyLink").onclick = async (e) => {
+      const t = $("shareLink"); t.select();
       try { await navigator.clipboard.writeText(t.value); } catch (x) { document.execCommand("copy"); }
       e.target.textContent = "Copied"; setTimeout(() => { e.target.textContent = "Copy link"; }, 2000);
     };
     // test chat (uses the live endpoint, counted as normal chats)
-    const log = document.getElementById("testLog"); const hist = [];
+    const log = $("testLog"); const hist = [];
     const bubble = (cls, t) => { const d = document.createElement("div"); d.className = "tm " + cls; d.textContent = t; log.appendChild(d); log.scrollTop = log.scrollHeight; return d; };
     bubble("a", bot.greeting);
-    document.getElementById("testForm").addEventListener("submit", async (e) => {
+    $("testForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const inp = document.getElementById("testIn"); const q = inp.value.trim(); if (!q) return; inp.value = "";
-      bubble("u", q); hist.push({ role: "user", content: q }); const w = bubble("a", "\u2026");
+      const inp = $("testIn"); const q = inp.value.trim(); if (!q) return; inp.value = "";
+      bubble("u", q); hist.push({ role: "user", content: q }); const w = bubble("a", "…");
       try {
         const res = await fetch(API + "/bot/" + bot.public_key + "/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ visitor: "test-" + state.me.user.id, messages: hist.slice(-8) }) });
         const j = await res.json();

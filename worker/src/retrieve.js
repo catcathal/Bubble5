@@ -59,27 +59,34 @@ export function chunkDocs(docs) {
 }
 
 // Returns up to k chunks ordered by relevance, only those that share at least one term with the question.
+// The tokenised form of each passage is remembered on the passage itself, so passages that are kept in memory
+// between questions are only tokenised once, and document frequencies are counted once per question term.
 export function rank(queryText, chunks, k = 6) {
   const q = [...new Set(tokenize(queryText))];
   if (!q.length || !chunks.length) return [];
   const docs = chunks.map((c) => {
-    const toks = tokenize(c.title + " " + c.text);
-    const tf = new Map();
-    for (const t of toks) tf.set(t, (tf.get(t) || 0) + 1);
-    return { c, tf, len: toks.length || 1 };
+    if (!c._idx) {
+      const toks = tokenize(c.title + " " + c.text);
+      const tf = new Map();
+      for (const t of toks) tf.set(t, (tf.get(t) || 0) + 1);
+      Object.defineProperty(c, "_idx", { value: { tf, len: toks.length || 1 }, enumerable: false });
+    }
+    return { c, tf: c._idx.tf, len: c._idx.len };
   });
   const avg = docs.reduce((s, d) => s + d.len, 0) / docs.length;
   const N = docs.length;
   const k1 = 1.4, b = 0.75;
+  const idf = q.map((t) => {
+    let df = 0;
+    for (const o of docs) if (o.tf.has(t)) df++;
+    return Math.log(1 + (N - df + 0.5) / (df + 0.5));
+  });
   const scored = docs.map((d) => {
     let score = 0;
-    for (const t of q) {
-      const f = d.tf.get(t) || 0;
+    for (let i = 0; i < q.length; i++) {
+      const f = d.tf.get(q[i]) || 0;
       if (!f) continue;
-      let df = 0;
-      for (const o of docs) if (o.tf.has(t)) df++;
-      const idf = Math.log(1 + (N - df + 0.5) / (df + 0.5));
-      score += idf * ((f * (k1 + 1)) / (f + k1 * (1 - b + (b * d.len) / avg)));
+      score += idf[i] * ((f * (k1 + 1)) / (f + k1 * (1 - b + (b * d.len) / avg)));
     }
     return { chunk: d.c, score };
   });
